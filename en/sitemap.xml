@@ -5,6 +5,11 @@
     <loc>https://liusir521.github.io/en/categories/</loc>
     <xhtml:link
                 rel="alternate"
+                hreflang="zh-tw"
+                href="https://liusir521.github.io/zh-tw/categories/"
+                />
+    <xhtml:link
+                rel="alternate"
                 hreflang="ja"
                 href="https://liusir521.github.io/ja/categories/"
                 />
@@ -12,11 +17,6 @@
                 rel="alternate"
                 hreflang="zh-cn"
                 href="https://liusir521.github.io/categories/"
-                />
-    <xhtml:link
-                rel="alternate"
-                hreflang="zh-tw"
-                href="https://liusir521.github.io/zh-tw/categories/"
                 />
     <xhtml:link
                 rel="alternate"
