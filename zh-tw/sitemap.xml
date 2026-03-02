@@ -7,7 +7,7 @@
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="https://example.com/"
+                href="https://example.com/en/"
                 />
     <xhtml:link
                 rel="alternate"
@@ -17,7 +17,7 @@
     <xhtml:link
                 rel="alternate"
                 hreflang="zh-cn"
-                href="https://example.com/zh-cn/"
+                href="https://example.com/"
                 />
     <xhtml:link
                 rel="alternate"
@@ -35,7 +35,7 @@
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="https://example.com/categories/"
+                href="https://example.com/en/categories/"
                 />
     <xhtml:link
                 rel="alternate"
@@ -45,7 +45,7 @@
     <xhtml:link
                 rel="alternate"
                 hreflang="zh-cn"
-                href="https://example.com/zh-cn/categories/"
+                href="https://example.com/categories/"
                 />
     <xhtml:link
                 rel="alternate"
@@ -63,7 +63,7 @@
     <xhtml:link
                 rel="alternate"
                 hreflang="zh-cn"
-                href="https://example.com/zh-cn/p/test-chinese/"
+                href="https://example.com/p/test-chinese/"
                 />
     <xhtml:link
                 rel="alternate"
@@ -81,7 +81,7 @@
     <xhtml:link
                 rel="alternate"
                 hreflang="zh-cn"
-                href="https://example.com/zh-cn/post/"
+                href="https://example.com/post/"
                 />
     <xhtml:link
                 rel="alternate"
@@ -98,18 +98,13 @@
     <lastmod>2020-09-09T00:00:00+00:00</lastmod>
     <xhtml:link
                 rel="alternate"
-                hreflang="en"
+                hreflang="zh-cn"
                 href="https://example.com/categories/test/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="ja"
                 href="https://example.com/ja/categories/test/"
-                />
-    <xhtml:link
-                rel="alternate"
-                hreflang="zh-cn"
-                href="https://example.com/zh-cn/categories/test/"
                 />
     <xhtml:link
                 rel="alternate"
@@ -124,17 +119,17 @@
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
+                href="https://example.com/en/tags/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="zh-cn"
                 href="https://example.com/tags/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="ja"
                 href="https://example.com/ja/tags/"
-                />
-    <xhtml:link
-                rel="alternate"
-                hreflang="zh-cn"
-                href="https://example.com/zh-cn/tags/"
                 />
     <xhtml:link
                 rel="alternate"
