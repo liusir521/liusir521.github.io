@@ -7,7 +7,16 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>zh-cn</language>
         <copyright>Example Person</copyright>
-        <lastBuildDate>Wed, 09 Sep 2020 00:00:00 +0000</lastBuildDate><atom:link href="https://liusir521.github.io/post/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Tue, 03 Mar 2026 19:13:36 +0800</lastBuildDate><atom:link href="https://liusir521.github.io/post/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>Go Map</title>
+        <link>https://liusir521.github.io/p/go-map/</link>
+        <pubDate>Tue, 03 Mar 2026 19:13:36 +0800</pubDate>
+        
+        <guid>https://liusir521.github.io/p/go-map/</guid>
+        <description>&lt;p&gt;aaa&lt;/p&gt;
+</description>
+        </item>
+        <item>
         <title>Chinese Test</title>
         <link>https://liusir521.github.io/p/test-chinese/</link>
         <pubDate>Wed, 09 Sep 2020 00:00:00 +0000</pubDate>
