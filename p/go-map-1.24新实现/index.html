@@ -308,6 +308,34 @@
       </ol>
     </li>
     <li><a href="#初始化流程">初始化流程</a></li>
+    <li><a href="#添加流程">添加流程</a>
+      <ol>
+        <li><a href="#小map写入细节">小map写入细节</a></li>
+        <li><a href="#大map写入细节">大map写入细节</a></li>
+      </ol>
+    </li>
+    <li><a href="#搜索流程">搜索流程</a>
+      <ol>
+        <li>
+          <ol>
+            <li><a href="#关键点">关键点</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+    <li><a href="#删除过程">删除过程</a></li>
+    <li><a href="#扩容过程">扩容过程：</a>
+      <ol>
+        <li><a href="#小map扩容">小map扩容</a></li>
+        <li><a href="#大map扩容">大map扩容</a>
+          <ol>
+            <li><a href="#扩容流程详解grow">扩容流程详解（grow）</a></li>
+            <li><a href="#分裂流程详解split-extendible-hashing--">分裂流程详解（split）（ Extendible Hashing  ）</a></li>
+            <li><a href="#分裂过程中第8步详解">分裂过程中第8步详解</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
   </ol>
 </nav>
         </div>
@@ -398,7 +426,7 @@
 
 
                 <time class="article-time--reading">
-                    阅读时长: 4 分钟
+                    阅读时长: 11 分钟
                 </time>
             </div>
         
@@ -752,7 +780,7 @@ directory 里存的只是 指针</p>
 </span></span></span><span class="line"><span class="cl"><span class="p">}</span><span class="w">
 </span></span></span></code></pre></td></tr></table>
 </div>
-</div><p>初始化时会根据 <code>hint</code> 的值进入不同的初始化逻辑</p>
+</div><p>源码解读：初始化时会根据 <code>hint</code> 的值进入不同的初始化逻辑：</p>
 <ol>
 <li>
 <p>hint&lt;=8，小map</p>
@@ -768,6 +796,938 @@ directory 里存的只是 指针</p>
 <p>f&gt; directory <code>写入Map</code>（unsafe） ，最后返回Map。</p>
 </li>
 </ol>
+<h2 id="添加流程">添加流程
+</h2><p>关键源码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">m</span><span class="w"> </span><span class="o">*</span><span class="nx">Map</span><span class="p">)</span><span class="w"> </span><span class="nf">PutSlot</span><span class="p">(</span><span class="nx">typ</span><span class="w"> </span><span class="o">*</span><span class="nx">abi</span><span class="p">.</span><span class="nx">SwissMapType</span><span class="p">,</span><span class="w"> </span><span class="nx">key</span><span class="w"> </span><span class="nx">unsafe</span><span class="p">.</span><span class="nx">Pointer</span><span class="p">)</span><span class="w"> </span><span class="nx">unsafe</span><span class="p">.</span><span class="nx">Pointer</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">m</span><span class="p">.</span><span class="nx">writing</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nf">fatal</span><span class="p">(</span><span class="s">&#34;concurrent map writes&#34;</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">hash</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">typ</span><span class="p">.</span><span class="nf">Hasher</span><span class="p">(</span><span class="nx">key</span><span class="p">,</span><span class="w"> </span><span class="nx">m</span><span class="p">.</span><span class="nx">seed</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="c1">// Set writing after calling Hasher, since Hasher may panic, in which</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="c1">// case we have not actually done a write.</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">m</span><span class="p">.</span><span class="nx">writing</span><span class="w"> </span><span class="p">^=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="c1">// toggle, see comment on writing</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">m</span><span class="p">.</span><span class="nx">dirPtr</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">m</span><span class="p">.</span><span class="nf">growToSmall</span><span class="p">(</span><span class="nx">typ</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">m</span><span class="p">.</span><span class="nx">dirLen</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="k">if</span><span class="w"> </span><span class="nx">m</span><span class="p">.</span><span class="nx">used</span><span class="w"> </span><span class="p">&lt;</span><span class="w"> </span><span class="nx">abi</span><span class="p">.</span><span class="nx">SwissMapGroupSlots</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="nx">elem</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">m</span><span class="p">.</span><span class="nf">putSlotSmall</span><span class="p">(</span><span class="nx">typ</span><span class="p">,</span><span class="w"> </span><span class="nx">hash</span><span class="p">,</span><span class="w"> </span><span class="nx">key</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="k">if</span><span class="w"> </span><span class="nx">m</span><span class="p">.</span><span class="nx">writing</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">				</span><span class="nf">fatal</span><span class="p">(</span><span class="s">&#34;concurrent map writes&#34;</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="nx">m</span><span class="p">.</span><span class="nx">writing</span><span class="w"> </span><span class="p">^=</span><span class="w"> </span><span class="mi">1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="k">return</span><span class="w"> </span><span class="nx">elem</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="c1">// Can&#39;t fit another entry, grow to full size map.</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="c1">//
+</span></span></span><span class="line"><span class="cl"><span class="c1">		// TODO(prattmic): If this is an update to an existing key then</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="c1">// we actually don&#39;t need to grow.</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">m</span><span class="p">.</span><span class="nf">growToTable</span><span class="p">(</span><span class="nx">typ</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">for</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">idx</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">m</span><span class="p">.</span><span class="nf">directoryIndex</span><span class="p">(</span><span class="nx">hash</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">elem</span><span class="p">,</span><span class="w"> </span><span class="nx">ok</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">m</span><span class="p">.</span><span class="nf">directoryAt</span><span class="p">(</span><span class="nx">idx</span><span class="p">).</span><span class="nf">PutSlot</span><span class="p">(</span><span class="nx">typ</span><span class="p">,</span><span class="w"> </span><span class="nx">m</span><span class="p">,</span><span class="w"> </span><span class="nx">hash</span><span class="p">,</span><span class="w"> </span><span class="nx">key</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="k">if</span><span class="w"> </span><span class="p">!</span><span class="nx">ok</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="k">continue</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="k">if</span><span class="w"> </span><span class="nx">m</span><span class="p">.</span><span class="nx">writing</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="nf">fatal</span><span class="p">(</span><span class="s">&#34;concurrent map writes&#34;</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">m</span><span class="p">.</span><span class="nx">writing</span><span class="w"> </span><span class="p">^=</span><span class="w"> </span><span class="mi">1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="nx">elem</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>源码解读：</p>
+<ol>
+<li>
+<p>首先进行并发写检测，保障线程安全。</p>
+</li>
+<li>
+<p>然后计算key的hash，并标记写入状态，防止并发写。</p>
+</li>
+<li>
+<p>判断当前<code>map是否已经分配</code>了，如果没有分配，会先分配一个group（小map）。</p>
+<p>a. 如果当前map是小map</p>
+<ol>
+<li>
+<p>如果是小表且未满，直接插入，返回元素槽指针。</p>
+</li>
+<li>
+<p>如果小表已满，升级为大表（分配table并迁移数据）</p>
+</li>
+</ol>
+<p>b. 如果当前map是大map</p>
+<ol>
+<li>
+<p>根据H1计算目录索引，定位table（与查找相同）</p>
+</li>
+<li>
+<p>调用大map的插入函数，若table扩容则重试</p>
+</li>
+<li>
+<p>插入成功返回与元素槽指针</p>
+</li>
+</ol>
+</li>
+<li>
+<p><code>再次检测并发写</code>，防止并发写破坏数据。</p>
+</li>
+</ol>
+<h3 id="小map写入细节">小map写入细节
+</h3><ol>
+<li>
+<p>首先获取group的引用，并结合H2对所有控制字进行比对。</p>
+</li>
+<li>
+<p>若存在相同的，比对是否存在相同key，如果存在则返回对应value槽指针。</p>
+</li>
+<li>
+<p>不存在相同的，查找空槽，准备写入新key，如果没有空槽，说明并发写入或者逻辑错误。</p>
+</li>
+<li>
+<p>写入key和value。</p>
+</li>
+<li>
+<p>更新控制字和used计数。</p>
+</li>
+<li>
+<p>返回value槽指针。</p>
+</li>
+</ol>
+<h3 id="大map写入细节">大map写入细节
+</h3><ol>
+<li>
+<p>首先根据hash的高位H1和group的数量定位探查序列。</p>
+</li>
+<li>
+<p>定义变量，记录第一个已删除槽，以便后续使用。</p>
+</li>
+<li>
+<p>探查循环，遍历group，查找与H2匹配的槽。</p>
+</li>
+<li>
+<p>若有匹配的槽，对比key，若key需要更新，则拷贝新key</p>
+</li>
+<li>
+<p>无匹配槽，查找空槽或已删除槽（tombstone）。若有空槽且growthleft&gt;0，优先复用空槽，设置控制字，更新计数。若growthleft耗尽（表已满），触发rehash（扩容或分裂），返回nil，false，提示上层重试。</p>
+</li>
+</ol>
+<h2 id="搜索流程">搜索流程
+</h2><p>关键源码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="c1">// Get performs a lookup of the key that key points to. It returns a pointer to</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="c1">// the element, or false if the key doesn&#39;t exist.</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">m</span><span class="w"> </span><span class="o">*</span><span class="nx">Map</span><span class="p">)</span><span class="w"> </span><span class="nf">Get</span><span class="p">(</span><span class="nx">typ</span><span class="w"> </span><span class="o">*</span><span class="nx">abi</span><span class="p">.</span><span class="nx">SwissMapType</span><span class="p">,</span><span class="w"> </span><span class="nx">key</span><span class="w"> </span><span class="nx">unsafe</span><span class="p">.</span><span class="nx">Pointer</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="nx">unsafe</span><span class="p">.</span><span class="nx">Pointer</span><span class="p">,</span><span class="w"> </span><span class="kt">bool</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="nx">m</span><span class="p">.</span><span class="nf">getWithoutKey</span><span class="p">(</span><span class="nx">typ</span><span class="p">,</span><span class="w"> </span><span class="nx">key</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">m</span><span class="w"> </span><span class="o">*</span><span class="nx">Map</span><span class="p">)</span><span class="w"> </span><span class="nf">getWithoutKey</span><span class="p">(</span><span class="nx">typ</span><span class="w"> </span><span class="o">*</span><span class="nx">abi</span><span class="p">.</span><span class="nx">SwissMapType</span><span class="p">,</span><span class="w"> </span><span class="nx">key</span><span class="w"> </span><span class="nx">unsafe</span><span class="p">.</span><span class="nx">Pointer</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="nx">unsafe</span><span class="p">.</span><span class="nx">Pointer</span><span class="p">,</span><span class="w"> </span><span class="kt">bool</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">m</span><span class="p">.</span><span class="nf">Used</span><span class="p">()</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="kc">false</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">m</span><span class="p">.</span><span class="nx">writing</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nf">fatal</span><span class="p">(</span><span class="s">&#34;concurrent map read and map write&#34;</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">hash</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">typ</span><span class="p">.</span><span class="nf">Hasher</span><span class="p">(</span><span class="nx">key</span><span class="p">,</span><span class="w"> </span><span class="nx">m</span><span class="p">.</span><span class="nx">seed</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">m</span><span class="p">.</span><span class="nx">dirLen</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">elem</span><span class="p">,</span><span class="w"> </span><span class="nx">ok</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">m</span><span class="p">.</span><span class="nf">getWithKeySmall</span><span class="p">(</span><span class="nx">typ</span><span class="p">,</span><span class="w"> </span><span class="nx">hash</span><span class="p">,</span><span class="w"> </span><span class="nx">key</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="nx">elem</span><span class="p">,</span><span class="w"> </span><span class="nx">ok</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">idx</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">m</span><span class="p">.</span><span class="nf">directoryIndex</span><span class="p">(</span><span class="nx">hash</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="nx">m</span><span class="p">.</span><span class="nf">directoryAt</span><span class="p">(</span><span class="nx">idx</span><span class="p">).</span><span class="nf">getWithoutKey</span><span class="p">(</span><span class="nx">typ</span><span class="p">,</span><span class="w"> </span><span class="nx">hash</span><span class="p">,</span><span class="w"> </span><span class="nx">key</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">m</span><span class="w"> </span><span class="o">*</span><span class="nx">Map</span><span class="p">)</span><span class="w"> </span><span class="nf">directoryIndex</span><span class="p">(</span><span class="nx">hash</span><span class="w"> </span><span class="kt">uintptr</span><span class="p">)</span><span class="w"> </span><span class="kt">uintptr</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">m</span><span class="p">.</span><span class="nx">dirLen</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="nx">hash</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="p">(</span><span class="nx">m</span><span class="p">.</span><span class="nx">globalShift</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="mi">63</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">t</span><span class="w"> </span><span class="o">*</span><span class="nx">table</span><span class="p">)</span><span class="w"> </span><span class="nf">getWithoutKey</span><span class="p">(</span><span class="nx">typ</span><span class="w"> </span><span class="o">*</span><span class="nx">abi</span><span class="p">.</span><span class="nx">SwissMapType</span><span class="p">,</span><span class="w"> </span><span class="nx">hash</span><span class="w"> </span><span class="kt">uintptr</span><span class="p">,</span><span class="w"> </span><span class="nx">key</span><span class="w"> </span><span class="nx">unsafe</span><span class="p">.</span><span class="nx">Pointer</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="nx">unsafe</span><span class="p">.</span><span class="nx">Pointer</span><span class="p">,</span><span class="w"> </span><span class="kt">bool</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">seq</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nf">makeProbeSeq</span><span class="p">(</span><span class="nf">h1</span><span class="p">(</span><span class="nx">hash</span><span class="p">),</span><span class="w"> </span><span class="nx">t</span><span class="p">.</span><span class="nx">groups</span><span class="p">.</span><span class="nx">lengthMask</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">for</span><span class="w"> </span><span class="p">;</span><span class="w"> </span><span class="p">;</span><span class="w"> </span><span class="nx">seq</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">seq</span><span class="p">.</span><span class="nf">next</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">g</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">t</span><span class="p">.</span><span class="nx">groups</span><span class="p">.</span><span class="nf">group</span><span class="p">(</span><span class="nx">typ</span><span class="p">,</span><span class="w"> </span><span class="nx">seq</span><span class="p">.</span><span class="nx">offset</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">match</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">g</span><span class="p">.</span><span class="nf">ctrls</span><span class="p">().</span><span class="nf">matchH2</span><span class="p">(</span><span class="nf">h2</span><span class="p">(</span><span class="nx">hash</span><span class="p">))</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="k">for</span><span class="w"> </span><span class="nx">match</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="nx">i</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">match</span><span class="p">.</span><span class="nf">first</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="nx">slotKey</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">g</span><span class="p">.</span><span class="nf">key</span><span class="p">(</span><span class="nx">typ</span><span class="p">,</span><span class="w"> </span><span class="nx">i</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="k">if</span><span class="w"> </span><span class="nx">typ</span><span class="p">.</span><span class="nf">IndirectKey</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">				</span><span class="nx">slotKey</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="o">*</span><span class="p">((</span><span class="o">*</span><span class="nx">unsafe</span><span class="p">.</span><span class="nx">Pointer</span><span class="p">)(</span><span class="nx">slotKey</span><span class="p">))</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="k">if</span><span class="w"> </span><span class="nx">typ</span><span class="p">.</span><span class="nx">Key</span><span class="p">.</span><span class="nf">Equal</span><span class="p">(</span><span class="nx">key</span><span class="p">,</span><span class="w"> </span><span class="nx">slotKey</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">				</span><span class="nx">slotElem</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">g</span><span class="p">.</span><span class="nf">elem</span><span class="p">(</span><span class="nx">typ</span><span class="p">,</span><span class="w"> </span><span class="nx">i</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">				</span><span class="k">if</span><span class="w"> </span><span class="nx">typ</span><span class="p">.</span><span class="nf">IndirectElem</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">					</span><span class="nx">slotElem</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="o">*</span><span class="p">((</span><span class="o">*</span><span class="nx">unsafe</span><span class="p">.</span><span class="nx">Pointer</span><span class="p">)(</span><span class="nx">slotElem</span><span class="p">))</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">				</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">				</span><span class="k">return</span><span class="w"> </span><span class="nx">slotElem</span><span class="p">,</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="nx">match</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">match</span><span class="p">.</span><span class="nf">removeFirst</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">match</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">g</span><span class="p">.</span><span class="nf">ctrls</span><span class="p">().</span><span class="nf">matchEmpty</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="k">if</span><span class="w"> </span><span class="nx">match</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="c1">// Finding an empty slot means we&#39;ve reached the end of</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="c1">// the probe sequence.</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="kc">false</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>源码解读：</p>
+<ol>
+<li>
+<p>根据map的 <code>used</code> 字段快速判断，如果是空map，直接返回nil。</p>
+</li>
+<li>
+<p>其次对map的 <code>并发读写</code> 进行检测，存在并发读写直接报错。</p>
+</li>
+<li>
+<p>计算key的hash（<code>H1-高57位</code>，用于定位group。<code>H2-低7位</code>，用于对比控制字）值。</p>
+</li>
+<li>
+<p>根据<code>dirLen</code>判断是否是小map。</p>
+<p>a. 如果是小map</p>
+<ol>
+<li>
+<p>进入小map的搜索流程，直接从初始化中的<code>单个group</code>中进行查找</p>
+</li>
+<li>
+<p>获取当前hash的H2，然后<code>遍历group</code>，逐个对比控制字中的H2部分</p>
+</li>
+<li>
+<p>不匹配就继续下一个，匹配之后，再继续对<code>key校验</code>（只用7位进行校验，存在hash冲突的可能性，虽然很低，1/128）</p>
+</li>
+<li>
+<p>若key相同，找到val直接返回，若遍历结束也没有匹配项，返回nil结束。</p>
+</li>
+</ol>
+<p>b. 如果不是小map</p>
+<ol>
+<li>
+<p>先根据key的hash的高位（<strong>globalDepth</strong>）计算出当前 map 的“目录数组”(<code>directory</code>)中的索引，从而定位到应该查找或操作的 table（分表）。（如果目录长度为 1，说明 map 只有一个 table（未分表），所有 key 都在这一个 table 里。否则说明已经分表，用hash的高位来选择table。例如globalDepth = 3，则目录长度为8，globalShift = 61，目录索引为hash&raquo;61，即hash的最高3位）</p>
+</li>
+<li>
+<p>根据hash的 <code>H1</code> 部分计算出table内部遍历的 <code>group的起始位置</code>。（起始位置offset：uint64(<code>H1</code>) &amp; mask，用 h1(hash) 的低若干位（由 mask 决定）作为 group 的初始索引。其中<code>mask = group 数量 - 1</code>。例如group数量为8，mask=0b111，则只取H1的最低3位。）</p>
+</li>
+<li>
+<p>然后开始查找group内的元素，通过<code>H2</code>与group的8个控制字做<code>并行匹配</code>（复制H2为8份），如果存在匹配的，则继续对key进行比较，如果遇到空槽，说明key不存在，返回nil,false，如果没有找到且没有空槽，继续查找下一个group。</p>
+</li>
+</ol>
+</li>
+</ol>
+<h4 id="关键点">关键点
+</h4><blockquote>
+<p>q：为什么遇到空槽代表不存在key？<br>
+a：在插入新key时会沿着探查序列查找第一个空槽或者已删除的空槽，查找时同样沿着探查序列查找，如果key曾经被插入过，一定会在遇到空槽之前被找到（插入时遇到空槽就插入了）</p>
+</blockquote>
+<h2 id="删除过程">删除过程
+</h2><p>关键源码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">m</span><span class="w"> </span><span class="o">*</span><span class="nx">Map</span><span class="p">)</span><span class="w"> </span><span class="nf">Delete</span><span class="p">(</span><span class="nx">typ</span><span class="w"> </span><span class="o">*</span><span class="nx">abi</span><span class="p">.</span><span class="nx">SwissMapType</span><span class="p">,</span><span class="w"> </span><span class="nx">key</span><span class="w"> </span><span class="nx">unsafe</span><span class="p">.</span><span class="nx">Pointer</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">m</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nx">m</span><span class="p">.</span><span class="nf">Used</span><span class="p">()</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nf">mapKeyError</span><span class="p">(</span><span class="nx">typ</span><span class="p">,</span><span class="w"> </span><span class="nx">key</span><span class="p">);</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="nb">panic</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span><span class="w"> </span><span class="c1">// see issue 23734</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="k">return</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">m</span><span class="p">.</span><span class="nx">writing</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nf">fatal</span><span class="p">(</span><span class="s">&#34;concurrent map writes&#34;</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">hash</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">typ</span><span class="p">.</span><span class="nf">Hasher</span><span class="p">(</span><span class="nx">key</span><span class="p">,</span><span class="w"> </span><span class="nx">m</span><span class="p">.</span><span class="nx">seed</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="c1">// Set writing after calling Hasher, since Hasher may panic, in which</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="c1">// case we have not actually done a write.</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">m</span><span class="p">.</span><span class="nx">writing</span><span class="w"> </span><span class="p">^=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="c1">// toggle, see comment on writing</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">m</span><span class="p">.</span><span class="nx">dirLen</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">m</span><span class="p">.</span><span class="nf">deleteSmall</span><span class="p">(</span><span class="nx">typ</span><span class="p">,</span><span class="w"> </span><span class="nx">hash</span><span class="p">,</span><span class="w"> </span><span class="nx">key</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">idx</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">m</span><span class="p">.</span><span class="nf">directoryIndex</span><span class="p">(</span><span class="nx">hash</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">m</span><span class="p">.</span><span class="nf">directoryAt</span><span class="p">(</span><span class="nx">idx</span><span class="p">).</span><span class="nf">Delete</span><span class="p">(</span><span class="nx">typ</span><span class="p">,</span><span class="w"> </span><span class="nx">m</span><span class="p">,</span><span class="w"> </span><span class="nx">hash</span><span class="p">,</span><span class="w"> </span><span class="nx">key</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">m</span><span class="p">.</span><span class="nx">used</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="c1">// Reset the hash seed to make it more difficult for attackers</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="c1">// to repeatedly trigger hash collisions. See</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="c1">// https://go.dev/issue/25237.</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">m</span><span class="p">.</span><span class="nx">seed</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">uintptr</span><span class="p">(</span><span class="nf">rand</span><span class="p">())</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">m</span><span class="p">.</span><span class="nx">writing</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nf">fatal</span><span class="p">(</span><span class="s">&#34;concurrent map writes&#34;</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">m</span><span class="p">.</span><span class="nx">writing</span><span class="w"> </span><span class="p">^=</span><span class="w"> </span><span class="mi">1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>源码解读：</p>
+<ol>
+<li>
+<p>判断当前map是否为空，如果为空，则删除操作无效。同时检查key的类型是否合法，如果不合法直接 <code>panic</code>。</p>
+</li>
+<li>
+<p>检测并发写状态，保证线程安全。</p>
+</li>
+<li>
+<p>计算key的hash，如果key类型不匹配则panic。</p>
+</li>
+<li>
+<p>设置并发写标志。</p>
+</li>
+<li>
+<p>判断map的大小。</p>
+<p>a. 如果是小map</p>
+<ol>
+<li>
+<p>获取group引用，匹配H2。</p>
+</li>
+<li>
+<p>若有匹配的，再对比key。</p>
+</li>
+<li>
+<p>找到之后， 计数-1，然后清理key和value。</p>
+</li>
+<li>
+<p>标记slot为空，小map没有探查序列，不需要tombstone直接将控制字设为empty。</p>
+</li>
+<li>
+<p>如果没有匹配的key，则什么都不做。</p>
+</li>
+</ol>
+<p>b. 如果是大map</p>
+<ol>
+<li>
+<p>通过H1和表容量构造探查序列。</p>
+</li>
+<li>
+<p>结合H2遍历group，若存在H2匹配的，再对比key。</p>
+</li>
+<li>
+<p>清理key和value。</p>
+</li>
+<li>
+<p>设置控制字，如果当前group还有空槽，直接将ctrl（控制字）设置为empty，并回收growthleft（可插入槽数）。否则，设置为deleted（墓碑），墓碑会在rehash时被清理。</p>
+</li>
+<li>
+<p>如果group没找到目标key，遇到空槽则终止。如果group有空槽，说明key不存在，直接返回。</p>
+</li>
+</ol>
+</li>
+</ol>
+<h2 id="扩容过程">扩容过程：
+</h2><h3 id="小map扩容">小map扩容
+</h3><p>扩容节点：小map只能存放8个元素，当插入第9个元素时会触发扩容。调用growToTable</p>
+<p>关键源码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">m</span><span class="w"> </span><span class="o">*</span><span class="nx">Map</span><span class="p">)</span><span class="w"> </span><span class="nf">growToTable</span><span class="p">(</span><span class="nx">typ</span><span class="w"> </span><span class="o">*</span><span class="nx">abi</span><span class="p">.</span><span class="nx">SwissMapType</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">tab</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nf">newTable</span><span class="p">(</span><span class="nx">typ</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="o">*</span><span class="nx">abi</span><span class="p">.</span><span class="nx">SwissMapGroupSlots</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">g</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">groupReference</span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">data</span><span class="p">:</span><span class="w"> </span><span class="nx">m</span><span class="p">.</span><span class="nx">dirPtr</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">uintptr</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="p">&lt;</span><span class="w"> </span><span class="nx">abi</span><span class="p">.</span><span class="nx">SwissMapGroupSlots</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="o">++</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">g</span><span class="p">.</span><span class="nf">ctrls</span><span class="p">().</span><span class="nf">get</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="nx">ctrlEmpty</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nx">ctrlEmpty</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="c1">// Empty</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="k">continue</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">key</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">g</span><span class="p">.</span><span class="nf">key</span><span class="p">(</span><span class="nx">typ</span><span class="p">,</span><span class="w"> </span><span class="nx">i</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="k">if</span><span class="w"> </span><span class="nx">typ</span><span class="p">.</span><span class="nf">IndirectKey</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="nx">key</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="o">*</span><span class="p">((</span><span class="o">*</span><span class="nx">unsafe</span><span class="p">.</span><span class="nx">Pointer</span><span class="p">)(</span><span class="nx">key</span><span class="p">))</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">elem</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">g</span><span class="p">.</span><span class="nf">elem</span><span class="p">(</span><span class="nx">typ</span><span class="p">,</span><span class="w"> </span><span class="nx">i</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="k">if</span><span class="w"> </span><span class="nx">typ</span><span class="p">.</span><span class="nf">IndirectElem</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="nx">elem</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="o">*</span><span class="p">((</span><span class="o">*</span><span class="nx">unsafe</span><span class="p">.</span><span class="nx">Pointer</span><span class="p">)(</span><span class="nx">elem</span><span class="p">))</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">hash</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">typ</span><span class="p">.</span><span class="nf">Hasher</span><span class="p">(</span><span class="nx">key</span><span class="p">,</span><span class="w"> </span><span class="nx">m</span><span class="p">.</span><span class="nx">seed</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">tab</span><span class="p">.</span><span class="nf">uncheckedPutSlot</span><span class="p">(</span><span class="nx">typ</span><span class="p">,</span><span class="w"> </span><span class="nx">hash</span><span class="p">,</span><span class="w"> </span><span class="nx">key</span><span class="p">,</span><span class="w"> </span><span class="nx">elem</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">directory</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">([]</span><span class="o">*</span><span class="nx">table</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">directory</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">tab</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">m</span><span class="p">.</span><span class="nx">dirPtr</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">unsafe</span><span class="p">.</span><span class="nf">Pointer</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">directory</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">m</span><span class="p">.</span><span class="nx">dirLen</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">directory</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">m</span><span class="p">.</span><span class="nx">globalDepth</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">0</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">m</span><span class="p">.</span><span class="nx">globalShift</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nf">depthToShift</span><span class="p">(</span><span class="nx">m</span><span class="p">.</span><span class="nx">globalDepth</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>源码解读：</p>
+<ol>
+<li>
+<p>分配新表，新表容量为16，原来2倍，localdepth\globaldepth都为0，index为0。</p>
+</li>
+<li>
+<p>遍历原来的8个slot，如果非空，重新计算hash，插入到新表。</p>
+</li>
+<li>
+<p>构建目录指向新表，长度为1。</p>
+</li>
+<li>
+<p>map进入表模式，后续插入查找都走table逻辑。</p>
+</li>
+</ol>
+<h3 id="大map扩容">大map扩容
+</h3><p>扩容节点：在插入流程中，如果当前为大表，且在插入时发现没有空槽，就会出发rehash。</p>
+<p>关键源码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">  1
+</span><span class="lnt">  2
+</span><span class="lnt">  3
+</span><span class="lnt">  4
+</span><span class="lnt">  5
+</span><span class="lnt">  6
+</span><span class="lnt">  7
+</span><span class="lnt">  8
+</span><span class="lnt">  9
+</span><span class="lnt"> 10
+</span><span class="lnt"> 11
+</span><span class="lnt"> 12
+</span><span class="lnt"> 13
+</span><span class="lnt"> 14
+</span><span class="lnt"> 15
+</span><span class="lnt"> 16
+</span><span class="lnt"> 17
+</span><span class="lnt"> 18
+</span><span class="lnt"> 19
+</span><span class="lnt"> 20
+</span><span class="lnt"> 21
+</span><span class="lnt"> 22
+</span><span class="lnt"> 23
+</span><span class="lnt"> 24
+</span><span class="lnt"> 25
+</span><span class="lnt"> 26
+</span><span class="lnt"> 27
+</span><span class="lnt"> 28
+</span><span class="lnt"> 29
+</span><span class="lnt"> 30
+</span><span class="lnt"> 31
+</span><span class="lnt"> 32
+</span><span class="lnt"> 33
+</span><span class="lnt"> 34
+</span><span class="lnt"> 35
+</span><span class="lnt"> 36
+</span><span class="lnt"> 37
+</span><span class="lnt"> 38
+</span><span class="lnt"> 39
+</span><span class="lnt"> 40
+</span><span class="lnt"> 41
+</span><span class="lnt"> 42
+</span><span class="lnt"> 43
+</span><span class="lnt"> 44
+</span><span class="lnt"> 45
+</span><span class="lnt"> 46
+</span><span class="lnt"> 47
+</span><span class="lnt"> 48
+</span><span class="lnt"> 49
+</span><span class="lnt"> 50
+</span><span class="lnt"> 51
+</span><span class="lnt"> 52
+</span><span class="lnt"> 53
+</span><span class="lnt"> 54
+</span><span class="lnt"> 55
+</span><span class="lnt"> 56
+</span><span class="lnt"> 57
+</span><span class="lnt"> 58
+</span><span class="lnt"> 59
+</span><span class="lnt"> 60
+</span><span class="lnt"> 61
+</span><span class="lnt"> 62
+</span><span class="lnt"> 63
+</span><span class="lnt"> 64
+</span><span class="lnt"> 65
+</span><span class="lnt"> 66
+</span><span class="lnt"> 67
+</span><span class="lnt"> 68
+</span><span class="lnt"> 69
+</span><span class="lnt"> 70
+</span><span class="lnt"> 71
+</span><span class="lnt"> 72
+</span><span class="lnt"> 73
+</span><span class="lnt"> 74
+</span><span class="lnt"> 75
+</span><span class="lnt"> 76
+</span><span class="lnt"> 77
+</span><span class="lnt"> 78
+</span><span class="lnt"> 79
+</span><span class="lnt"> 80
+</span><span class="lnt"> 81
+</span><span class="lnt"> 82
+</span><span class="lnt"> 83
+</span><span class="lnt"> 84
+</span><span class="lnt"> 85
+</span><span class="lnt"> 86
+</span><span class="lnt"> 87
+</span><span class="lnt"> 88
+</span><span class="lnt"> 89
+</span><span class="lnt"> 90
+</span><span class="lnt"> 91
+</span><span class="lnt"> 92
+</span><span class="lnt"> 93
+</span><span class="lnt"> 94
+</span><span class="lnt"> 95
+</span><span class="lnt"> 96
+</span><span class="lnt"> 97
+</span><span class="lnt"> 98
+</span><span class="lnt"> 99
+</span><span class="lnt">100
+</span><span class="lnt">101
+</span><span class="lnt">102
+</span><span class="lnt">103
+</span><span class="lnt">104
+</span><span class="lnt">105
+</span><span class="lnt">106
+</span><span class="lnt">107
+</span><span class="lnt">108
+</span><span class="lnt">109
+</span><span class="lnt">110
+</span><span class="lnt">111
+</span><span class="lnt">112
+</span><span class="lnt">113
+</span><span class="lnt">114
+</span><span class="lnt">115
+</span><span class="lnt">116
+</span><span class="lnt">117
+</span><span class="lnt">118
+</span><span class="lnt">119
+</span><span class="lnt">120
+</span><span class="lnt">121
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">t</span><span class="w"> </span><span class="o">*</span><span class="nx">table</span><span class="p">)</span><span class="w"> </span><span class="nf">rehash</span><span class="p">(</span><span class="nx">typ</span><span class="w"> </span><span class="o">*</span><span class="nx">abi</span><span class="p">.</span><span class="nx">SwissMapType</span><span class="p">,</span><span class="w"> </span><span class="nx">m</span><span class="w"> </span><span class="o">*</span><span class="nx">Map</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">newCapacity</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">t</span><span class="p">.</span><span class="nx">capacity</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">newCapacity</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="nx">maxTableCapacity</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">t</span><span class="p">.</span><span class="nf">grow</span><span class="p">(</span><span class="nx">typ</span><span class="p">,</span><span class="w"> </span><span class="nx">m</span><span class="p">,</span><span class="w"> </span><span class="nx">newCapacity</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="k">return</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">t</span><span class="p">.</span><span class="nf">split</span><span class="p">(</span><span class="nx">typ</span><span class="p">,</span><span class="w"> </span><span class="nx">m</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">t</span><span class="w"> </span><span class="o">*</span><span class="nx">table</span><span class="p">)</span><span class="w"> </span><span class="nf">grow</span><span class="p">(</span><span class="nx">typ</span><span class="w"> </span><span class="o">*</span><span class="nx">abi</span><span class="p">.</span><span class="nx">SwissMapType</span><span class="p">,</span><span class="w"> </span><span class="nx">m</span><span class="w"> </span><span class="o">*</span><span class="nx">Map</span><span class="p">,</span><span class="w"> </span><span class="nx">newCapacity</span><span class="w"> </span><span class="kt">uint16</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">newTable</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nf">newTable</span><span class="p">(</span><span class="nx">typ</span><span class="p">,</span><span class="w"> </span><span class="nb">uint64</span><span class="p">(</span><span class="nx">newCapacity</span><span class="p">),</span><span class="w"> </span><span class="nx">t</span><span class="p">.</span><span class="nx">index</span><span class="p">,</span><span class="w"> </span><span class="nx">t</span><span class="p">.</span><span class="nx">localDepth</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">t</span><span class="p">.</span><span class="nx">capacity</span><span class="w"> </span><span class="p">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">uint64</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="nx">t</span><span class="p">.</span><span class="nx">groups</span><span class="p">.</span><span class="nx">lengthMask</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="o">++</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="nx">g</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">t</span><span class="p">.</span><span class="nx">groups</span><span class="p">.</span><span class="nf">group</span><span class="p">(</span><span class="nx">typ</span><span class="p">,</span><span class="w"> </span><span class="nx">i</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="k">for</span><span class="w"> </span><span class="nx">j</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">uintptr</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span><span class="w"> </span><span class="nx">j</span><span class="w"> </span><span class="p">&lt;</span><span class="w"> </span><span class="nx">abi</span><span class="p">.</span><span class="nx">SwissMapGroupSlots</span><span class="p">;</span><span class="w"> </span><span class="nx">j</span><span class="o">++</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">				</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">g</span><span class="p">.</span><span class="nf">ctrls</span><span class="p">().</span><span class="nf">get</span><span class="p">(</span><span class="nx">j</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="nx">ctrlEmpty</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nx">ctrlEmpty</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">					</span><span class="c1">// Empty or deleted</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">					</span><span class="k">continue</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">				</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">				</span><span class="nx">key</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">g</span><span class="p">.</span><span class="nf">key</span><span class="p">(</span><span class="nx">typ</span><span class="p">,</span><span class="w"> </span><span class="nx">j</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">				</span><span class="k">if</span><span class="w"> </span><span class="nx">typ</span><span class="p">.</span><span class="nf">IndirectKey</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">					</span><span class="nx">key</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="o">*</span><span class="p">((</span><span class="o">*</span><span class="nx">unsafe</span><span class="p">.</span><span class="nx">Pointer</span><span class="p">)(</span><span class="nx">key</span><span class="p">))</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">				</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">				</span><span class="nx">elem</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">g</span><span class="p">.</span><span class="nf">elem</span><span class="p">(</span><span class="nx">typ</span><span class="p">,</span><span class="w"> </span><span class="nx">j</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">				</span><span class="k">if</span><span class="w"> </span><span class="nx">typ</span><span class="p">.</span><span class="nf">IndirectElem</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">					</span><span class="nx">elem</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="o">*</span><span class="p">((</span><span class="o">*</span><span class="nx">unsafe</span><span class="p">.</span><span class="nx">Pointer</span><span class="p">)(</span><span class="nx">elem</span><span class="p">))</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">				</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">				</span><span class="nx">hash</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">typ</span><span class="p">.</span><span class="nf">Hasher</span><span class="p">(</span><span class="nx">key</span><span class="p">,</span><span class="w"> </span><span class="nx">m</span><span class="p">.</span><span class="nx">seed</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">				</span><span class="nx">newTable</span><span class="p">.</span><span class="nf">uncheckedPutSlot</span><span class="p">(</span><span class="nx">typ</span><span class="p">,</span><span class="w"> </span><span class="nx">hash</span><span class="p">,</span><span class="w"> </span><span class="nx">key</span><span class="p">,</span><span class="w"> </span><span class="nx">elem</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">newTable</span><span class="p">.</span><span class="nf">checkInvariants</span><span class="p">(</span><span class="nx">typ</span><span class="p">,</span><span class="w"> </span><span class="nx">m</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">m</span><span class="p">.</span><span class="nf">replaceTable</span><span class="p">(</span><span class="nx">newTable</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">t</span><span class="p">.</span><span class="nx">index</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">t</span><span class="w"> </span><span class="o">*</span><span class="nx">table</span><span class="p">)</span><span class="w"> </span><span class="nf">split</span><span class="p">(</span><span class="nx">typ</span><span class="w"> </span><span class="o">*</span><span class="nx">abi</span><span class="p">.</span><span class="nx">SwissMapType</span><span class="p">,</span><span class="w"> </span><span class="nx">m</span><span class="w"> </span><span class="o">*</span><span class="nx">Map</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">localDepth</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">t</span><span class="p">.</span><span class="nx">localDepth</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">localDepth</span><span class="o">++</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="c1">// TODO: is this the best capacity?</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">left</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nf">newTable</span><span class="p">(</span><span class="nx">typ</span><span class="p">,</span><span class="w"> </span><span class="nx">maxTableCapacity</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nx">localDepth</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">right</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nf">newTable</span><span class="p">(</span><span class="nx">typ</span><span class="p">,</span><span class="w"> </span><span class="nx">maxTableCapacity</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nx">localDepth</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="c1">// Split in half at the localDepth bit from the top.</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">mask</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nf">localDepthMask</span><span class="p">(</span><span class="nx">localDepth</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">uint64</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="nx">t</span><span class="p">.</span><span class="nx">groups</span><span class="p">.</span><span class="nx">lengthMask</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="o">++</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">g</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">t</span><span class="p">.</span><span class="nx">groups</span><span class="p">.</span><span class="nf">group</span><span class="p">(</span><span class="nx">typ</span><span class="p">,</span><span class="w"> </span><span class="nx">i</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="k">for</span><span class="w"> </span><span class="nx">j</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">uintptr</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span><span class="w"> </span><span class="nx">j</span><span class="w"> </span><span class="p">&lt;</span><span class="w"> </span><span class="nx">abi</span><span class="p">.</span><span class="nx">SwissMapGroupSlots</span><span class="p">;</span><span class="w"> </span><span class="nx">j</span><span class="o">++</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">g</span><span class="p">.</span><span class="nf">ctrls</span><span class="p">().</span><span class="nf">get</span><span class="p">(</span><span class="nx">j</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="nx">ctrlEmpty</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nx">ctrlEmpty</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">				</span><span class="c1">// Empty or deleted</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">				</span><span class="k">continue</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="nx">key</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">g</span><span class="p">.</span><span class="nf">key</span><span class="p">(</span><span class="nx">typ</span><span class="p">,</span><span class="w"> </span><span class="nx">j</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="k">if</span><span class="w"> </span><span class="nx">typ</span><span class="p">.</span><span class="nf">IndirectKey</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">				</span><span class="nx">key</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="o">*</span><span class="p">((</span><span class="o">*</span><span class="nx">unsafe</span><span class="p">.</span><span class="nx">Pointer</span><span class="p">)(</span><span class="nx">key</span><span class="p">))</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="nx">elem</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">g</span><span class="p">.</span><span class="nf">elem</span><span class="p">(</span><span class="nx">typ</span><span class="p">,</span><span class="w"> </span><span class="nx">j</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="k">if</span><span class="w"> </span><span class="nx">typ</span><span class="p">.</span><span class="nf">IndirectElem</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">				</span><span class="nx">elem</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="o">*</span><span class="p">((</span><span class="o">*</span><span class="nx">unsafe</span><span class="p">.</span><span class="nx">Pointer</span><span class="p">)(</span><span class="nx">elem</span><span class="p">))</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="nx">hash</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">typ</span><span class="p">.</span><span class="nf">Hasher</span><span class="p">(</span><span class="nx">key</span><span class="p">,</span><span class="w"> </span><span class="nx">m</span><span class="p">.</span><span class="nx">seed</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="kd">var</span><span class="w"> </span><span class="nx">newTable</span><span class="w"> </span><span class="o">*</span><span class="nx">table</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="k">if</span><span class="w"> </span><span class="nx">hash</span><span class="o">&amp;</span><span class="nx">mask</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">				</span><span class="nx">newTable</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">left</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">				</span><span class="nx">newTable</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">right</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="nx">newTable</span><span class="p">.</span><span class="nf">uncheckedPutSlot</span><span class="p">(</span><span class="nx">typ</span><span class="p">,</span><span class="w"> </span><span class="nx">hash</span><span class="p">,</span><span class="w"> </span><span class="nx">key</span><span class="p">,</span><span class="w"> </span><span class="nx">elem</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">m</span><span class="p">.</span><span class="nf">installTableSplit</span><span class="p">(</span><span class="nx">t</span><span class="p">,</span><span class="w"> </span><span class="nx">left</span><span class="p">,</span><span class="w"> </span><span class="nx">right</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">t</span><span class="p">.</span><span class="nx">index</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">m</span><span class="w"> </span><span class="o">*</span><span class="nx">Map</span><span class="p">)</span><span class="w"> </span><span class="nf">installTableSplit</span><span class="p">(</span><span class="nx">old</span><span class="p">,</span><span class="w"> </span><span class="nx">left</span><span class="p">,</span><span class="w"> </span><span class="nx">right</span><span class="w"> </span><span class="o">*</span><span class="nx">table</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">old</span><span class="p">.</span><span class="nx">localDepth</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nx">m</span><span class="p">.</span><span class="nx">globalDepth</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="c1">// No room for another level in the directory. Grow the</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="c1">// directory.</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">newDir</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">([]</span><span class="o">*</span><span class="nx">table</span><span class="p">,</span><span class="w"> </span><span class="nx">m</span><span class="p">.</span><span class="nx">dirLen</span><span class="o">*</span><span class="mi">2</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">m</span><span class="p">.</span><span class="nx">dirLen</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="nx">t</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">m</span><span class="p">.</span><span class="nf">directoryAt</span><span class="p">(</span><span class="nb">uintptr</span><span class="p">(</span><span class="nx">i</span><span class="p">))</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="nx">newDir</span><span class="p">[</span><span class="mi">2</span><span class="o">*</span><span class="nx">i</span><span class="p">]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">t</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="nx">newDir</span><span class="p">[</span><span class="mi">2</span><span class="o">*</span><span class="nx">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">t</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="c1">// t may already exist in multiple indicies. We should</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="c1">// only update t.index once. Since the index must</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="c1">// increase, seeing the original index means this must</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="c1">// be the first time we&#39;ve encountered this table.</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="k">if</span><span class="w"> </span><span class="nx">t</span><span class="p">.</span><span class="nx">index</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">				</span><span class="nx">t</span><span class="p">.</span><span class="nx">index</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">i</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">m</span><span class="p">.</span><span class="nx">globalDepth</span><span class="o">++</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">m</span><span class="p">.</span><span class="nx">globalShift</span><span class="o">--</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="cp">//m.directory = newDir</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">m</span><span class="p">.</span><span class="nx">dirPtr</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">unsafe</span><span class="p">.</span><span class="nf">Pointer</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">newDir</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">m</span><span class="p">.</span><span class="nx">dirLen</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">newDir</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="c1">// N.B. left and right may still consume multiple indicies if the</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="c1">// directory has grown multiple times since old was last split.</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">left</span><span class="p">.</span><span class="nx">index</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">old</span><span class="p">.</span><span class="nx">index</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">m</span><span class="p">.</span><span class="nf">replaceTable</span><span class="p">(</span><span class="nx">left</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">entries</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="p">(</span><span class="nx">m</span><span class="p">.</span><span class="nx">globalDepth</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nx">left</span><span class="p">.</span><span class="nx">localDepth</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">right</span><span class="p">.</span><span class="nx">index</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">left</span><span class="p">.</span><span class="nx">index</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">entries</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">m</span><span class="p">.</span><span class="nf">replaceTable</span><span class="p">(</span><span class="nx">right</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>源码解读：</p>
+<ol>
+<li>
+<p>首先判断预期的<code>新容量</code>（旧容量的两倍）是否达到了单表的<code>最大group容量</code>（maxTableCapacity=1024）</p>
+</li>
+<li>
+<p>如果没超过，则进入扩容流程（<code>grow</code>）</p>
+</li>
+<li>
+<p>如果超过了，则进入分裂流程（<code>split</code>）</p>
+</li>
+</ol>
+<h4 id="扩容流程详解grow">扩容流程详解（grow）
+</h4><ol>
+<li>
+<p>首先创建新table（但还未替换）。</p>
+</li>
+<li>
+<p>判断旧table是否为空，迁移所有元素（新建table时capacity=0，判断避免空表扫描）。</p>
+</li>
+<li>
+<p>遍历所有group，遍历每个group内的8个slot，遇到delete或者empty的直接跳过，获取存活的key\elem，重新计算hash。</p>
+</li>
+<li>
+<p>插入新table（unchecked）（新table是一定有足够空间的）。</p>
+</li>
+<li>
+<p>完整性校验（checkInvariants）（used数量、ctrl状态、 growthLeft 、 map.used 一致性 ）。</p>
+</li>
+<li>
+<p>替换旧table（replaceTable）。</p>
+</li>
+<li>
+<p>标记旧table失效（t.index = -1）。</p>
+</li>
+</ol>
+<h4 id="分裂流程详解split-extendible-hashing--">分裂流程详解（split）（ Extendible Hashing  ）
+</h4><ol>
+<li>
+<p>当一个table已经到达最大容量（ maxTableCapacity  ），但还是要继续插入时会进入split。</p>
+</li>
+<li>
+<p>table的localdepth加1（localdepth表示当前table负责的hash范围，区别globaldepth表示当前directory使用的hash的范围）。</p>
+</li>
+<li>
+<p>创建左右两个新table。</p>
+</li>
+<li>
+<p>计算分流掩码mask（用于后续决定元素流向哪个table）。</p>
+</li>
+<li>
+<p>扫描旧table，逐个slot进行分流。跳过delete\empty，取key\elem并重新hash。</p>
+</li>
+<li>
+<p>根据mask，用新增的那一位hash来决定该slot流入哪个table（见上方源码）。</p>
+</li>
+<li>
+<p>插入新table，不需要检查，保证成功。</p>
+</li>
+<li>
+<p>将split的结果加入到directory中（如果directory的globalDepth位数不够用会扩容）。</p>
+</li>
+<li>
+<p>废弃当前table。</p>
+</li>
+</ol>
+<h4 id="分裂过程中第8步详解">分裂过程中第8步详解
+</h4><blockquote>
+<ol>
+<li>判断当前directory的globalDepth位数是否够用。（split会使得localdepth+1，如果超过的globalDepth位数则需要扩容directory）</li>
+<li>如果需要翻倍，创建新的dir数组，原来的2倍容量。
+a. 复制并维护index。
+b. 更新 globalDepth / globalShift 。
+c. 原子替换 directory（将原来的dir指针指向新的数组）。</li>
+<li>left覆盖原来old table负责的起始位置。</li>
+<li>计算right table的index偏移量并设置right index。</li>
+</ol>
+</blockquote>
 
 </section>
 
