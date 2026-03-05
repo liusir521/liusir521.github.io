@@ -1,22 +1,25 @@
 <!DOCTYPE html>
 <html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="欢迎来到我的网站,主要分享个人学习记录,后端开发人员,技术栈Go。">
-<title>源码</title>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="Go语言内存分配模型个人学习笔记">
+<title>Go语言内存分配模型</title>
 
-<link rel='canonical' href='https://liusir521.github.io/categories/%E6%BA%90%E7%A0%81/'>
+<link rel='canonical' href='https://liusir521.github.io/p/go%E8%AF%AD%E8%A8%80%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%A8%A1%E5%9E%8B/'>
 
-<link rel="stylesheet" href="/scss/style.min.86591c898bd806857815fbb8c47e8d3fed97c133b78e83d9bfc27b164dd0aa2b.css"><meta property='og:title' content="源码">
-<meta property='og:description' content="欢迎来到我的网站,主要分享个人学习记录,后端开发人员,技术栈Go。">
-<meta property='og:url' content='https://liusir521.github.io/categories/%E6%BA%90%E7%A0%81/'>
+<link rel="stylesheet" href="/scss/style.min.86591c898bd806857815fbb8c47e8d3fed97c133b78e83d9bfc27b164dd0aa2b.css"><meta property='og:title' content="Go语言内存分配模型">
+<meta property='og:description' content="Go语言内存分配模型个人学习笔记">
+<meta property='og:url' content='https://liusir521.github.io/p/go%E8%AF%AD%E8%A8%80%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%A8%A1%E5%9E%8B/'>
 <meta property='og:site_name' content='你怂你mua'>
-<meta property='og:type' content='website'><meta property='og:updated_time' content=' 2025-12-12T00:00:00&#43;00:00 '/>
-<meta name="twitter:title" content="源码">
-<meta name="twitter:description" content="欢迎来到我的网站,主要分享个人学习记录,后端开发人员,技术栈Go。"><link rel="alternate" type="application/rss&#43;xml" href="https://liusir521.github.io/categories/%E6%BA%90%E7%A0%81/index.xml">
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='源码' /><meta property='article:tag' content='Go语言' /><meta property='article:tag' content='内存模型' /><meta property='article:published_time' content='2025-12-04T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2025-12-04T00:00:00&#43;00:00'/><meta property='og:image' content='https://liusir521.github.io/pawel-czerwinski-8uZPynIu-rQ-unsplash.jpg' />
+<meta name="twitter:title" content="Go语言内存分配模型">
+<meta name="twitter:description" content="Go语言内存分配模型个人学习笔记"><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='https://liusir521.github.io/pawel-czerwinski-8uZPynIu-rQ-unsplash.jpg' />
     <link rel="shortcut icon" href="/favicon.png" />
 
     </head>
-    <body class="">
+    <body class="
+    article-page
+    ">
     <script>
         (function() {
             const colorSchemeKey = 'StackColorScheme';
@@ -276,60 +279,10 @@
     <aside class="sidebar right-sidebar sticky">
         
             
-                <form action="/search/" class="search-form widget" >
-        <p>
-            <label>搜索</label>
-            <input name="keyword" required placeholder="输入关键词..." />
-        
-            <button title="搜索">
-                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <circle cx="10" cy="10" r="7" />
-  <line x1="21" y1="21" x2="15" y2="15" />
-</svg>
-
-
-
-            </button>
-        </p>
-    </form>
-            
-        
-            
-                <section class="widget archives">
+                
+    <section class="widget archives">
         <div class="widget-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-infinity" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <path d="M9.828 9.172a4 4 0 1 0 0 5.656 a10 10 0 0 0 2.172 -2.828a10 10 0 0 1 2.172 -2.828 a4 4 0 1 1 0 5.656a10 10 0 0 1 -2.172 -2.828a10 10 0 0 0 -2.172 -2.828" />
-</svg>
-
-
-
-        </div>
-        <h2 class="widget-title section-title">归档</h2>
-
-        
-        
-        
-        
-        <div class="widget-archive--list">
-            <div class="archives-year">
-                    <a href="/archives/#2025">
-                        
-                            <span class="year">2025</span>
-                            <span class="count">2</span>
-                        
-                    </a> 
-                </div>
-            
-        </div>
-    </section>
-            
-        
-            
-                <section class="widget tagCloud">
-    <div class="widget-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <line x1="5" y1="9" x2="19" y2="9" />
   <line x1="5" y1="15" x2="19" y2="15" />
@@ -339,54 +292,54 @@
 
 
 
-    </div>
-    <h2 class="widget-title section-title">分类</h2>
-
-    <div class="tagCloud-tags">
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
         
-            <a href="/categories/go%E8%AF%AD%E8%A8%80/" class="font_size_2">
-                Go语言
-            </a>
-        
-            <a href="/categories/%E6%BA%90%E7%A0%81/" class="font_size_2">
-                源码
-            </a>
-        
-    </div>
-</section>
-
-            
-        
-            
-                <section class="widget tagCloud">
-    <div class="widget-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-tag" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <path d="M11 3L20 12a1.5 1.5 0 0 1 0 2L14 20a1.5 1.5 0 0 1 -2 0L3 11v-4a4 4 0 0 1 4 -4h4" />
-  <circle cx="9" cy="9" r="2" />
-</svg>
-
-
-
-    </div>
-    <h2 class="widget-title section-title">标签云</h2>
-
-    <div class="tagCloud-tags">
-        
-            <a href="/tags/go%E8%AF%AD%E8%A8%80/">
-                Go语言
-            </a>
-        
-            <a href="/tags/%E6%BA%90%E7%A0%81/">
-                源码
-            </a>
-        
-            <a href="/tags/%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/">
-                内存模型
-            </a>
-        
-    </div>
-</section>
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#相关概念">相关概念</a>
+      <ol>
+        <li><a href="#page">page</a></li>
+        <li><a href="#mspan">mspan</a></li>
+        <li><a href="#size-class相关">size class相关</a>
+          <ol>
+            <li><a href="#demo">Demo</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+    <li><a href="#mcache">MCache</a>
+      <ol>
+        <li><a href="#简介">简介</a></li>
+        <li><a href="#内部构造">内部构造</a></li>
+        <li><a href="#特殊size-class">特殊size class</a></li>
+      </ol>
+    </li>
+    <li><a href="#mcentral">MCentral</a>
+      <ol>
+        <li><a href="#简介-1">简介</a></li>
+        <li><a href="#内部构造-1">内部构造</a></li>
+      </ol>
+    </li>
+    <li><a href="#mheap">MHeap</a>
+      <ol>
+        <li><a href="#简介-2">简介</a></li>
+        <li><a href="#内部构造-2">内部构造</a></li>
+      </ol>
+    </li>
+    <li><a href="#对象分配流程">对象分配流程</a>
+      <ol>
+        <li><a href="#go语言内存管理中的对象划分">go语言内存管理中的对象划分：</a></li>
+        <li><a href="#tiny对象分配流程">Tiny对象分配流程</a></li>
+        <li><a href="#小对象">小对象</a></li>
+        <li><a href="#大对象">大对象</a></li>
+      </ol>
+    </li>
+  </ol>
+</nav>
+        </div>
+    </section>
 
             
         
@@ -394,63 +347,502 @@
 
 
             <main class="main full-width">
-    <header>
-        <h3 class="section-title">
-            
-                Categories
-            
-        </h3>
-
-        <div class="section-card">
-            <div class="section-details">
-                <h3 class="section-count">2 个页面</h3>
-                <h1 class="section-term">源码</h1>
-                
-            </div>
-        </div>
-    </header>
-    
-    
-        <section class="article-list--compact">
-            
-                <article>
-    <a href="/p/go-map-1.24%E6%96%B0%E5%AE%9E%E7%8E%B0/">
-        <div class="article-details">
-            <h2 class="article-title">Go Map 1.24新实现</h2>
-            <footer class="article-time">
-                <time datetime='2025-12-12T00:00:00Z'>Dec 12, 2025</time>
-            </footer>
-        </div>
-            <div class="article-image">
-                <img src="/p/go-map-1.24%E6%96%B0%E5%AE%9E%E7%8E%B0/pawel-czerwinski-8uZPynIu-rQ-unsplash_hu_9e6bcf9cfe9a9448.jpg" 
-                        width="120"
-                        height="120" 
-                        alt="Go Map 1.24新实现"
-                        loading="lazy">
-                
-            </div>
-        
-    </a>
-</article>
-            
-                <article>
-    <a href="/p/go%E8%AF%AD%E8%A8%80%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%A8%A1%E5%9E%8B/">
-        <div class="article-details">
-            <h2 class="article-title">Go语言内存分配模型</h2>
-            <footer class="article-time">
-                <time datetime='2025-12-04T00:00:00Z'>Dec 04, 2025</time>
-            </footer>
-        </div>
-            <div class="article-image">
+    <article class="has-image main-article">
+    <header class="article-header">
+        <div class="article-image">
+            <a href="/p/go%E8%AF%AD%E8%A8%80%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%A8%A1%E5%9E%8B/">
                 
                     <img src="/pawel-czerwinski-8uZPynIu-rQ-unsplash.jpg" loading="lazy" alt="Featured image of post Go语言内存分配模型" />
                 
+            </a>
+        </div>
+    
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            
+            
+            
+            <a href="/categories/%E6%BA%90%E7%A0%81/" style="background-color: hsl(103, 60%, 84%); color: hsl(103, 60%, 15%);">
+                源码
+            </a>
+        
+            
+            
+            
+            <a href="/categories/go%E8%AF%AD%E8%A8%80/" style="background-color: hsl(287, 60%, 84%); color: hsl(287, 60%, 15%);">
+                Go语言
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/go%E8%AF%AD%E8%A8%80%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%A8%A1%E5%9E%8B/">Go语言内存分配模型</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            Go语言内存分配模型个人学习笔记
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published" datetime='2025-12-04T00:00:00Z'>Dec 04, 2025</time>
             </div>
         
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 2 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="相关概念">相关概念
+</h2><p>整体结构图：
+<img src="/p/go%E8%AF%AD%E8%A8%80%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%A8%A1%E5%9E%8B/1-1.png"
+	width="1489"
+	height="1120"
+	srcset="/p/go%E8%AF%AD%E8%A8%80%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%A8%A1%E5%9E%8B/1-1_hu_a739cc3d6b4a2b23.png 480w, /p/go%E8%AF%AD%E8%A8%80%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%A8%A1%E5%9E%8B/1-1_hu_1c346baab8fbd7e.png 1024w"
+	loading="lazy"
+	
+		alt="整体结构图"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="132"
+		data-flex-basis="319px"
+	
+></p>
+<h3 id="page">page
+</h3><p>一个page大小为8kb，page是go语言内存管理和虚拟内存交互时的最小单元。</p>
+<h3 id="mspan">mspan
+</h3><p>表示一组连续的page（整数倍的page）</p>
+<h3 id="size-class相关">size class相关
+</h3><ol>
+<li>
+<p>object size: 指协程应用逻辑一次向go语言内存申请的对象object大小。</p>
+</li>
+<li>
+<p><code>object</code>: go语言内存管理模块针对内存管理更加细化的内存管理单元。</p>
+</li>
+<li>
+<p>span: span在初始化时会被分为多个object。</p>
+</li>
+<li>
+<p>size class: 表示一块内存所属的规格或者刻度，例如object size在1-8B的object属于size class1级别，8-16B大小的为size class2级别。（go语言划分了66个size）</p>
+</li>
+<li>
+<p>span class: 针对span进行划分，是span大小的级别。一个size class会对应两个span class，其中一个span存放需要gc扫描的对象（包含指针的对象），另一个span存放不需要gc扫描的对象（不含指针的）</p>
+</li>
+</ol>
+<h4 id="demo">Demo
+</h4><blockquote>
+<p>object size大小为8B大小的object，所属的span的大小为8kb，那么这个span就会被平均分为1024个object。</p>
+</blockquote>
+<p>相关图解：
+<img src="/p/go%E8%AF%AD%E8%A8%80%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%A8%A1%E5%9E%8B/1-2.png"
+	width="1490"
+	height="1115"
+	srcset="/p/go%E8%AF%AD%E8%A8%80%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%A8%A1%E5%9E%8B/1-2_hu_49b78e17f42b23f9.png 480w, /p/go%E8%AF%AD%E8%A8%80%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%A8%A1%E5%9E%8B/1-2_hu_5d87290a1cb63485.png 1024w"
+	loading="lazy"
+	
+		alt="Object size 与 Span的关系"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="133"
+		data-flex-basis="320px"
+	
+>
+<img src="/p/go%E8%AF%AD%E8%A8%80%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%A8%A1%E5%9E%8B/1-3.png"
+	width="1486"
+	height="1113"
+	srcset="/p/go%E8%AF%AD%E8%A8%80%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%A8%A1%E5%9E%8B/1-3_hu_f7a5be2c13e1a65f.png 480w, /p/go%E8%AF%AD%E8%A8%80%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%A8%A1%E5%9E%8B/1-3_hu_6e59107ebcabd298.png 1024w"
+	loading="lazy"
+	
+		alt="Span Class 与 Size Class 的逻辑关系"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="133"
+		data-flex-basis="320px"
+	
+></p>
+<h2 id="mcache">MCache
+</h2><h3 id="简介">简介
+</h3><p>MCache与go语言的GMP模型中的 <code>P进行绑定</code> ，因为真正可运行的线程M的数量与P一致，所以与P绑定更能 <code>节省内存空间</code>，可以保证每个 <code>G</code> 使用MCache时 <code>不需要加锁</code> 就可以获取内存。（因为一个P只有一个M在其上运行，不可能出现竞争，所以没有锁限制，进而加快了内存的分配）</p>
+<h3 id="内部构造">内部构造
+</h3><p>如图所示：
+<img src="/p/go%E8%AF%AD%E8%A8%80%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%A8%A1%E5%9E%8B/2-1.png"
+	width="1490"
+	height="1115"
+	srcset="/p/go%E8%AF%AD%E8%A8%80%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%A8%A1%E5%9E%8B/2-1_hu_ab2c5d4843d5eddb.png 480w, /p/go%E8%AF%AD%E8%A8%80%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%A8%A1%E5%9E%8B/2-1_hu_bbc454c0c110a8ae.png 1024w"
+	loading="lazy"
+	
+		alt="内部构造"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="133"
+		data-flex-basis="320px"
+	
+></p>
+<p>MCache中每个 <code>span class</code> 会对应一个 <code>Mspan</code> ，不同span class的mspan的总体长度不同（参考runtime/sizeclass.go）。当其中某个span class对应的mspan已经没有可以提供的object时，MCache会向MCentral申请一个对应的mspan。</p>
+<h3 id="特殊size-class">特殊size class
+</h3><p>对于span class为0和1，也就是 <code>size class为0</code> 的规格刻度内存，MCache实际上没有分配任何内存。Go语言内存管理对内存为0的数据申请做了特殊处理，如果申请的数据大小为0，则将直接返回一个 <code>固定内存地址</code> ，不会进入Go语言内存管理的正常逻辑。
+这也是为什么在做channel同步时，会发送一个struct{}数据，因为不会申请任何内存，能够适当节省一部分内存空间 。</p>
+<h2 id="mcentral">MCentral
+</h2><h3 id="简介-1">简介
+</h3><p>当MCache中的某个size class对应的span被一次次的object上层取走后，如果出现当前size class的span空缺的情况，MCache会向MCentral申请对应的span。申请时需要 <code>加锁</code> 。</p>
+<p><img src="/p/go%E8%AF%AD%E8%A8%80%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%A8%A1%E5%9E%8B/3-1.png"
+	width="1485"
+	height="1106"
+	srcset="/p/go%E8%AF%AD%E8%A8%80%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%A8%A1%E5%9E%8B/3-1_hu_406fe1ff9b15ef2a.png 480w, /p/go%E8%AF%AD%E8%A8%80%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%A8%A1%E5%9E%8B/3-1_hu_3013da13511ef2f.png 1024w"
+	loading="lazy"
+	
+		alt="交换单位图"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="134"
+		data-flex-basis="322px"
+	
+></p>
+<h3 id="内部构造-1">内部构造
+</h3><p>MCentral针对每个span class 级别有两个 <code>span链表</code> 。</p>
+<p><img src="/p/go%E8%AF%AD%E8%A8%80%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%A8%A1%E5%9E%8B/3-2.png"
+	width="1485"
+	height="1114"
+	srcset="/p/go%E8%AF%AD%E8%A8%80%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%A8%A1%E5%9E%8B/3-2_hu_b02a88765d53b299.png 480w, /p/go%E8%AF%AD%E8%A8%80%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%A8%A1%E5%9E%8B/3-2_hu_462e97e0570fc036.png 1024w"
+	loading="lazy"
+	
+		alt="交换单位图"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="133"
+		data-flex-basis="319px"
+	
+></p>
+<blockquote>
+<p>MCentral是一个抽象的概念，实际上每个span class对应的内存数据结构是一个MCentral， 即在MCentral这层数据管理中，实际上有span class个MCentral小内存管理单元。</p>
+</blockquote>
+<p>内部字段：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">type</span><span class="w"> </span><span class="nx">mcentral</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">_</span><span class="w">         </span><span class="nx">sys</span><span class="p">.</span><span class="nx">NotInHeap</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">spanclass</span><span class="w"> </span><span class="nx">spanClass</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="cp">//当前mcantral对应的spanclass等级</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">partial</span><span class="w"> </span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="nx">spanSet</span><span class="w"> </span><span class="c1">// list of spans with a free object</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="cp">//表示还有可用空间的集合，集合中的所有span都至少有一个空闲的object空间。 </span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="cp">//如果MCentral上游的MCache退还span，则会将退还的span加入集合</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">full</span><span class="w">    </span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="nx">spanSet</span><span class="w"> </span><span class="c1">// list of spans with no free objects</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="cp">//表示没有可用空间的span链表，该链表上的span都不确定是否还有空闲的object空间。</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="cp">//如果MCentral将一个span提供给上游MCache，则被提供的span就会加入集合</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>partial</code> 和 <code>full</code> 都是一个spanSet数组类型，都各有两个spanSet，这是为了给 <code>GC</code> 使用的，其中一个是已扫描的，另一个是未扫描的。</p>
+<h2 id="mheap">MHeap
+</h2><h3 id="简介-2">简介
+</h3><p>MHeap是内存块的管理对象，通过page对内存单元进行管理。用来详细管理每一系列page的结构称为一个 <code>HeapArena</code> 。一个HeapArena占用内存 <code>64MB</code> ，其中里面的内存是一个个的mspan，最小单元依然是pages。所有的HeapArena组成的集合是一个 <code>Arenas</code> ，即MHeap针对堆内存的管理。MHeap上游是MCentral，当MCentral中的span不够时向MHeap申请。MHeap的下游是操作系统，当MHeap内存不足时会向操作系统的 <code>虚拟内存</code> 空间申请，访问MHeap获取内存时依然需要 <code>加锁</code>。</p>
+<p>MHeap中HeapArena占用了绝大部分的空间，其中每个HeapArena包含一个 <code>bitmap</code> ，其作用是标记当前这个HeapArena的内存使用情况。其主要服务于 <code>GC</code> 垃圾回收模块，bitmap共有  <code>两种标记</code>，一种是标记对应地址中 <code>是否存在对象</code>，另一种是标记此对象 <code>是否被GC模块标记过</code>，所以当前HeapArena中的所有page均会被bitmap标记。</p>
+<h3 id="内部构造-2">内部构造
+</h3><p>如图所示：
+<img src="/p/go%E8%AF%AD%E8%A8%80%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%A8%A1%E5%9E%8B/4-2.png"
+	width="840"
+	height="1105"
+	srcset="/p/go%E8%AF%AD%E8%A8%80%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%A8%A1%E5%9E%8B/4-2_hu_792db3dfb7aeb768.png 480w, /p/go%E8%AF%AD%E8%A8%80%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%A8%A1%E5%9E%8B/4-2_hu_6f2bb0dc3bc54d27.png 1024w"
+	loading="lazy"
+	
+		alt="MHeap内部构造"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="76"
+		data-flex-basis="182px"
+	
+></p>
+<h2 id="对象分配流程">对象分配流程
+</h2><h3 id="go语言内存管理中的对象划分">go语言内存管理中的对象划分：
+</h3><div class="table-wrapper"><table>
+  <thead>
+      <tr>
+          <th>对象级别</th>
+          <th>大小范围</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>微对象（Tiny对象）</td>
+          <td>[1，16B）</td>
+      </tr>
+      <tr>
+          <td>小对象</td>
+          <td>[16B，32KB]</td>
+      </tr>
+      <tr>
+          <td>大对象</td>
+          <td>(32KB，无限大）</td>
+      </tr>
+  </tbody>
+</table></div>
+<h3 id="tiny对象分配流程">Tiny对象分配流程
+</h3><p>针对Tiny对象，go语言做了特殊处理，MCache中不仅保存着各个span class级别的内存块空间，还有一个比较特殊的 <code>Tiny存储空间</code>。</p>
+<p>Tiny空间是从size class=2（对应span class=4\5）中获取的一个16B的object，作为Tiny对象的分配空间。</p>
+<p>主要是因为类似bool或者1字节的byte，也都会独享8B的内存空间，进而导致一定的空间浪费。所以将申请的object小于16B的申请同意归为Tiny对象申请。</p>
+<p>分配过程：</p>
+<ol>
+<li>
+<p><code>P</code> 向 <code>MCache</code> 申请微小对象，如一个bool变量。如果申请的object在Tiny对象的大小范围，则进入Tiny对象的申请流程，否则进入小对象或者大对象的申请流程。</p>
+</li>
+<li>
+<p>判断申请的tiny对象是否包含 <code>指针</code> ，如果包含指针，则进入 <code>小对象</code> 的申请流程（不会放在tiny缓冲区，因为需要 <code>GC</code> 进入扫描流程）。</p>
+</li>
+<li>
+<p>如果tiny空间的16B没有多余的存储容量，则从size class=2的span中获取一个16B的object放入tiny缓冲区中。</p>
+</li>
+<li>
+<p>将1B的bool类型放置在16B的tiny空间中，以 <code>字节对齐</code> 的方式放置。（tiny对象的申请也达不到内存利用率100%）（此处不做详细内存对齐讲解）</p>
+</li>
+</ol>
+<h3 id="小对象">小对象
+</h3><p>分配小对象的流程是按照span class的规格匹配的。</p>
+<p>分配过程：</p>
+<ol>
+<li>
+<p>协程逻辑层 <code>P</code> 向go语言内存管理申请一个对象所需的内存空间。</p>
+</li>
+<li>
+<p><code>MCache</code> 收到请求后，根据对象所需的内存空间计算出需要的size。</p>
+</li>
+<li>
+<p>判断size是否小于16B，小于进入tiny对象的申请流程，否则进入小对象的申请流程。</p>
+</li>
+<li>
+<p>根据size匹配对应的 <code>size class</code> 内存规格，在根据size class和该对象是否包含 <code>指针</code>，来定位是从noscan span class还是从scan span class获取空间，如果没有指针，则锁定 <code>noscan</code>。</p>
+</li>
+<li>
+<p>在定位的span class中的span取出一个object返回给协程逻辑层P。流程结束</p>
+</li>
+<li>
+<p>如果定位的span class中的span所有的内存块object都被占用，则 <code>MCache</code> 会向 <code>MCentral</code> 申请一个span。</p>
+</li>
+<li>
+<p>MCentral收到内存申请后，优先从对应的span class中的 <code>Partial Set</code> 里取出span，如果Partial Set里没有，则从 <code>Full Set</code> 中取，返给MCache。</p>
+</li>
+<li>
+<p>MCache得到span后，补充 到对应的span class中，之后再次执行第5步。</p>
+</li>
+<li>
+<p>如果Full Set中没有符合的span，则MCentral会向 <code>MHeap</code> 申请内存。</p>
+</li>
+<li>
+<p>MHeap收到请求后从其中一个 <code>HeapArena</code> 中取出一部分pages返给MCentral，当MHeap没有足够空间时向 <code>操作系统</code> 申请内存，将申请的内存也保存到HeapArena中的mspan中。MCentral将从MHeap获取的由pages组成的span添加到对应的span class <code>集合中作为补充</code> ，之后继续执行第7步。</p>
+</li>
+<li>
+<p>最后协程业务逻辑层得到对象申请到的内存，流程结束。</p>
+</li>
+</ol>
+<h3 id="大对象">大对象
+</h3><p>小对象从MCache中分配，而大对象直接从MHeap中分配。对于不满足MCache分配范围的对象均按照大对象处理。</p>
+<p>分配过程：</p>
+<ol>
+<li>
+<p>协程逻辑层申请大对象所需的内存空间，如果超过32KB，则直接 <code>绕过MCache</code> 和 <code>MCentral</code> 向 <code>MHeap</code> 申请。</p>
+</li>
+<li>
+<p>MHeap根据对象所需的空间计算得到需要多少个pages。</p>
+</li>
+<li>
+<p>MHeap向 <code>Arenas</code> 中的HeapArena申请对应的pages。</p>
+</li>
+<li>
+<p>如果Arenas中没有HeapArena可提供合适的pages内存，则向操作系统的虚拟内存申请，并且填充到Arenas中。</p>
+</li>
+<li>
+<p>MHeap返回大对象的内存空间，协程逻辑层得到内存，流程结束</p>
+</li>
+</ol>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/%E6%BA%90%E7%A0%81/">源码</a>
+        
+            <a href="/tags/go%E8%AF%AD%E8%A8%80/">Go语言</a>
+        
+            <a href="/tags/%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/">内存模型</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="has-image">
+    <a href="/p/go-map-1.24%E6%96%B0%E5%AE%9E%E7%8E%B0/">
+        
+        
+            <div class="article-image">
+                <img src="/p/go-map-1.24%E6%96%B0%E5%AE%9E%E7%8E%B0/pawel-czerwinski-8uZPynIu-rQ-unsplash.c514d916917173a48a42e0114b469961_hu_cd6a07a0d3af7b3e.jpg" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post Go Map 1.24新实现"
+                        
+                        data-hash="md5-xRTZFpFxc6SKQuARS0aZYQ==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Go Map 1.24新实现</h2>
+        </div>
     </a>
 </article>
+
             
-        </section>
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
     <footer class="site-footer">
     <section class="copyright">
         &copy; 
@@ -466,6 +858,85 @@
     </section>
 </footer>
 
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+    
 
             </main>
         </div>

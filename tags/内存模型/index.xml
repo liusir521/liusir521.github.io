@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>内存模型 on 你怂你mua</title>
+        <link>https://liusir521.github.io/tags/%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/</link>
+        <description>Recent content in 内存模型 on 你怂你mua</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>zh-cn</language>
+        <copyright>Example Person</copyright>
+        <lastBuildDate>Thu, 04 Dec 2025 00:00:00 +0000</lastBuildDate><atom:link href="https://liusir521.github.io/tags/%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>Go语言内存分配模型</title>
+        <link>https://liusir521.github.io/p/go%E8%AF%AD%E8%A8%80%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%A8%A1%E5%9E%8B/</link>
+        <pubDate>Thu, 04 Dec 2025 00:00:00 +0000</pubDate>
+        
+        <guid>https://liusir521.github.io/p/go%E8%AF%AD%E8%A8%80%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%A8%A1%E5%9E%8B/</guid>
+        <description>&lt;img src="https://liusir521.github.io/pawel-czerwinski-8uZPynIu-rQ-unsplash.jpg" alt="Featured image of post Go语言内存分配模型" /&gt;&lt;h2 id=&#34;相关概念&#34;&gt;相关概念
+&lt;/h2&gt;&lt;p&gt;整体结构图：
+&lt;img src=&#34;https://liusir521.github.io/p/go%E8%AF%AD%E8%A8%80%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%A8%A1%E5%9E%8B/1-1.png&#34;
+	width=&#34;1489&#34;
+	height=&#34;1120&#34;
+	srcset=&#34;https://liusir521.github.io/p/go%E8%AF%AD%E8%A8%80%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%A8%A1%E5%9E%8B/1-1_hu_a739cc3d6b4a2b23.png 480w, https://liusir521.github.io/p/go%E8%AF%AD%E8%A8%80%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%A8%A1%E5%9E%8B/1-1_hu_1c346baab8fbd7e.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;整体结构图&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;132&#34;
+		data-flex-basis=&#34;319px&#34;
+	
+&gt;&lt;/p&gt;
+&lt;h3 id=&#34;page&#34;&gt;page
+&lt;/h3&gt;&lt;p&gt;一个page大小为8kb，page是go语言内存管理和虚拟内存交互时的最小单元。&lt;/p&gt;
+&lt;h3 id=&#34;mspan&#34;&gt;mspan
+&lt;/h3&gt;&lt;p&gt;表示一组连续的page（整数倍的page）&lt;/p&gt;
+&lt;h3 id=&#34;size-class相关&#34;&gt;size class相关
+&lt;/h3&gt;&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;object size: 指协程应用逻辑一次向go语言内存申请的对象object大小。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;object&lt;/code&gt;: go语言内存管理模块针对内存管理更加细化的内存管理单元。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;span: span在初始化时会被分为多个object。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;size class: 表示一块内存所属的规格或者刻度，例如object size在1-8B的object属于size class1级别，8-16B大小的为size class2级别。（go语言划分了66个size）&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;span class: 针对span进行划分，是span大小的级别。一个size class会对应两个span class，其中一个span存放需要gc扫描的对象（包含指针的对象），另一个span存放不需要gc扫描的对象（不含指针的）&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h4 id=&#34;demo&#34;&gt;Demo
+&lt;/h4&gt;&lt;blockquote&gt;
+&lt;p&gt;object size大小为8B大小的object，所属的span的大小为8kb，那么这个span就会被平均分为1024个object。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;相关图解：
+&lt;img src=&#34;https://liusir521.github.io/p/go%E8%AF%AD%E8%A8%80%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%A8%A1%E5%9E%8B/1-2.png&#34;
+	width=&#34;1490&#34;
+	height=&#34;1115&#34;
+	srcset=&#34;https://liusir521.github.io/p/go%E8%AF%AD%E8%A8%80%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%A8%A1%E5%9E%8B/1-2_hu_49b78e17f42b23f9.png 480w, https://liusir521.github.io/p/go%E8%AF%AD%E8%A8%80%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%A8%A1%E5%9E%8B/1-2_hu_5d87290a1cb63485.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Object size 与 Span的关系&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;133&#34;
+		data-flex-basis=&#34;320px&#34;
+	
+&gt;
+&lt;img src=&#34;https://liusir521.github.io/p/go%E8%AF%AD%E8%A8%80%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%A8%A1%E5%9E%8B/1-3.png&#34;
+	width=&#34;1486&#34;
+	height=&#34;1113&#34;
+	srcset=&#34;https://liusir521.github.io/p/go%E8%AF%AD%E8%A8%80%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%A8%A1%E5%9E%8B/1-3_hu_f7a5be2c13e1a65f.png 480w, https://liusir521.github.io/p/go%E8%AF%AD%E8%A8%80%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%A8%A1%E5%9E%8B/1-3_hu_6e59107ebcabd298.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Span Class 与 Size Class 的逻辑关系&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;133&#34;
+		data-flex-basis=&#34;320px&#34;
+	
+&gt;&lt;/p&gt;
+&lt;h2 id=&#34;mcache&#34;&gt;MCache
+&lt;/h2&gt;&lt;h3 id=&#34;简介&#34;&gt;简介
+&lt;/h3&gt;&lt;p&gt;MCache与go语言的GMP模型中的 &lt;code&gt;P进行绑定&lt;/code&gt; ，因为真正可运行的线程M的数量与P一致，所以与P绑定更能 &lt;code&gt;节省内存空间&lt;/code&gt;，可以保证每个 &lt;code&gt;G&lt;/code&gt; 使用MCache时 &lt;code&gt;不需要加锁&lt;/code&gt; 就可以获取内存。（因为一个P只有一个M在其上运行，不可能出现竞争，所以没有锁限制，进而加快了内存的分配）&lt;/p&gt;
+&lt;h3 id=&#34;内部构造&#34;&gt;内部构造
+&lt;/h3&gt;&lt;p&gt;如图所示：
+&lt;img src=&#34;https://liusir521.github.io/p/go%E8%AF%AD%E8%A8%80%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%A8%A1%E5%9E%8B/2-1.png&#34;
+	width=&#34;1490&#34;
+	height=&#34;1115&#34;
+	srcset=&#34;https://liusir521.github.io/p/go%E8%AF%AD%E8%A8%80%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%A8%A1%E5%9E%8B/2-1_hu_ab2c5d4843d5eddb.png 480w, https://liusir521.github.io/p/go%E8%AF%AD%E8%A8%80%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%A8%A1%E5%9E%8B/2-1_hu_bbc454c0c110a8ae.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;内部构造&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;133&#34;
+		data-flex-basis=&#34;320px&#34;
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;MCache中每个 &lt;code&gt;span class&lt;/code&gt; 会对应一个 &lt;code&gt;Mspan&lt;/code&gt; ，不同span class的mspan的总体长度不同（参考runtime/sizeclass.go）。当其中某个span class对应的mspan已经没有可以提供的object时，MCache会向MCentral申请一个对应的mspan。&lt;/p&gt;
+&lt;h3 id=&#34;特殊size-class&#34;&gt;特殊size class
+&lt;/h3&gt;&lt;p&gt;对于span class为0和1，也就是 &lt;code&gt;size class为0&lt;/code&gt; 的规格刻度内存，MCache实际上没有分配任何内存。Go语言内存管理对内存为0的数据申请做了特殊处理，如果申请的数据大小为0，则将直接返回一个 &lt;code&gt;固定内存地址&lt;/code&gt; ，不会进入Go语言内存管理的正常逻辑。
+这也是为什么在做channel同步时，会发送一个struct{}数据，因为不会申请任何内存，能够适当节省一部分内存空间 。&lt;/p&gt;
+&lt;h2 id=&#34;mcentral&#34;&gt;MCentral
+&lt;/h2&gt;&lt;h3 id=&#34;简介-1&#34;&gt;简介
+&lt;/h3&gt;&lt;p&gt;当MCache中的某个size class对应的span被一次次的object上层取走后，如果出现当前size class的span空缺的情况，MCache会向MCentral申请对应的span。申请时需要 &lt;code&gt;加锁&lt;/code&gt; 。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://liusir521.github.io/p/go%E8%AF%AD%E8%A8%80%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%A8%A1%E5%9E%8B/3-1.png&#34;
+	width=&#34;1485&#34;
+	height=&#34;1106&#34;
+	srcset=&#34;https://liusir521.github.io/p/go%E8%AF%AD%E8%A8%80%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%A8%A1%E5%9E%8B/3-1_hu_406fe1ff9b15ef2a.png 480w, https://liusir521.github.io/p/go%E8%AF%AD%E8%A8%80%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%A8%A1%E5%9E%8B/3-1_hu_3013da13511ef2f.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;交换单位图&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;134&#34;
+		data-flex-basis=&#34;322px&#34;
+	
+&gt;&lt;/p&gt;
+&lt;h3 id=&#34;内部构造-1&#34;&gt;内部构造
+&lt;/h3&gt;&lt;p&gt;MCentral针对每个span class 级别有两个 &lt;code&gt;span链表&lt;/code&gt; 。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://liusir521.github.io/p/go%E8%AF%AD%E8%A8%80%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%A8%A1%E5%9E%8B/3-2.png&#34;
+	width=&#34;1485&#34;
+	height=&#34;1114&#34;
+	srcset=&#34;https://liusir521.github.io/p/go%E8%AF%AD%E8%A8%80%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%A8%A1%E5%9E%8B/3-2_hu_b02a88765d53b299.png 480w, https://liusir521.github.io/p/go%E8%AF%AD%E8%A8%80%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%A8%A1%E5%9E%8B/3-2_hu_462e97e0570fc036.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;交换单位图&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;133&#34;
+		data-flex-basis=&#34;319px&#34;
+	
+&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;MCentral是一个抽象的概念，实际上每个span class对应的内存数据结构是一个MCentral， 即在MCentral这层数据管理中，实际上有span class个MCentral小内存管理单元。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;内部字段：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;14
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-go&#34; data-lang=&#34;go&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kd&#34;&gt;type&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;mcentral&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;kd&#34;&gt;struct&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;	&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;_&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;         &lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;sys&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;NotInHeap&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;	&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;spanclass&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;spanClass&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;&lt;span class=&#34;cp&#34;&gt;//当前mcantral对应的spanclass等级&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;    
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;	&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;partial&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;2&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;spanSet&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;c1&#34;&gt;// list of spans with a free object&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;&lt;span class=&#34;cp&#34;&gt;//表示还有可用空间的集合，集合中的所有span都至少有一个空闲的object空间。 &lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;&lt;span class=&#34;cp&#34;&gt;//如果MCentral上游的MCache退还span，则会将退还的span加入集合&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;    
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;	&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;full&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;2&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;nx&#34;&gt;spanSet&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;c1&#34;&gt;// list of spans with no free objects&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;&lt;span class=&#34;cp&#34;&gt;//表示没有可用空间的span链表，该链表上的span都不确定是否还有空闲的object空间。&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;&lt;span class=&#34;cp&#34;&gt;//如果MCentral将一个span提供给上游MCache，则被提供的span就会加入集合&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;code&gt;partial&lt;/code&gt; 和 &lt;code&gt;full&lt;/code&gt; 都是一个spanSet数组类型，都各有两个spanSet，这是为了给 &lt;code&gt;GC&lt;/code&gt; 使用的，其中一个是已扫描的，另一个是未扫描的。&lt;/p&gt;
+&lt;h2 id=&#34;mheap&#34;&gt;MHeap
+&lt;/h2&gt;&lt;h3 id=&#34;简介-2&#34;&gt;简介
+&lt;/h3&gt;&lt;p&gt;MHeap是内存块的管理对象，通过page对内存单元进行管理。用来详细管理每一系列page的结构称为一个 &lt;code&gt;HeapArena&lt;/code&gt; 。一个HeapArena占用内存 &lt;code&gt;64MB&lt;/code&gt; ，其中里面的内存是一个个的mspan，最小单元依然是pages。所有的HeapArena组成的集合是一个 &lt;code&gt;Arenas&lt;/code&gt; ，即MHeap针对堆内存的管理。MHeap上游是MCentral，当MCentral中的span不够时向MHeap申请。MHeap的下游是操作系统，当MHeap内存不足时会向操作系统的 &lt;code&gt;虚拟内存&lt;/code&gt; 空间申请，访问MHeap获取内存时依然需要 &lt;code&gt;加锁&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;MHeap中HeapArena占用了绝大部分的空间，其中每个HeapArena包含一个 &lt;code&gt;bitmap&lt;/code&gt; ，其作用是标记当前这个HeapArena的内存使用情况。其主要服务于 &lt;code&gt;GC&lt;/code&gt; 垃圾回收模块，bitmap共有  &lt;code&gt;两种标记&lt;/code&gt;，一种是标记对应地址中 &lt;code&gt;是否存在对象&lt;/code&gt;，另一种是标记此对象 &lt;code&gt;是否被GC模块标记过&lt;/code&gt;，所以当前HeapArena中的所有page均会被bitmap标记。&lt;/p&gt;
+&lt;h3 id=&#34;内部构造-2&#34;&gt;内部构造
+&lt;/h3&gt;&lt;p&gt;如图所示：
+&lt;img src=&#34;https://liusir521.github.io/p/go%E8%AF%AD%E8%A8%80%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%A8%A1%E5%9E%8B/4-2.png&#34;
+	width=&#34;840&#34;
+	height=&#34;1105&#34;
+	srcset=&#34;https://liusir521.github.io/p/go%E8%AF%AD%E8%A8%80%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%A8%A1%E5%9E%8B/4-2_hu_792db3dfb7aeb768.png 480w, https://liusir521.github.io/p/go%E8%AF%AD%E8%A8%80%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%A8%A1%E5%9E%8B/4-2_hu_6f2bb0dc3bc54d27.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;MHeap内部构造&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;76&#34;
+		data-flex-basis=&#34;182px&#34;
+	
+&gt;&lt;/p&gt;
+&lt;h2 id=&#34;对象分配流程&#34;&gt;对象分配流程
+&lt;/h2&gt;&lt;h3 id=&#34;go语言内存管理中的对象划分&#34;&gt;go语言内存管理中的对象划分：
+&lt;/h3&gt;&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;对象级别&lt;/th&gt;
+          &lt;th&gt;大小范围&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;微对象（Tiny对象）&lt;/td&gt;
+          &lt;td&gt;[1，16B）&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;小对象&lt;/td&gt;
+          &lt;td&gt;[16B，32KB]&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;大对象&lt;/td&gt;
+          &lt;td&gt;(32KB，无限大）&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id=&#34;tiny对象分配流程&#34;&gt;Tiny对象分配流程
+&lt;/h3&gt;&lt;p&gt;针对Tiny对象，go语言做了特殊处理，MCache中不仅保存着各个span class级别的内存块空间，还有一个比较特殊的 &lt;code&gt;Tiny存储空间&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;Tiny空间是从size class=2（对应span class=4\5）中获取的一个16B的object，作为Tiny对象的分配空间。&lt;/p&gt;
+&lt;p&gt;主要是因为类似bool或者1字节的byte，也都会独享8B的内存空间，进而导致一定的空间浪费。所以将申请的object小于16B的申请同意归为Tiny对象申请。&lt;/p&gt;
+&lt;p&gt;分配过程：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;P&lt;/code&gt; 向 &lt;code&gt;MCache&lt;/code&gt; 申请微小对象，如一个bool变量。如果申请的object在Tiny对象的大小范围，则进入Tiny对象的申请流程，否则进入小对象或者大对象的申请流程。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;判断申请的tiny对象是否包含 &lt;code&gt;指针&lt;/code&gt; ，如果包含指针，则进入 &lt;code&gt;小对象&lt;/code&gt; 的申请流程（不会放在tiny缓冲区，因为需要 &lt;code&gt;GC&lt;/code&gt; 进入扫描流程）。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;如果tiny空间的16B没有多余的存储容量，则从size class=2的span中获取一个16B的object放入tiny缓冲区中。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;将1B的bool类型放置在16B的tiny空间中，以 &lt;code&gt;字节对齐&lt;/code&gt; 的方式放置。（tiny对象的申请也达不到内存利用率100%）（此处不做详细内存对齐讲解）&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id=&#34;小对象&#34;&gt;小对象
+&lt;/h3&gt;&lt;p&gt;分配小对象的流程是按照span class的规格匹配的。&lt;/p&gt;
+&lt;p&gt;分配过程：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;协程逻辑层 &lt;code&gt;P&lt;/code&gt; 向go语言内存管理申请一个对象所需的内存空间。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;MCache&lt;/code&gt; 收到请求后，根据对象所需的内存空间计算出需要的size。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;判断size是否小于16B，小于进入tiny对象的申请流程，否则进入小对象的申请流程。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;根据size匹配对应的 &lt;code&gt;size class&lt;/code&gt; 内存规格，在根据size class和该对象是否包含 &lt;code&gt;指针&lt;/code&gt;，来定位是从noscan span class还是从scan span class获取空间，如果没有指针，则锁定 &lt;code&gt;noscan&lt;/code&gt;。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;在定位的span class中的span取出一个object返回给协程逻辑层P。流程结束&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;如果定位的span class中的span所有的内存块object都被占用，则 &lt;code&gt;MCache&lt;/code&gt; 会向 &lt;code&gt;MCentral&lt;/code&gt; 申请一个span。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;MCentral收到内存申请后，优先从对应的span class中的 &lt;code&gt;Partial Set&lt;/code&gt; 里取出span，如果Partial Set里没有，则从 &lt;code&gt;Full Set&lt;/code&gt; 中取，返给MCache。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;MCache得到span后，补充 到对应的span class中，之后再次执行第5步。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;如果Full Set中没有符合的span，则MCentral会向 &lt;code&gt;MHeap&lt;/code&gt; 申请内存。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;MHeap收到请求后从其中一个 &lt;code&gt;HeapArena&lt;/code&gt; 中取出一部分pages返给MCentral，当MHeap没有足够空间时向 &lt;code&gt;操作系统&lt;/code&gt; 申请内存，将申请的内存也保存到HeapArena中的mspan中。MCentral将从MHeap获取的由pages组成的span添加到对应的span class &lt;code&gt;集合中作为补充&lt;/code&gt; ，之后继续执行第7步。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;最后协程业务逻辑层得到对象申请到的内存，流程结束。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id=&#34;大对象&#34;&gt;大对象
+&lt;/h3&gt;&lt;p&gt;小对象从MCache中分配，而大对象直接从MHeap中分配。对于不满足MCache分配范围的对象均按照大对象处理。&lt;/p&gt;
+&lt;p&gt;分配过程：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;协程逻辑层申请大对象所需的内存空间，如果超过32KB，则直接 &lt;code&gt;绕过MCache&lt;/code&gt; 和 &lt;code&gt;MCentral&lt;/code&gt; 向 &lt;code&gt;MHeap&lt;/code&gt; 申请。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;MHeap根据对象所需的空间计算得到需要多少个pages。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;MHeap向 &lt;code&gt;Arenas&lt;/code&gt; 中的HeapArena申请对应的pages。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;如果Arenas中没有HeapArena可提供合适的pages内存，则向操作系统的虚拟内存申请，并且填充到Arenas中。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;MHeap返回大对象的内存空间，协程逻辑层得到内存，流程结束&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>
