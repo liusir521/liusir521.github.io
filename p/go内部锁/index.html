@@ -1,23 +1,25 @@
 <!DOCTYPE html>
 <html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="This is an example category">
-<title>Test</title>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="Go语言内部Mutex和RWMutex学习笔记">
+<title>Go内部锁</title>
 
-<link rel='canonical' href='https://liusir521.github.io/categories/test/'>
+<link rel='canonical' href='https://liusir521.github.io/p/go%E5%86%85%E9%83%A8%E9%94%81/'>
 
-<link rel="stylesheet" href="/scss/style.min.86591c898bd806857815fbb8c47e8d3fed97c133b78e83d9bfc27b164dd0aa2b.css"><meta property='og:title' content="Test">
-<meta property='og:description' content="This is an example category">
-<meta property='og:url' content='https://liusir521.github.io/categories/test/'>
+<link rel="stylesheet" href="/scss/style.min.86591c898bd806857815fbb8c47e8d3fed97c133b78e83d9bfc27b164dd0aa2b.css"><meta property='og:title' content="Go内部锁">
+<meta property='og:description' content="Go语言内部Mutex和RWMutex学习笔记">
+<meta property='og:url' content='https://liusir521.github.io/p/go%E5%86%85%E9%83%A8%E9%94%81/'>
 <meta property='og:site_name' content='你怂你mua'>
-<meta property='og:type' content='website'><meta property='og:updated_time' content=' 2025-12-12T00:00:00&#43;00:00 '/><meta property='og:image' content='https://liusir521.github.io/categories/test/hutomo-abrianto-l2jk-uxb1BY-unsplash.jpg' />
-<meta name="twitter:title" content="Test">
-<meta name="twitter:description" content="This is an example category"><meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content='https://liusir521.github.io/categories/test/hutomo-abrianto-l2jk-uxb1BY-unsplash.jpg' /><link rel="alternate" type="application/rss&#43;xml" href="https://liusir521.github.io/categories/test/index.xml">
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='源码' /><meta property='article:tag' content='Go语言' /><meta property='article:published_time' content='2025-12-12T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2025-12-12T00:00:00&#43;00:00'/><meta property='og:image' content='https://liusir521.github.io/p/go%E5%86%85%E9%83%A8%E9%94%81/go.jpg' />
+<meta name="twitter:title" content="Go内部锁">
+<meta name="twitter:description" content="Go语言内部Mutex和RWMutex学习笔记"><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='https://liusir521.github.io/p/go%E5%86%85%E9%83%A8%E9%94%81/go.jpg' />
     <link rel="shortcut icon" href="/favicon.png" />
 
     </head>
-    <body class="">
+    <body class="
+    article-page
+    ">
     <script>
         (function() {
             const colorSchemeKey = 'StackColorScheme';
@@ -277,60 +279,10 @@
     <aside class="sidebar right-sidebar sticky">
         
             
-                <form action="/search/" class="search-form widget" >
-        <p>
-            <label>搜索</label>
-            <input name="keyword" required placeholder="输入关键词..." />
-        
-            <button title="搜索">
-                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <circle cx="10" cy="10" r="7" />
-  <line x1="21" y1="21" x2="15" y2="15" />
-</svg>
-
-
-
-            </button>
-        </p>
-    </form>
-            
-        
-            
-                <section class="widget archives">
+                
+    <section class="widget archives">
         <div class="widget-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-infinity" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <path d="M9.828 9.172a4 4 0 1 0 0 5.656 a10 10 0 0 0 2.172 -2.828a10 10 0 0 1 2.172 -2.828 a4 4 0 1 1 0 5.656a10 10 0 0 1 -2.172 -2.828a10 10 0 0 0 -2.172 -2.828" />
-</svg>
-
-
-
-        </div>
-        <h2 class="widget-title section-title">归档</h2>
-
-        
-        
-        
-        
-        <div class="widget-archive--list">
-            <div class="archives-year">
-                    <a href="/archives/#2025">
-                        
-                            <span class="year">2025</span>
-                            <span class="count">4</span>
-                        
-                    </a> 
-                </div>
-            
-        </div>
-    </section>
-            
-        
-            
-                <section class="widget tagCloud">
-    <div class="widget-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <line x1="5" y1="9" x2="19" y2="9" />
   <line x1="5" y1="15" x2="19" y2="15" />
@@ -340,54 +292,28 @@
 
 
 
-    </div>
-    <h2 class="widget-title section-title">分类</h2>
-
-    <div class="tagCloud-tags">
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
         
-            <a href="/categories/go%E8%AF%AD%E8%A8%80/" class="font_size_4">
-                Go语言
-            </a>
-        
-            <a href="/categories/%E6%BA%90%E7%A0%81/" class="font_size_4">
-                源码
-            </a>
-        
-    </div>
-</section>
-
-            
-        
-            
-                <section class="widget tagCloud">
-    <div class="widget-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-tag" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <path d="M11 3L20 12a1.5 1.5 0 0 1 0 2L14 20a1.5 1.5 0 0 1 -2 0L3 11v-4a4 4 0 0 1 4 -4h4" />
-  <circle cx="9" cy="9" r="2" />
-</svg>
-
-
-
-    </div>
-    <h2 class="widget-title section-title">标签云</h2>
-
-    <div class="tagCloud-tags">
-        
-            <a href="/tags/go%E8%AF%AD%E8%A8%80/">
-                Go语言
-            </a>
-        
-            <a href="/tags/%E6%BA%90%E7%A0%81/">
-                源码
-            </a>
-        
-            <a href="/tags/%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/">
-                内存模型
-            </a>
-        
-    </div>
-</section>
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#mutex">Mutex</a>
+      <ol>
+        <li><a href="#mutex的状态">Mutex的状态</a></li>
+        <li><a href="#加锁和解锁">加锁和解锁</a></li>
+      </ol>
+    </li>
+    <li><a href="#rwmutex">RWMutex</a>
+      <ol>
+        <li><a href="#写锁">写锁</a></li>
+        <li><a href="#读锁">读锁</a></li>
+      </ol>
+    </li>
+  </ol>
+</nav>
+        </div>
+    </section>
 
             
         
@@ -395,37 +321,374 @@
 
 
             <main class="main full-width">
-    <header>
-        <h3 class="section-title">
-            
-                Categories
-            
-        </h3>
-
-        <div class="section-card">
-            <div class="section-details">
-                <h3 class="section-count">0 个页面</h3>
-                <h1 class="section-term">Test</h1>
+    <article class="has-image main-article">
+    <header class="article-header">
+        <div class="article-image">
+            <a href="/p/go%E5%86%85%E9%83%A8%E9%94%81/">
+                <img src="/p/go%E5%86%85%E9%83%A8%E9%94%81/go_hu_7764931340ce5611.jpg"
+                        srcset="/p/go%E5%86%85%E9%83%A8%E9%94%81/go_hu_7764931340ce5611.jpg 800w, /p/go%E5%86%85%E9%83%A8%E9%94%81/go_hu_bf26697928858536.jpg 1600w"
+                        width="800" 
+                        height="465" 
+                        loading="lazy"
+                        alt="Featured image of post Go内部锁" />
                 
-                    <h2 class="section-description">This is an example category</h2>
+            </a>
+        </div>
+    
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            
+            
+            
+            <a href="/categories/%E6%BA%90%E7%A0%81/" style="background-color: hsl(103, 60%, 84%); color: hsl(103, 60%, 15%);">
+                源码
+            </a>
+        
+            
+            
+            
+            <a href="/categories/go%E8%AF%AD%E8%A8%80/" style="background-color: hsl(287, 60%, 84%); color: hsl(287, 60%, 15%);">
+                Go语言
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/go%E5%86%85%E9%83%A8%E9%94%81/">Go内部锁</a>
+        </h2>
+    
+        
+        <h3 class="article-subtitle">
+            Go语言内部Mutex和RWMutex学习笔记
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published" datetime='2025-12-12T00:00:00Z'>Dec 12, 2025</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 1 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="mutex">Mutex
+</h2><p>Mutex由 <code>state</code> 和 <code>sema</code> 两个字段组成，state表示当前互斥锁的状态，sema是用于控制锁状态的信号量。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">type</span><span class="w"> </span><span class="nx">Mutex</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">state</span><span class="w"> </span><span class="kt">int32</span><span class="w">		</span><span class="c1">// 状态</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">sema</span><span class="w">  </span><span class="kt">uint32</span><span class="w">  </span><span class="c1">// 信号量</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>互斥锁的状态的 <code>低三位</code> 分别表示互斥锁 <code>是否锁定</code>（mutexLocked）（1是锁定）、 <code>是否有唤醒</code>的goroutine(mutexWoken)（1是有）、当前线程 <code>是否是饥饿</code>状态(mutexStarving)（1是饥饿）。前面的就表示当前互斥锁上等待的goroutine的个数。</p>
+<h3 id="mutex的状态">Mutex的状态
+</h3><p>Mutex有两种模式，正常模式和饥饿模式。</p>
+<p>在正常模式下，锁的等待者会按照 <code>先进先出</code> 的顺序去获取锁，但是刚被唤醒的goroutine与新创建的goroutine竞争时，大概率获取不到锁。为了减少这种情况的发生，一旦goroutine超过1ms没有获取到锁，他就会将当前互斥锁切换到饥饿模式，防止部分goroutine被饿死。</p>
+<p>在饥饿模式下，互斥锁会直接交给 <code>等待队列最前面</code> 的goroutine。新的goroutine在该状态下不能获取锁，也不会进入自旋状态，他只会在 <code>队列末尾</code> 等待。如果一个goroutine获得了互斥锁并且他在队列末尾或者他等待的时间少于 <code>1ms</code> ，那么当前互斥锁就会切换为 <code>正常状态</code>。</p>
+<p>正常状态能提供更好的性能，饥饿模式能够避免goroutine由于陷入等待无法获取锁造成的高延时。</p>
+<h3 id="加锁和解锁">加锁和解锁
+</h3><p>加锁：在lock方法中，他会先通过CAS（<code>CompareAndSwapInt32</code>方法）去判断能否获取到锁，获取到的话就会将mutexLocked设置为1。如果获取时他的状态不是0，也就会获取不到锁，他会调用lockslow方法来尝试通过 <code>自旋</code> 来等待锁的释放。当前线程进入自旋的话会一直 <code>保持CPU的占用</code>，持续检查某些条件是否为真。处理完自旋相关的逻辑之后，互斥锁会根据上下文计算当前互斥锁的最新状态。然后使用CAS（CompareAndSwapInt32方法）更新状态，如果获取不到会通过 <code>信号量</code> 来保证资源不被两个goroutine获取。</p>
+<p>解锁：解锁会先使用atomic.addint32()方法来快速解锁，如果成功就释放，不成功的话会进行慢速解锁（unlockslow方法），他会先 <code>校验锁的状态</code>，如果已经解锁了，会报错。然后正常情况下分为正常模式和饥饿模式处理，正常模式下如果有等待者，会唤醒等待者并移交锁的所有权，没有等待者的话直接返回。在饥饿模式下，他会将当前锁交给下一个正在尝试获取锁的等待者，然后依然是饥饿状态。</p>
+<h2 id="rwmutex">RWMutex
+</h2><p>RWMutex结构体中共有5个字段。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">type</span><span class="w"> </span><span class="nx">RWMutex</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nx">w</span><span class="w">           </span><span class="nx">Mutex</span><span class="w">  </span><span class="c1">// 控制 writer 在 队列 排队</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nx">writerSem</span><span class="w">   </span><span class="kt">uint32</span><span class="w"> </span><span class="c1">// 写信号量，用于等待前面的 reader 完成读操作</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nx">readerSem</span><span class="w">   </span><span class="kt">uint32</span><span class="w"> </span><span class="c1">// 读信号量，用于等待前面的 writer 完成写操作</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nx">readerCount</span><span class="w"> </span><span class="kt">int32</span><span class="w">  </span><span class="c1">// reader 的总数量，同时也指示是否有 writer 在队列中等待</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nx">readerWait</span><span class="w">  </span><span class="kt">int32</span><span class="w">  </span><span class="c1">// writer 前面 reader 的数量</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="c1">// 允许最大的 reader 数量</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="kd">const</span><span class="w"> </span><span class="nx">rwmutexMaxReaders</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="mi">30</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>w：主要提供写锁相关的功能</p>
+<p>readerCount：存储了正在执行的读操作的数量</p>
+<p>readerWait：表示当前写操作被阻塞时前方等待的读操作的数量</p>
+<h3 id="写锁">写锁
+</h3><p>加锁Lock()：</p>
+<ol>
+<li>
+<p>首先会先调用w.Lock() <code>阻塞后续的写操作</code> 。因为锁已经被获取，当其他的goroutine获取写锁时会进入 <code>自旋或者休眠</code>。</p>
+</li>
+<li>
+<p>然后通过 <code>原子操作</code> (调用atomic.AddInt32方法)将readerCount设置为负数， <code>阻塞后续的读操作</code>。</p>
+</li>
+<li>
+<p>然后判断如果有其他的goroutine持有读锁的话，当前goroutine会进入 <code>休眠状态</code>，等待所有读锁读完之后释放writerSem信号量唤醒当前goroutine。</p>
+</li>
+<li>
+<p>先阻塞写锁后阻塞读锁避免读操作因为连续的写操作饿死。</p>
+</li>
+</ol>
+<p>释放UnLock():</p>
+<ol>
+<li>
+<p>先通过 <code>原子操作</code> 将(调用atomic.AddInt32方法)readerCount设置为正数，释放读锁。</p>
+</li>
+<li>
+<p>然后通过for循环释放所有因为获取 <code>读锁</code> 而陷入等待的goroutine。</p>
+</li>
+<li>
+<p>然后调用w.UnLock()释放写锁。</p>
+</li>
+</ol>
+<h3 id="读锁">读锁
+</h3><p>加锁RLock()：</p>
+<ol>
+<li>
+<p>该方法会通过 <code>原子操作</code> 将(调用atomic.AddInt32方法)readerCount加一。</p>
+</li>
+<li>
+<p>然后如果返回负数，说明其他goroutine获得了写锁，当前goroutine就会陷入 <code>休眠</code> 等待锁的释放。</p>
+</li>
+<li>
+<p>如果返回非负数，说明没有goroutine获得写锁，该方法会返回成功。</p>
+</li>
+</ol>
+<p>释放RUnLock():</p>
+<ol>
+<li>
+<p>该方法会通过原子操作将(调用atomic.AddInt32方法)readerCount减一。</p>
+</li>
+<li>
+<p>如果返回值大于零，直接解锁成功。</p>
+</li>
+<li>
+<p>如果小于零，说明有一个写操作正在执行。这时会调用rUnlockSlow()方法，他会减少写操作前面等待的读操作的数量readerWait，并在 <code>所有读操作完成之后</code> 触发写操作的信号量writerSem唤醒写线程。</p>
+</li>
+</ol>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/%E6%BA%90%E7%A0%81/">源码</a>
+        
+            <a href="/tags/go%E8%AF%AD%E8%A8%80/">Go语言</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="has-image">
+    <a href="/p/go-map-1.24%E6%96%B0%E5%AE%9E%E7%8E%B0/">
+        
+        
+            <div class="article-image">
+                <img src="/p/go-map-1.24%E6%96%B0%E5%AE%9E%E7%8E%B0/go.a4569e34ee3c8189513108a2f7bedc42_hu_a7d8e649438b8d60.jpg" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post Go Map 1.24新实现"
+                        
+                        data-hash="md5-pFaeNO48gYlRMQii977cQg==">
                 
             </div>
-                <div class="section-image">
-                    <img src="/categories/test/hutomo-abrianto-l2jk-uxb1BY-unsplash_hu_147a8f90287e725.jpg" 
-                            width="120"
-                            height="120" 
-                            loading="lazy">
-                    
-                </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Go Map 1.24新实现</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/go%E8%AF%AD%E8%A8%80gmp%E6%A8%A1%E5%9E%8B/">
+        
+        
+            <div class="article-image">
+                <img src="/p/go%E8%AF%AD%E8%A8%80gmp%E6%A8%A1%E5%9E%8B/go.a4569e34ee3c8189513108a2f7bedc42_hu_a7d8e649438b8d60.jpg" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post Go语言GMP模型"
+                        
+                        data-hash="md5-pFaeNO48gYlRMQii977cQg==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Go语言GMP模型</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/go%E8%AF%AD%E8%A8%80%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%A8%A1%E5%9E%8B/">
+        
+        
+            <div class="article-image">
+                <img src="/p/go%E8%AF%AD%E8%A8%80%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%A8%A1%E5%9E%8B/go.a4569e34ee3c8189513108a2f7bedc42_hu_a7d8e649438b8d60.jpg" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post Go语言内存分配模型"
+                        
+                        data-hash="md5-pFaeNO48gYlRMQii977cQg==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Go语言内存分配模型</h2>
+        </div>
+    </a>
+</article>
+
             
         </div>
-    </header>
+    </div>
+</aside>
+
+     
+    
         
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
     
     
-        <section class="article-list--compact">
-            
-        </section>
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
     <footer class="site-footer">
     <section class="copyright">
         &copy; 
@@ -441,6 +704,85 @@
     </section>
 </footer>
 
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+    
 
             </main>
         </div>
