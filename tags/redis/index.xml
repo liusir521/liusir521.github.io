@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>Redis on 你怂你mua</title>
+        <link>https://liusir521.github.io/tags/redis/</link>
+        <description>Recent content in Redis on 你怂你mua</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>zh-cn</language>
+        <copyright>Example Person</copyright>
+        <lastBuildDate>Wed, 10 Sep 2025 00:00:00 +0000</lastBuildDate><atom:link href="https://liusir521.github.io/tags/redis/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>Redis数据结构之String(SDS)</title>
+        <link>https://liusir521.github.io/p/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B9%8Bstringsds/</link>
+        <pubDate>Wed, 10 Sep 2025 00:00:00 +0000</pubDate>
+        
+        <guid>https://liusir521.github.io/p/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B9%8Bstringsds/</guid>
+        <description>&lt;img src="https://liusir521.github.io/p/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B9%8Bstringsds/redis.jpg" alt="Featured image of post Redis数据结构之String(SDS)" /&gt;&lt;blockquote&gt;
+&lt;p&gt;redis版本7.x&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;原生c语言字符串的问题&#34;&gt;原生C语言字符串的问题
+&lt;/h2&gt;&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;C语言使用char * 字符数组来实现字符串，在创建时就需要手动检查和分配空间。由于没有 &lt;code&gt;length属性&lt;/code&gt; 记录长度，想要获取字符串的长度就需要从头遍历，直到遇到\0。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;无法做到“安全的二进制格式数据存储”，图片等二进制格式数据无法保存。无法存储\0这种特殊字符，\0在C语言中代表字符串结尾。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;字符串的扩容和缩容。char数组的长度在创建字符串的时候就确定下来，如果要追加数据，则要重新申请一块空间，把追加后的字符串内容拷贝进去，再释放旧的空间，十分消耗资源。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id=&#34;redis中sds设计&#34;&gt;Redis中SDS设计
+&lt;/h2&gt;&lt;p&gt;SDS也遵循C语言的以空字符串 &lt;code&gt;\0&lt;/code&gt; 结尾的惯例，但是空字符串不计入SDS内部的len字段中。&lt;/p&gt;
+&lt;p&gt;SDS主要字段如下：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;len：数组已使用长度&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;alloc：数组总长度&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;flags：：SDS类型&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;char buf[]：存储的实际内容&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id=&#34;o1时间复杂度获取字符串长度&#34;&gt;O(1)时间复杂度获取字符串长度
+&lt;/h3&gt;&lt;p&gt;SDS中的len字段保存了字符串的长度，实现了O(1)时间复杂度获取字符串长度。&lt;/p&gt;
+&lt;p&gt;SDS结构有一个flags字段，表示的是SDS类型。实际上SDS一共设计了5种类型，分别是sdshdr5、sdshdr8、sdshdr16、sdshdr32、sdshdr64，区别在于数组的len长度和分配空间长度alloc不同。&lt;/p&gt;
+&lt;h3 id=&#34;节省内存&#34;&gt;节省内存
+&lt;/h3&gt;&lt;p&gt;之所以这么设计，是因为SDS使用不同的类型保存不同大小的字符串可以节省内存。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;redis内部限制最大的字符串长度为512MB&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;编码格式&#34;&gt;编码格式
+&lt;/h3&gt;&lt;p&gt;SDS内部采用了三种编码格式来存储，分别是int、embstr和raw。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;int编码：8字节的长整型，值是数字类型且数字的长度小于20。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;embstr编码：长度小于或等于44字节的字符串。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;raw编码：长度大于44字节的字符串。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;作用：代替字节对齐的方式来节省内存。&lt;/p&gt;
+&lt;h3 id=&#34;二进制格式的数据安全&#34;&gt;二进制格式的数据安全
+&lt;/h3&gt;&lt;p&gt;因为SDS并不是通过 &lt;code&gt;\0&lt;/code&gt; 来判断字符串结束的，而是采用len标志结束，所以可以直接存储二进制格式数据。&lt;/p&gt;
+&lt;h3 id=&#34;空间预分配&#34;&gt;空间预分配
+&lt;/h3&gt;&lt;p&gt;在需要对SDS的空间进行扩容时，不仅仅分配所需的空间，还会分配额外的未使用空间，通过预分配策略，减少了执行字符串增长所需的内存重新分配次数。&lt;/p&gt;
+&lt;h3 id=&#34;惰性空间释放&#34;&gt;惰性空间释放
+&lt;/h3&gt;&lt;p&gt;当对SDS进行缩短操作时，程序并不会回收多余的内存空间，如果后面需要append追加操作，则直接使用buf数组alloc-len中未使用的空间。通过惰性空间释放策略，避免了减小字符串所需的内存重新分配操作。&lt;/p&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>
