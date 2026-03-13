@@ -304,7 +304,13 @@
         <li><a href="#覆盖流程">覆盖流程</a></li>
       </ol>
     </li>
-    <li><a href="#写流程插入或更新">写流程（插入或更新）</a></li>
+    <li><a href="#写流程插入或更新">写流程（插入或更新）</a>
+      <ol>
+        <li><a href="#dirtylocked流程">dirtyLocked流程</a></li>
+      </ol>
+    </li>
+    <li><a href="#删除流程">删除流程</a></li>
+    <li><a href="#遍历流程">遍历流程</a></li>
   </ol>
 </nav>
         </div>
@@ -519,6 +525,63 @@ entry的三种状态：</p>
 </li>
 <li>
 <p>如果read中不存在或者是硬删除态，就会进入dirty中，同样会先进行一个read的二次检查，如果read中没有，就看dirty中是否存在，存在就进行更新操作（修改dirty），不存在就进行插入操作。插入时要判断amended，如果为false，就会执行dirtyLocked流程，并将amended置为true。</p>
+</li>
+</ol>
+<h3 id="dirtylocked流程">dirtyLocked流程
+</h3><p>关键源码dirtyLocked：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">m</span><span class="w"> </span><span class="o">*</span><span class="nx">Map</span><span class="p">)</span><span class="w"> </span><span class="nf">dirtyLocked</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">m</span><span class="p">.</span><span class="nx">dirty</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="k">return</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nx">read</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">m</span><span class="p">.</span><span class="nx">read</span><span class="p">.</span><span class="nf">Load</span><span class="p">().(</span><span class="nx">readOnly</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nx">m</span><span class="p">.</span><span class="nx">dirty</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">make</span><span class="p">(</span><span class="kd">map</span><span class="p">[</span><span class="kt">any</span><span class="p">]</span><span class="o">*</span><span class="nx">entry</span><span class="p">,</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">read</span><span class="p">.</span><span class="nx">m</span><span class="p">))</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">k</span><span class="p">,</span><span class="w"> </span><span class="nx">e</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">read</span><span class="p">.</span><span class="nx">m</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">!</span><span class="nx">e</span><span class="p">.</span><span class="nf">tryExpungeLocked</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="nx">m</span><span class="p">.</span><span class="nx">dirty</span><span class="p">[</span><span class="nx">k</span><span class="p">]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">e</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>当将dirty覆盖给read之后，dirty应该为nil，如果执行时为nil说明已经执行过了，可以直接返回。如果不是nil，就通过for循环线性的将read中的非删除态数据拷贝回dirty中，并将其中的软删除态的数据更新为硬删除态。</p>
+<p>dirtyLocked的拷贝是线性的，性能不好。</p>
+<p>诱发dirtyLocked的原因：<code>写多读少</code> ，大量的新数据的插入，同时很多读操作在read中未命中。造成misslocked，然后又一次写操作越过了read和dirty，就会进入dirtyLocked流程。</p>
+<h2 id="删除流程">删除流程
+</h2><ol>
+<li>
+<p>如果read中存在key，通过CAS的操作将对应的value置为nil（软删除态）</p>
+</li>
+<li>
+<p>如果read中不存在，去dirty中查找，会先进行二次检查。如果read中不存在并且amended为true，则去dirty中查找删除（物理删除）并返回旧值（方法要返回），然后将misses++。如果read中存在或者amended为false，就会去read中判断删除。</p>
+</li>
+</ol>
+<h2 id="遍历流程">遍历流程
+</h2><ol>
+<li>
+<p>首先获取read，然后判断amended，如果amended为true，就会将dirty中的数据覆盖到read中，并将dirty置为nil并将misses归零。</p>
+</li>
+<li>
+<p>然后遍历read并执行传入的函数，通过返回值判断何时终止。</p>
 </li>
 </ol>
 

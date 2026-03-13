@@ -1,22 +1,25 @@
 <!DOCTYPE html>
 <html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="欢迎来到我的网站,主要分享个人学习记录,后端开发人员,技术栈Go。">
-<title>Redis</title>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="Redis数据结构之Lists个人学习笔记">
+<title>Redis数据结构之Lists</title>
 
-<link rel='canonical' href='https://liusir521.github.io/categories/redis/'>
+<link rel='canonical' href='https://liusir521.github.io/p/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B9%8Blists/'>
 
-<link rel="stylesheet" href="/scss/style.min.86591c898bd806857815fbb8c47e8d3fed97c133b78e83d9bfc27b164dd0aa2b.css"><meta property='og:title' content="Redis">
-<meta property='og:description' content="欢迎来到我的网站,主要分享个人学习记录,后端开发人员,技术栈Go。">
-<meta property='og:url' content='https://liusir521.github.io/categories/redis/'>
+<link rel="stylesheet" href="/scss/style.min.86591c898bd806857815fbb8c47e8d3fed97c133b78e83d9bfc27b164dd0aa2b.css"><meta property='og:title' content="Redis数据结构之Lists">
+<meta property='og:description' content="Redis数据结构之Lists个人学习笔记">
+<meta property='og:url' content='https://liusir521.github.io/p/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B9%8Blists/'>
 <meta property='og:site_name' content='你怂你mua'>
-<meta property='og:type' content='website'><meta property='og:updated_time' content=' 2025-12-12T00:00:00&#43;00:00 '/>
-<meta name="twitter:title" content="Redis">
-<meta name="twitter:description" content="欢迎来到我的网站,主要分享个人学习记录,后端开发人员,技术栈Go。"><link rel="alternate" type="application/rss&#43;xml" href="https://liusir521.github.io/categories/redis/index.xml">
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='源码' /><meta property='article:tag' content='Redis' /><meta property='article:tag' content='缓存' /><meta property='article:published_time' content='2025-09-11T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2025-09-11T00:00:00&#43;00:00'/><meta property='og:image' content='https://liusir521.github.io/p/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B9%8Blists/redis.jpg' />
+<meta name="twitter:title" content="Redis数据结构之Lists">
+<meta name="twitter:description" content="Redis数据结构之Lists个人学习笔记"><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='https://liusir521.github.io/p/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B9%8Blists/redis.jpg' />
     <link rel="shortcut icon" href="/favicon.png" />
 
     </head>
-    <body class="">
+    <body class="
+    article-page
+    ">
     <script>
         (function() {
             const colorSchemeKey = 'StackColorScheme';
@@ -273,207 +276,318 @@
     </ol>
 </aside>
 
-    <aside class="sidebar right-sidebar sticky">
-        
-            
-                <form action="/search/" class="search-form widget" >
-        <p>
-            <label>搜索</label>
-            <input name="keyword" required placeholder="输入关键词..." />
-        
-            <button title="搜索">
-                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <circle cx="10" cy="10" r="7" />
-  <line x1="21" y1="21" x2="15" y2="15" />
-</svg>
-
-
-
-            </button>
-        </p>
-    </form>
-            
-        
-            
-                <section class="widget archives">
-        <div class="widget-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-infinity" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <path d="M9.828 9.172a4 4 0 1 0 0 5.656 a10 10 0 0 0 2.172 -2.828a10 10 0 0 1 2.172 -2.828 a4 4 0 1 1 0 5.656a10 10 0 0 1 -2.172 -2.828a10 10 0 0 0 -2.172 -2.828" />
-</svg>
-
-
-
-        </div>
-        <h2 class="widget-title section-title">归档</h2>
-
-        
-        
-        
-        
-        <div class="widget-archive--list">
-            <div class="archives-year">
-                    <a href="/archives/#2025">
-                        
-                            <span class="year">2025</span>
-                            <span class="count">9</span>
-                        
-                    </a> 
-                </div>
-            
-        </div>
-    </section>
-            
-        
-            
-                <section class="widget tagCloud">
-    <div class="widget-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <line x1="5" y1="9" x2="19" y2="9" />
-  <line x1="5" y1="15" x2="19" y2="15" />
-  <line x1="11" y1="4" x2="7" y2="20" />
-  <line x1="17" y1="4" x2="13" y2="20" />
-</svg>
-
-
-
-    </div>
-    <h2 class="widget-title section-title">分类</h2>
-
-    <div class="tagCloud-tags">
-        
-            <a href="/categories/%E6%BA%90%E7%A0%81/" class="font_size_9">
-                源码
-            </a>
-        
-            <a href="/categories/go%E8%AF%AD%E8%A8%80/" class="font_size_7">
-                Go语言
-            </a>
-        
-            <a href="/categories/redis/" class="font_size_2">
-                Redis
-            </a>
-        
-            <a href="/categories/%E4%B8%89%E6%96%B9%E5%BA%93/" class="font_size_1">
-                三方库
-            </a>
-        
-    </div>
-</section>
-
-            
-        
-            
-                <section class="widget tagCloud">
-    <div class="widget-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-tag" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <path d="M11 3L20 12a1.5 1.5 0 0 1 0 2L14 20a1.5 1.5 0 0 1 -2 0L3 11v-4a4 4 0 0 1 4 -4h4" />
-  <circle cx="9" cy="9" r="2" />
-</svg>
-
-
-
-    </div>
-    <h2 class="widget-title section-title">标签云</h2>
-
-    <div class="tagCloud-tags">
-        
-            <a href="/tags/%E6%BA%90%E7%A0%81/">
-                源码
-            </a>
-        
-            <a href="/tags/go%E8%AF%AD%E8%A8%80/">
-                Go语言
-            </a>
-        
-            <a href="/tags/%E7%BC%93%E5%AD%98/">
-                缓存
-            </a>
-        
-            <a href="/tags/redis/">
-                Redis
-            </a>
-        
-            <a href="/tags/%E4%B8%89%E6%96%B9%E5%BA%93/">
-                三方库
-            </a>
-        
-            <a href="/tags/%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/">
-                内存模型
-            </a>
-        
-    </div>
-</section>
-
-            
-        
-    </aside>
-
+    
 
             <main class="main full-width">
-    <header>
-        <h3 class="section-title">
-            
-                Categories
-            
-        </h3>
-
-        <div class="section-card">
-            <div class="section-details">
-                <h3 class="section-count">2 个页面</h3>
-                <h1 class="section-term">Redis</h1>
+    <article class="has-image main-article">
+    <header class="article-header">
+        <div class="article-image">
+            <a href="/p/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B9%8Blists/">
+                <img src="/p/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B9%8Blists/redis_hu_69c42c4a77c4ce09.jpg"
+                        srcset="/p/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B9%8Blists/redis_hu_69c42c4a77c4ce09.jpg 800w, /p/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B9%8Blists/redis_hu_40a6a94429802e1c.jpg 1600w"
+                        width="800" 
+                        height="533" 
+                        loading="lazy"
+                        alt="Featured image of post Redis数据结构之Lists" />
                 
-            </div>
+            </a>
         </div>
+    
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            
+            
+            
+            <a href="/categories/%E6%BA%90%E7%A0%81/" style="background-color: hsl(103, 60%, 84%); color: hsl(103, 60%, 15%);">
+                源码
+            </a>
+        
+            
+            
+            
+            <a href="/categories/redis/" style="background-color: hsl(92, 60%, 84%); color: hsl(92, 60%, 15%);">
+                Redis
+            </a>
+        
     </header>
     
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B9%8Blists/">Redis数据结构之Lists</a>
+        </h2>
     
-        <section class="article-list--compact">
+        
+        <h3 class="article-subtitle">
+            Redis数据结构之Lists个人学习笔记
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published" datetime='2025-09-11T00:00:00Z'>Sep 11, 2025</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 0 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/%E6%BA%90%E7%A0%81/">源码</a>
+        
+            <a href="/tags/redis/">Redis</a>
+        
+            <a href="/tags/%E7%BC%93%E5%AD%98/">缓存</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
             
-                <article>
-    <a href="/p/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B9%8Blists/">
-        <div class="article-details">
-            <h2 class="article-title">Redis数据结构之Lists</h2>
-            <footer class="article-time">
-                <time datetime='2025-09-11T00:00:00Z'>Sep 11, 2025</time>
-            </footer>
-        </div>
+                
+<article class="has-image">
+    <a href="/p/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B9%8Bstringsds/">
+        
+        
             <div class="article-image">
-                <img src="/p/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B9%8Blists/redis_hu_b82f72a20a63ec03.jpg" 
-                        width="120"
-                        height="120" 
-                        alt="Redis数据结构之Lists"
-                        loading="lazy">
+                <img src="/p/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B9%8Bstringsds/redis.872186ff6c931911da626469f2139e5f_hu_65ab293de65def56.jpg" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post Redis数据结构之String(SDS)"
+                        
+                        data-hash="md5-hyGG/2yTGRHaYmRp8hOeXw==">
                 
             </div>
         
-    </a>
-</article>
-            
-                <article>
-    <a href="/p/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B9%8Bstringsds/">
+
         <div class="article-details">
             <h2 class="article-title">Redis数据结构之String(SDS)</h2>
-            <footer class="article-time">
-                <time datetime='2025-09-10T00:00:00Z'>Sep 10, 2025</time>
-            </footer>
         </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/go%E4%B8%89%E6%96%B9%E7%BC%93%E5%AD%98%E5%BA%93%E5%AF%B9%E6%AF%94/">
+        
+        
             <div class="article-image">
-                <img src="/p/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B9%8Bstringsds/redis_hu_b82f72a20a63ec03.jpg" 
-                        width="120"
-                        height="120" 
-                        alt="Redis数据结构之String(SDS)"
-                        loading="lazy">
+                <img src="/p/go%E4%B8%89%E6%96%B9%E7%BC%93%E5%AD%98%E5%BA%93%E5%AF%B9%E6%AF%94/go.f728972150cab6a3c788a250a2f0ea76_hu_9becc318e7b5d04c.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post Go三方缓存库对比"
+                        
+                        data-hash="md5-9yiXIVDKtqPHiKJQovDqdg==">
                 
             </div>
         
+
+        <div class="article-details">
+            <h2 class="article-title">Go三方缓存库对比</h2>
+        </div>
     </a>
 </article>
+
             
-        </section>
+                
+<article class="has-image">
+    <a href="/p/go-map-1.24%E6%96%B0%E5%AE%9E%E7%8E%B0/">
+        
+        
+            <div class="article-image">
+                <img src="/p/go-map-1.24%E6%96%B0%E5%AE%9E%E7%8E%B0/go.a4569e34ee3c8189513108a2f7bedc42_hu_a7d8e649438b8d60.jpg" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post Go Map 1.24新实现"
+                        
+                        data-hash="md5-pFaeNO48gYlRMQii977cQg==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Go Map 1.24新实现</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/go%E5%86%85%E9%83%A8%E9%94%81/">
+        
+        
+            <div class="article-image">
+                <img src="/p/go%E5%86%85%E9%83%A8%E9%94%81/go.a4569e34ee3c8189513108a2f7bedc42_hu_a7d8e649438b8d60.jpg" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post Go内部锁"
+                        
+                        data-hash="md5-pFaeNO48gYlRMQii977cQg==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Go内部锁</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/go%E8%AF%AD%E8%A8%80gmp%E6%A8%A1%E5%9E%8B/">
+        
+        
+            <div class="article-image">
+                <img src="/p/go%E8%AF%AD%E8%A8%80gmp%E6%A8%A1%E5%9E%8B/go.a4569e34ee3c8189513108a2f7bedc42_hu_a7d8e649438b8d60.jpg" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post Go语言GMP模型"
+                        
+                        data-hash="md5-pFaeNO48gYlRMQii977cQg==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Go语言GMP模型</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
     <footer class="site-footer">
     <section class="copyright">
         &copy; 
@@ -489,6 +603,85 @@
     </section>
 </footer>
 
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+    
 
             </main>
         </div>
