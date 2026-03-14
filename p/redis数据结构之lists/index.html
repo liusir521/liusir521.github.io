@@ -276,7 +276,47 @@
     </ol>
 </aside>
 
-    
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#内部结构演进">内部结构演进</a>
+      <ol>
+        <li><a href="#linkedlist">linkedlist</a></li>
+        <li><a href="#redis链表的特性">redis链表的特性</a></li>
+        <li><a href="#ziplist">ziplist</a></li>
+        <li><a href="#linkedlist与ziplist对比">linkedlist与ziplist对比</a></li>
+        <li><a href="#quicklist">quicklist</a></li>
+        <li><a href="#listpack">listpack</a></li>
+      </ol>
+    </li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
 
             <main class="main full-width">
     <article class="has-image main-article">
@@ -358,7 +398,7 @@
 
 
                 <time class="article-time--reading">
-                    阅读时长: 0 分钟
+                    阅读时长: 2 分钟
                 </time>
             </div>
         
@@ -373,7 +413,302 @@
     <section class="article-content">
     
     
-    
+    <blockquote>
+<p>redis中的list和java中的linkedlist类似，是一种线性有序结构，按照元素被推入列表中的顺序存储元素，满足先进先出的需求。可以把它当作队列、栈来使用。</p>
+</blockquote>
+<h2 id="内部结构演进">内部结构演进
+</h2><h3 id="linkedlist">linkedlist
+</h3><p>在redis3.2之前List底层数据结构由linkedlist或者ziplist实现，优先使用ziplist存储。当List对象满足以下两个条件时，将使用ziplist存储，否则使用linkedlist。</p>
+<ul>
+<li>
+<p>链表中的每个元素占用的字节数小于64</p>
+</li>
+<li>
+<p>链表中的元素数量小于512个</p>
+</li>
+</ul>
+<p>关键源码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cm">/* 链表节点 */</span>
+</span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="n">listNode</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// prev与next字段形成双端链表
+</span></span></span><span class="line"><span class="cl">    <span class="k">struct</span> <span class="n">listNode</span> <span class="o">*</span><span class="n">prev</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">struct</span> <span class="n">listNode</span> <span class="o">*</span><span class="n">next</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">void</span> <span class="o">*</span><span class="n">value</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="n">listNode</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cm">/* 链表结构体 */</span>
+</span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="n">list</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">listNode</span> <span class="o">*</span><span class="n">head</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">listNode</span> <span class="o">*</span><span class="n">tail</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kt">void</span> <span class="o">*</span><span class="p">(</span><span class="o">*</span><span class="n">dup</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">ptr</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">free</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">ptr</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="p">(</span><span class="o">*</span><span class="n">match</span><span class="p">)(</span><span class="kt">void</span> <span class="o">*</span><span class="n">ptr</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">key</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">len</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="n">list</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="redis链表的特性">redis链表的特性
+</h3><ul>
+<li>
+<p>双端：链表节点带有prev和next指针，获取某个节点的前置和后置节点的时间复杂度都是O(1)</p>
+</li>
+<li>
+<p>无环：链表头节点的prev和尾节点的next指针指向的都是null。对链表的访问以null结尾。</p>
+</li>
+<li>
+<p>带表头指针和表尾指针：list结构体有head和tail指针，获取链表头尾节点的时间复杂度为O(1)</p>
+</li>
+<li>
+<p>len属性：list结构体有len属性，获取节点数量的时间复杂度为O(1)</p>
+</li>
+</ul>
+<h3 id="ziplist">ziplist
+</h3><blockquote>
+<p>linkedlist中存在prev、next两个指针，在数据很小的情况下，指针占用的空间会超过数据占用的空间。</p>
+<p>linkedlist是链表结构，在内存中不是连续的，遍历效率低下。</p>
+</blockquote>
+<p>为了解决上述的两个问题，创建了ziplist，ziplist是一种内存紧凑的数据结构，占用一块连续的内存空间，能够提高内存利用率。</p>
+<p>当一个Lists只有少量数据，并且每个列表项要么是小整数型，要么是比较短的字符串时，就会使用ziplist来作为List的底层数据结构存储数据。</p>
+<p>ziplist是一块连续的内存，结构如下：</p>
+<p><img src="/p/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B9%8Blists/ziplist.png"
+	width="1219"
+	height="364"
+	srcset="/p/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B9%8Blists/ziplist_hu_c1a7c844a0e5db96.png 480w, /p/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B9%8Blists/ziplist_hu_9255aeb9a6e510be.png 1024w"
+	loading="lazy"
+	
+		alt="ziplist结构图"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="334"
+		data-flex-basis="803px"
+	
+></p>
+<ul>
+<li>
+<p>zlbytes：占用4字节，记录整个ziplist占用的总字节数</p>
+</li>
+<li>
+<p>zltail：占用4字节，只想最后一个entry偏移量，用于快速定位最后一个entry</p>
+</li>
+<li>
+<p>zllen：占用2字节，记录entry总数</p>
+</li>
+<li>
+<p>entry：Lists的元素</p>
+</li>
+<li>
+<p>zlend：ziplist结束的标志，占用1字节，值等于255</p>
+</li>
+</ul>
+<p>因为ziplist头尾元数据大小是固定的，并且zllen记录了ziplist头部最后一个元素的位置，所以可以用O(1)的时间复杂度找到ziplist中第一个或最后一个元素。而在查找中间元素时，只能从Lists头部或尾部开始遍历，时间复杂度O(n)。</p>
+<p>存储数据的entry结构如图所示：</p>
+<p><img src="/p/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B9%8Blists/entry.png"
+	width="768"
+	height="385"
+	srcset="/p/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B9%8Blists/entry_hu_73134cf5b7b32e54.png 480w, /p/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B9%8Blists/entry_hu_a4ed8201857157e4.png 1024w"
+	loading="lazy"
+	
+		alt="entry结构图"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="199"
+		data-flex-basis="478px"
+	
+></p>
+<ul>
+<li>
+<p>prevlen：记录前一个entry占用的字节数，逆序遍历就是通过这个字段确定的向前移动多少字节拿到上一个entry的 <code>首地址</code> 的。这部分会根据上一个entry的长度进行变长编码。变长方式如下：</p>
+<ul>
+<li>
+<p>前一个entry的字节数小于254（255用于zlend），prevlen的长度为1字节，值等于上一个entry的长度。</p>
+</li>
+<li>
+<p>前一个entry的字节数大于等于254，prevlen占用5字节，第一字节配置为254作为一个标识，后面4字节组成一个32位int值，用于存放上一个entry的字节长度。</p>
+</li>
+</ul>
+</li>
+<li>
+<p>encoding：表示当前entry的类型和长度，前两位用于表示类型，前两位为11时表示存储的是int类型，其他情况表示存储的字符串。</p>
+</li>
+<li>
+<p>entry-data：实际存放数据的地方，但是当entry存储的是int类型时，encoding和entry-data会合并到encoding中，并没有entry-data字段。</p>
+</li>
+</ul>
+<h3 id="linkedlist与ziplist对比">linkedlist与ziplist对比
+</h3><p>为什么说ziplist节省内存？</p>
+<ul>
+<li>
+<p>与linkedlist相比，少了prev和next指针。</p>
+</li>
+<li>
+<p>通过encoding字段针对编码进行细化存储，尽可能做到按需分配。</p>
+</li>
+</ul>
+<p>ziplist的不足:</p>
+<ul>
+<li>
+<p>不能保存过多的元素，否则查询性能下降，导致O(n)时间复杂度。</p>
+</li>
+<li>
+<p>ziplist存储空间是连续的，当插入新的entry时，内存空间不足就需要重新分配一块连续的内存空间，引发连锁更新。</p>
+</li>
+</ul>
+<p>连锁更新问题:</p>
+<p>每个entry都用prevlen记录上一个entry的长度，在当前entry B 前面插入一个新的entry A 时，会导致 B 的prevlen发生变化，也会导致 B 的大小发生改变。同理后面的entry C 也会发生改变。以此类推，就可能导致连锁更新问题。</p>
+<p>连锁更新会导致多次重新分配ziplist的存储空间，直接影响ziplist的查询性能。所以在redis3.2引入了quicklist。</p>
+<h3 id="quicklist">quicklist
+</h3><p>quicklist结合了linkedlist与ziplist的优势，本质还是一个双向链表，只不过链表的每一个节点都是一个ziplist。</p>
+<p>结构体源码如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="n">quicklistNode</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">struct</span> <span class="n">quicklistNode</span> <span class="o">*</span><span class="n">prev</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">struct</span> <span class="n">quicklistNode</span> <span class="o">*</span><span class="n">next</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="n">zl</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">sz</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kt">unsigned</span> <span class="kt">int</span> <span class="nl">count</span> <span class="p">:</span> <span class="mi">16</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">unsigned</span> <span class="kt">int</span> <span class="nl">encoding</span> <span class="p">:</span> <span class="mi">2</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">unsigned</span> <span class="kt">int</span> <span class="nl">container</span> <span class="p">:</span> <span class="mi">2</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">unsigned</span> <span class="kt">int</span> <span class="nl">recompress</span> <span class="p">:</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">unsigned</span> <span class="kt">int</span> <span class="nl">attempted_compress</span> <span class="p">:</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">unsigned</span> <span class="kt">int</span> <span class="nl">extra</span> <span class="p">:</span> <span class="mi">10</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="n">quicklistNode</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="n">quicklist</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">quicklistNode</span> <span class="o">*</span><span class="n">head</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">quicklistNode</span> <span class="o">*</span><span class="n">tail</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">count</span><span class="p">;</span>        <span class="cm">/* total entries */</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">len</span><span class="p">;</span>          <span class="cm">/* number of nodes */</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="nl">fill</span> <span class="p">:</span> <span class="mi">16</span><span class="p">;</span>              <span class="cm">/* ziplist size limit */</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">unsigned</span> <span class="kt">int</span> <span class="nl">compress</span> <span class="p">:</span> <span class="mi">16</span><span class="p">;</span> <span class="cm">/* compression depth */</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="n">quicklist</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>quicklist是ziplist的升级版，优化的关键点在于控制好每个ziplist的大小或者元素个数。</p>
+<p>但是存在两个极端情况：</p>
+<ul>
+<li>
+<p>quicklist node的ziplist越小，可能造成越多的内存碎片。极端情况是每个ziplist只有一个entry，退化成了linkedlist。</p>
+</li>
+<li>
+<p>quicklist node的ziplist过大，极端情况下会造成一个quicklist只有一个ziplist, 退化成了ziplist, 连锁更新的问题就会暴露出来。</p>
+</li>
+</ul>
+<p>所以在5.0版本的时候设计了另一个数据结构listpack, 并在7.0版本中替换掉了ziplist。</p>
+<h3 id="listpack">listpack
+</h3><p>listpack的结构如图所示：</p>
+<p><img src="/p/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B9%8Blists/listpack.png"
+	width="1138"
+	height="404"
+	srcset="/p/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B9%8Blists/listpack_hu_d8adf7c493870101.png 480w, /p/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B9%8Blists/listpack_hu_cb1bb6b843b36b45.png 1024w"
+	loading="lazy"
+	
+		alt="listpack结构图"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="281"
+		data-flex-basis="676px"
+	
+></p>
+<ul>
+<li>
+<p>tot-bytes：即total bytes，占用4字节，记录listpack占用的总字节数</p>
+</li>
+<li>
+<p>num-elements：占用2字节，记录listpack elements的个数</p>
+</li>
+<li>
+<p>elements：listpack元素，保存数据的部分</p>
+</li>
+<li>
+<p>listpack-end-byte：结束标志，占用1字节，固定值为255</p>
+</li>
+</ul>
+<p>element结构如图所示：</p>
+<p><img src="/p/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B9%8Blists/listpackele.png"
+	width="664"
+	height="340"
+	srcset="/p/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B9%8Blists/listpackele_hu_47f3919b9ae45cdd.png 480w, /p/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B9%8Blists/listpackele_hu_4a57c64aa151b132.png 1024w"
+	loading="lazy"
+	
+		alt="listpackele结构图"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="195"
+		data-flex-basis="468px"
+	
+></p>
+<ul>
+<li>
+<p>encoding-type：存储实际数据的编码类型和长度，是一个变长字段。</p>
+</li>
+<li>
+<p>element-data：存放实际数据。</p>
+</li>
+<li>
+<p>element-tot-len：前两个字段的总长度，不包括自身长度。</p>
+</li>
+</ul>
+<p>每个element只记录自身长度，修改或新增元素时，不会影响后续element的长度，解决了连锁更新的问题。</p>
+
 </section>
 
 
