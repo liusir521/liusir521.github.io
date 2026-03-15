@@ -1,22 +1,25 @@
 <!DOCTYPE html>
 <html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="欢迎来到我的网站,主要分享个人学习记录,后端开发人员,技术栈Go。">
-<title>源码</title>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="Redis数据结构之Set个人学习笔记">
+<title>Redis数据结构之Set</title>
 
-<link rel='canonical' href='https://liusir521.github.io/categories/%E6%BA%90%E7%A0%81/'>
+<link rel='canonical' href='https://liusir521.github.io/p/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B9%8Bset/'>
 
-<link rel="stylesheet" href="/scss/style.min.86591c898bd806857815fbb8c47e8d3fed97c133b78e83d9bfc27b164dd0aa2b.css"><meta property='og:title' content="源码">
-<meta property='og:description' content="欢迎来到我的网站,主要分享个人学习记录,后端开发人员,技术栈Go。">
-<meta property='og:url' content='https://liusir521.github.io/categories/%E6%BA%90%E7%A0%81/'>
+<link rel="stylesheet" href="/scss/style.min.86591c898bd806857815fbb8c47e8d3fed97c133b78e83d9bfc27b164dd0aa2b.css"><meta property='og:title' content="Redis数据结构之Set">
+<meta property='og:description' content="Redis数据结构之Set个人学习笔记">
+<meta property='og:url' content='https://liusir521.github.io/p/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B9%8Bset/'>
 <meta property='og:site_name' content='你怂你mua'>
-<meta property='og:type' content='website'><meta property='og:updated_time' content=' 2025-12-12T00:00:00&#43;00:00 '/>
-<meta name="twitter:title" content="源码">
-<meta name="twitter:description" content="欢迎来到我的网站,主要分享个人学习记录,后端开发人员,技术栈Go。"><link rel="alternate" type="application/rss&#43;xml" href="https://liusir521.github.io/categories/%E6%BA%90%E7%A0%81/index.xml">
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='源码' /><meta property='article:tag' content='Redis' /><meta property='article:tag' content='缓存' /><meta property='article:published_time' content='2025-09-11T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2025-09-11T00:00:00&#43;00:00'/><meta property='og:image' content='https://liusir521.github.io/p/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B9%8Bset/redis.jpg' />
+<meta name="twitter:title" content="Redis数据结构之Set">
+<meta name="twitter:description" content="Redis数据结构之Set个人学习笔记"><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='https://liusir521.github.io/p/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B9%8Bset/redis.jpg' />
     <link rel="shortcut icon" href="/favicon.png" />
 
     </head>
-    <body class="">
+    <body class="
+    article-page
+    ">
     <script>
         (function() {
             const colorSchemeKey = 'StackColorScheme';
@@ -276,60 +279,10 @@
     <aside class="sidebar right-sidebar sticky">
         
             
-                <form action="/search/" class="search-form widget" >
-        <p>
-            <label>搜索</label>
-            <input name="keyword" required placeholder="输入关键词..." />
-        
-            <button title="搜索">
-                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <circle cx="10" cy="10" r="7" />
-  <line x1="21" y1="21" x2="15" y2="15" />
-</svg>
-
-
-
-            </button>
-        </p>
-    </form>
-            
-        
-            
-                <section class="widget archives">
+                
+    <section class="widget archives">
         <div class="widget-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-infinity" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <path d="M9.828 9.172a4 4 0 1 0 0 5.656 a10 10 0 0 0 2.172 -2.828a10 10 0 0 1 2.172 -2.828 a4 4 0 1 1 0 5.656a10 10 0 0 1 -2.172 -2.828a10 10 0 0 0 -2.172 -2.828" />
-</svg>
-
-
-
-        </div>
-        <h2 class="widget-title section-title">归档</h2>
-
-        
-        
-        
-        
-        <div class="widget-archive--list">
-            <div class="archives-year">
-                    <a href="/archives/#2025">
-                        
-                            <span class="year">2025</span>
-                            <span class="count">10</span>
-                        
-                    </a> 
-                </div>
-            
-        </div>
-    </section>
-            
-        
-            
-                <section class="widget tagCloud">
-    <div class="widget-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <line x1="5" y1="9" x2="19" y2="9" />
   <line x1="5" y1="15" x2="19" y2="15" />
@@ -339,74 +292,34 @@
 
 
 
-    </div>
-    <h2 class="widget-title section-title">分类</h2>
-
-    <div class="tagCloud-tags">
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
         
-            <a href="/categories/%E6%BA%90%E7%A0%81/" class="font_size_10">
-                源码
-            </a>
-        
-            <a href="/categories/go%E8%AF%AD%E8%A8%80/" class="font_size_7">
-                Go语言
-            </a>
-        
-            <a href="/categories/redis/" class="font_size_3">
-                Redis
-            </a>
-        
-            <a href="/categories/%E4%B8%89%E6%96%B9%E5%BA%93/" class="font_size_1">
-                三方库
-            </a>
-        
-    </div>
-</section>
-
-            
-        
-            
-                <section class="widget tagCloud">
-    <div class="widget-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-tag" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <path d="M11 3L20 12a1.5 1.5 0 0 1 0 2L14 20a1.5 1.5 0 0 1 -2 0L3 11v-4a4 4 0 0 1 4 -4h4" />
-  <circle cx="9" cy="9" r="2" />
-</svg>
-
-
-
-    </div>
-    <h2 class="widget-title section-title">标签云</h2>
-
-    <div class="tagCloud-tags">
-        
-            <a href="/tags/%E6%BA%90%E7%A0%81/">
-                源码
-            </a>
-        
-            <a href="/tags/go%E8%AF%AD%E8%A8%80/">
-                Go语言
-            </a>
-        
-            <a href="/tags/%E7%BC%93%E5%AD%98/">
-                缓存
-            </a>
-        
-            <a href="/tags/redis/">
-                Redis
-            </a>
-        
-            <a href="/tags/%E4%B8%89%E6%96%B9%E5%BA%93/">
-                三方库
-            </a>
-        
-            <a href="/tags/%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/">
-                内存模型
-            </a>
-        
-    </div>
-</section>
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#无序和唯一">无序和唯一</a>
+      <ol>
+        <li><a href="#使用场景">使用场景</a></li>
+      </ol>
+    </li>
+    <li><a href="#intset">intset</a>
+      <ol>
+        <li><a href="#intset升级">intset升级</a></li>
+      </ol>
+    </li>
+    <li><a href="#散列表原理">散列表原理</a>
+      <ol>
+        <li><a href="#存储结构">存储结构</a></li>
+        <li><a href="#扩容和缩容">扩容和缩容</a></li>
+        <li><a href="#扩容缩容时机">扩容\缩容时机</a></li>
+        <li><a href="#扩容过程">扩容过程</a></li>
+      </ol>
+    </li>
+  </ol>
+</nav>
+        </div>
+    </section>
 
             
         
@@ -414,136 +327,548 @@
 
 
             <main class="main full-width">
-    <header>
-        <h3 class="section-title">
-            
-                Categories
-            
-        </h3>
-
-        <div class="section-card">
-            <div class="section-details">
-                <h3 class="section-count">10 个页面</h3>
-                <h1 class="section-term">源码</h1>
+    <article class="has-image main-article">
+    <header class="article-header">
+        <div class="article-image">
+            <a href="/p/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B9%8Bset/">
+                <img src="/p/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B9%8Bset/redis_hu_69c42c4a77c4ce09.jpg"
+                        srcset="/p/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B9%8Bset/redis_hu_69c42c4a77c4ce09.jpg 800w, /p/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B9%8Bset/redis_hu_40a6a94429802e1c.jpg 1600w"
+                        width="800" 
+                        height="533" 
+                        loading="lazy"
+                        alt="Featured image of post Redis数据结构之Set" />
                 
-            </div>
+            </a>
         </div>
+    
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            
+            
+            
+            <a href="/categories/%E6%BA%90%E7%A0%81/" style="background-color: hsl(103, 60%, 84%); color: hsl(103, 60%, 15%);">
+                源码
+            </a>
+        
+            
+            
+            
+            <a href="/categories/redis/" style="background-color: hsl(92, 60%, 84%); color: hsl(92, 60%, 15%);">
+                Redis
+            </a>
+        
     </header>
     
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B9%8Bset/">Redis数据结构之Set</a>
+        </h2>
     
-        <section class="article-list--compact">
+        
+        <h3 class="article-subtitle">
+            Redis数据结构之Set个人学习笔记
+        </h3>
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published" datetime='2025-09-11T00:00:00Z'>Sep 11, 2025</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 1 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <h2 id="无序和唯一">无序和唯一
+</h2><p>Sets是字符串类型的无序集合，集合中的元素是唯一的，不会出现重复的数据。Sets底层是用散列表实现的，散列表的key存储的是Sets元素中的value，散列表的value指向null。</p>
+<h3 id="使用场景">使用场景
+</h3><p>当你需要存储多个元素，且不允许出现重复数据，无需考虑元素有序性时，可以使用Sets。Sets还支持在集合之间做交集、并集、差集操作</p>
+<ul>
+<li>
+<p>共同关注：通过交集实现</p>
+</li>
+<li>
+<p>每日新增关注数：对近两天的总注册用户量集合取差集</p>
+</li>
+<li>
+<p>打标签：为自己收藏的文章打标签，例如微信收藏功能，这样可以快速找到被添加了某个标签的所有文章。</p>
+</li>
+</ul>
+<h2 id="intset">intset
+</h2><p>当元素内容是64位以内的10进制整数，且元素个数不超过512时，Sets会使用更加省内存的intset来存储。相关结构源码如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">typedef</span> <span class="k">struct</span> <span class="n">intset</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">uint32_t</span> <span class="n">encoding</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">uint32_t</span> <span class="n">length</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int8_t</span> <span class="n">contents</span><span class="p">[];</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span> <span class="n">intset</span><span class="p">;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>
+<p>length：记录整数集合存储的元素个数，其实就是contents数组的长度</p>
+</li>
+<li>
+<p>contents：真正存储整数集合的数组，是一块连续的内存区域。数组中的元素会按照值的大小从小到大存储，并且不会有重复元素</p>
+</li>
+<li>
+<p>encoding：编码格式，决定数组类型，一共有三种不同的值。</p>
+<ul>
+<li>
+<p>INTSET_ENC_INT16：表示contents数组的存储元素是int16_t类型的，每2字节表示一个整数元素</p>
+</li>
+<li>
+<p>INTSET_ENC_INT32：表示contents数组的存储元素是int32_t类型的，每4字节表示一个整数元素</p>
+</li>
+<li>
+<p>INTSET_ENC_INT64：表示contents数组的存储元素是int64_t类型的，每8字节表示一个整数元素</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="intset升级">intset升级
+</h3><p>当往一个int16_t类型的intset中插入一个int64_t类型的值时会触发升级。也就是Sets的所有数据类型会转换成int64_t类型。步骤如下：</p>
+<ol>
+<li>
+<p>根据新元素的类型和Sets元素数量，计算包括新添加的元素在内的新空间大小，对底层数组空间扩容，重新分配空间。</p>
+</li>
+<li>
+<p>将intset中原有的元素转换成新元素类型，按从大到小的顺序放到正确位置，需要保障intset元素的有序性。</p>
+</li>
+<li>
+<p>将encoding的值修改为length+1</p>
+</li>
+</ol>
+<p>因此，每次向intset添加新元素可能引起升级，升级又会对原始数据进行类型转换，时间复杂度是O(n)。</p>
+<blockquote>
+<p>intset不支持降级操作</p>
+</blockquote>
+<h2 id="散列表原理">散列表原理
+</h2><p>Redis的散列表的底层数据结构通常是dict，由数组和链表构成，数组元素占用的槽位叫做哈希桶。当出现散列冲突时，会在桶下挂一个链表，用 <code>拉链法</code> 解决散列冲突的问题。</p>
+<h3 id="存储结构">存储结构
+</h3><p>散列表的底层存储数据结构实际上有两种:</p>
+<ul>
+<li>
+<p>dict数据结构</p>
+</li>
+<li>
+<p>listpack(7.0之前使用ziplist)数据结构</p>
+</li>
+</ul>
+<p>通常使用dict数据结构存储数据，每个field-value pairs构成一个dictEntry节点。只有 <code>同时满足</code> 以下两个条件，才会使用listpack数据结构替代dict。按照field在前，value在后紧密相连的方式，依次把每个field-value pairs放到列表的表尾。</p>
+<ul>
+<li>
+<p>每个field-value pairs中的field和value的字符串的字节数都小于64</p>
+</li>
+<li>
+<p>field-value pairs数量小于512</p>
+</li>
+</ul>
+<p>每次向散列表写数据时，都会调用相关函数来判断是否需要转换底层数据结构。</p>
+<p>当插入和修改的数据不满足以上两个条件时，就把散列表底层存储的数据结构转换为dict。虽然使用了listpack无法实现O(1)时间复杂度操作数据，但能大大减少内存占用，由于数据量比较小，性能不会有太大差异。</p>
+<blockquote>
+<p>需要注意的是，不能由dict退化成listpack。</p>
+</blockquote>
+<p>dict结构体主要源码如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">struct</span> <span class="n">dict</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">dictType</span> <span class="o">*</span><span class="n">type</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">dictEntry</span> <span class="o">**</span><span class="n">ht_table</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">ht_used</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">long</span> <span class="n">rehashidx</span><span class="p">;</span> 
+</span></span><span class="line"><span class="cl">    <span class="kt">unsigned</span> <span class="n">pauserehash</span><span class="p">;</span> 
+</span></span><span class="line"><span class="cl">    <span class="kt">signed</span> <span class="kt">char</span> <span class="n">ht_size_exp</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span> 
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>
+<p>dictType *type：存放函数的结构体，定义了一些函数指针。可以通过配置自定义函数，实现在dict的key和value中存放任何类型的数据。</p>
+</li>
+<li>
+<p>dictEntry **ht_table[2]：存放大小为2的散列表指针数组，每个指针指向一个dictEntry类型的散列表。</p>
+</li>
+<li>
+<p>ht_used[2]：记录每个散列表使用了多少槽位。</p>
+</li>
+<li>
+<p>rehashidx：标记是否正在执行rehash操作，-1表示没有，如果正在执行rehash操作，那么其实表示当前执行rehash操作的ht_table[0]的dictEntry数组的索引。</p>
+</li>
+<li>
+<p>pauserehash：表示rehash的状态，大于0表示rehash暂停，等于0时表示继续执行，小于0时表示出错。</p>
+</li>
+</ul>
+<p>数组中每个元素都是dictEntry类型的，就是它存放了field-value pairs。其结构如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="k">struct</span> <span class="n">dictEntry</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">struct</span> <span class="n">dictEntry</span> <span class="o">*</span><span class="n">next</span><span class="p">;</span>  <span class="cm">/* Must be first */</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">void</span> <span class="o">*</span><span class="n">key</span><span class="p">;</span>               <span class="cm">/* Must be second */</span>
+</span></span><span class="line"><span class="cl">    <span class="k">union</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">void</span> <span class="o">*</span><span class="n">val</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">uint64_t</span> <span class="n">u64</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">int64_t</span> <span class="n">s64</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">double</span> <span class="n">d</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span> <span class="n">v</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">};</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>
+<p>*key指针指向field-value pairs中的field，实际上指向一个SDS实例</p>
+</li>
+<li>
+<p>v 是一个union联合体，表示field-value pairs中的value，同一时刻只有一个字段有value，用联合体的目的是节省内存。</p>
+<ul>
+<li>
+<p>*val：value是非数字类型时使用该指针存储</p>
+</li>
+<li>
+<p>uint64_t u64：value是无符号整数时使用该字段</p>
+</li>
+<li>
+<p>int64_t s64：value是有符号整数时使用该字段</p>
+</li>
+<li>
+<p>double d：value是浮点数时使用该字段</p>
+</li>
+</ul>
+</li>
+<li>
+<p>*next指针指向下一个节点。当发生哈希冲突时，使用此链表（链表法）。</p>
+</li>
+</ul>
+<h3 id="扩容和缩容">扩容和缩容
+</h3><p>扩容和缩容的步骤如下：</p>
+<ol>
+<li>
+<p>为了提高性能，减少哈希冲突，会创建一个大小等于ht_used[0] * 2的散列表ht_used[1]，也就是每次扩容时根据散列表ht_table [0]已使用空间扩大一倍创建一个新散列表ht_table [1]。反之，如果是缩容操作，就根据ht_table [0]已使用空间缩小一半创建一个新的散列表。</p>
+</li>
+<li>
+<p>重新计算field-value pairs的哈希值，得到这个field-value pairs在新散列表ht_table [1]中的桶位置，将field-value pairs迁移到新的散列表上。</p>
+</li>
+<li>
+<p>所有field-value pairs迁移完成后，修改指针，释放空间。把ht_table [0]指针指向扩容后的散列表，回收原来的小的散列表空间，把ht_table [1]指针指向null，为下次扩容\缩容准备。</p>
+</li>
+</ol>
+<h3 id="扩容缩容时机">扩容\缩容时机
+</h3><ul>
+<li>
+<p>当前没有执行bgsave或者BGREWRITEAOF命令，同时负载因子大于等于1。也就是当前没有RDB子进程和AOF重写子进程在工作，这两个操作容易对性能造成影响。</p>
+</li>
+<li>
+<p>正在执行bgsave或者BGREWRITEAOF命令，负载因子大于或等于5。这时哈希冲突比较严重，再不扩容，查询效率就太低了。</p>
+</li>
+</ul>
+<blockquote>
+<p>负载因子 = 散列表存储的dictEntry节点数量 / 哈希桶个数。理想情况下每个哈希桶存储一个dictEntry节点，这时负载因子 = 1。</p>
+</blockquote>
+<h3 id="扩容过程">扩容过程
+</h3><p>为了防止阻塞主线程造成性能问题，不是一次性把全部key迁移，而是分多次将迁移操作分散到每次请求中，避免集中式rehash造成长时间阻塞。</p>
+<p>在渐进式rehash期间，dict会同时使用ht_table[0]和ht_table[1]两个散列表，具体步骤如下：</p>
+<ol>
+<li>
+<p>将rehashidx配置为0，表示rehash开始执行。</p>
+</li>
+<li>
+<p>在rehash期间，服务端每次处理客户端对dict散列表的增删改查操作时，除了执行指定操作外，还会检查当前dict是否处于rehash状态，如果是，就把散列表ht_table[0]上索引位置为rehashidx的哈希桶的链表的所有field-value pairs rehash到散列表ht_table[1]上，并将rehashidx加1。</p>
+</li>
+<li>
+<p>当所有field-value pairs迁移完成后将rehashidx配置为-1，表示操作已完成。</p>
+</li>
+</ol>
+<blockquote>
+<p>删除、修改和查找可能会在两个散列表上进行，第一个没找到就去第二个，但是增加操作只会在新的散列表上进行。</p>
+</blockquote>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/%E6%BA%90%E7%A0%81/">源码</a>
+        
+            <a href="/tags/redis/">Redis</a>
+        
+            <a href="/tags/%E7%BC%93%E5%AD%98/">缓存</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">相关文章</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
             
-                <article>
+                
+<article class="has-image">
+    <a href="/p/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B9%8Blists/">
+        
+        
+            <div class="article-image">
+                <img src="/p/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B9%8Blists/redis.872186ff6c931911da626469f2139e5f_hu_65ab293de65def56.jpg" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post Redis数据结构之Lists"
+                        
+                        data-hash="md5-hyGG/2yTGRHaYmRp8hOeXw==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Redis数据结构之Lists</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B9%8Bstringsds/">
+        
+        
+            <div class="article-image">
+                <img src="/p/redis%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B9%8Bstringsds/redis.872186ff6c931911da626469f2139e5f_hu_65ab293de65def56.jpg" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post Redis数据结构之String(SDS)"
+                        
+                        data-hash="md5-hyGG/2yTGRHaYmRp8hOeXw==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Redis数据结构之String(SDS)</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/go%E4%B8%89%E6%96%B9%E7%BC%93%E5%AD%98%E5%BA%93%E5%AF%B9%E6%AF%94/">
+        
+        
+            <div class="article-image">
+                <img src="/p/go%E4%B8%89%E6%96%B9%E7%BC%93%E5%AD%98%E5%BA%93%E5%AF%B9%E6%AF%94/go.f728972150cab6a3c788a250a2f0ea76_hu_9becc318e7b5d04c.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post Go三方缓存库对比"
+                        
+                        data-hash="md5-9yiXIVDKtqPHiKJQovDqdg==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Go三方缓存库对比</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
     <a href="/p/go-map-1.24%E6%96%B0%E5%AE%9E%E7%8E%B0/">
+        
+        
+            <div class="article-image">
+                <img src="/p/go-map-1.24%E6%96%B0%E5%AE%9E%E7%8E%B0/go.a4569e34ee3c8189513108a2f7bedc42_hu_a7d8e649438b8d60.jpg" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post Go Map 1.24新实现"
+                        
+                        data-hash="md5-pFaeNO48gYlRMQii977cQg==">
+                
+            </div>
+        
+
         <div class="article-details">
             <h2 class="article-title">Go Map 1.24新实现</h2>
-            <footer class="article-time">
-                <time datetime='2025-12-12T00:00:00Z'>Dec 12, 2025</time>
-            </footer>
         </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/go%E5%86%85%E9%83%A8%E9%94%81/">
+        
+        
             <div class="article-image">
-                <img src="/p/go-map-1.24%E6%96%B0%E5%AE%9E%E7%8E%B0/go_hu_26c879cfae96044.jpg" 
-                        width="120"
-                        height="120" 
-                        alt="Go Map 1.24新实现"
-                        loading="lazy">
+                <img src="/p/go%E5%86%85%E9%83%A8%E9%94%81/go.a4569e34ee3c8189513108a2f7bedc42_hu_a7d8e649438b8d60.jpg" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post Go内部锁"
+                        
+                        data-hash="md5-pFaeNO48gYlRMQii977cQg==">
                 
             </div>
         
-    </a>
-</article>
-            
-                <article>
-    <a href="/p/go%E5%86%85%E9%83%A8%E9%94%81/">
+
         <div class="article-details">
             <h2 class="article-title">Go内部锁</h2>
-            <footer class="article-time">
-                <time datetime='2025-12-12T00:00:00Z'>Dec 12, 2025</time>
-            </footer>
         </div>
-            <div class="article-image">
-                <img src="/p/go%E5%86%85%E9%83%A8%E9%94%81/go_hu_26c879cfae96044.jpg" 
-                        width="120"
-                        height="120" 
-                        alt="Go内部锁"
-                        loading="lazy">
-                
-            </div>
-        
     </a>
 </article>
+
             
-                <article>
-    <a href="/p/go%E8%AF%AD%E8%A8%80gmp%E6%A8%A1%E5%9E%8B/">
-        <div class="article-details">
-            <h2 class="article-title">Go语言GMP模型</h2>
-            <footer class="article-time">
-                <time datetime='2025-12-12T00:00:00Z'>Dec 12, 2025</time>
-            </footer>
         </div>
-            <div class="article-image">
-                <img src="/p/go%E8%AF%AD%E8%A8%80gmp%E6%A8%A1%E5%9E%8B/go_hu_26c879cfae96044.jpg" 
-                        width="120"
-                        height="120" 
-                        alt="Go语言GMP模型"
-                        loading="lazy">
-                
-            </div>
+    </div>
+</aside>
+
+     
+    
         
-    </a>
-</article>
-            
-                <article>
-    <a href="/p/go%E8%AF%AD%E8%A8%80sync.map/">
-        <div class="article-details">
-            <h2 class="article-title">Go语言sync.Map</h2>
-            <footer class="article-time">
-                <time datetime='2025-12-12T00:00:00Z'>Dec 12, 2025</time>
-            </footer>
-        </div>
-            <div class="article-image">
-                <img src="/p/go%E8%AF%AD%E8%A8%80sync.map/go_hu_26c879cfae96044.jpg" 
-                        width="120"
-                        height="120" 
-                        alt="Go语言sync.Map"
-                        loading="lazy">
-                
-            </div>
-        
-    </a>
-</article>
-            
-                <article>
-    <a href="/p/go%E8%AF%AD%E8%A8%80%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%A8%A1%E5%9E%8B/">
-        <div class="article-details">
-            <h2 class="article-title">Go语言内存分配模型</h2>
-            <footer class="article-time">
-                <time datetime='2025-12-04T00:00:00Z'>Dec 04, 2025</time>
-            </footer>
-        </div>
-            <div class="article-image">
-                <img src="/p/go%E8%AF%AD%E8%A8%80%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%A8%A1%E5%9E%8B/go_hu_26c879cfae96044.jpg" 
-                        width="120"
-                        height="120" 
-                        alt="Go语言内存分配模型"
-                        loading="lazy">
-                
-            </div>
-        
-    </a>
-</article>
-            
-        </section>
-    <nav class="pagination" role="navigation" aria-label="pagination"><a class="page-link disabled"aria-label="Previous page"aria-disabled="true">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-chevron-left"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M15 6l-6 6l6 6" /></svg>
-    </a><a class="page-link current" aria-label="Page 1"aria-current="page">
-        1
-    </a><a class="page-link "href="/categories/%E6%BA%90%E7%A0%81/page/2/"aria-label="Page 2">
-        2
-    </a><a class="page-link "href="/categories/%E6%BA%90%E7%A0%81/page/2/"aria-label="Next page">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-chevron-right"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 6l6 6l-6 6" /></svg>
-    </a>
-</nav><footer class="site-footer">
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
     <section class="copyright">
         &copy; 
         
@@ -558,6 +883,85 @@
     </section>
 </footer>
 
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+    
 
             </main>
         </div>
