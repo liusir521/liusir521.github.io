@@ -8,12 +8,12 @@
         <language>zh-cn</language>
         <copyright>Example Person</copyright>
         <lastBuildDate>Fri, 27 Mar 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://liusir521.github.io/index.xml" rel="self" type="application/rss+xml" /><item>
-        <title>分布式公式算法</title>
-        <link>https://liusir521.github.io/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%AC%E5%BC%8F%E7%AE%97%E6%B3%95/</link>
+        <title>分布式共识算法</title>
+        <link>https://liusir521.github.io/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/</link>
         <pubDate>Fri, 27 Mar 2026 00:00:00 +0000</pubDate>
         
-        <guid>https://liusir521.github.io/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%AC%E5%BC%8F%E7%AE%97%E6%B3%95/</guid>
-        <description>&lt;img src="https://liusir521.github.io/fenix.jpg" alt="Featured image of post 分布式公式算法" /&gt;&lt;blockquote&gt;
+        <guid>https://liusir521.github.io/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/</guid>
+        <description>&lt;img src="https://liusir521.github.io/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/fenix.png" alt="Featured image of post 分布式共识算法" /&gt;&lt;blockquote&gt;
 &lt;p&gt;原文地址：https://icyfenix.cn/distribution/consensus/&lt;/p&gt;
 &lt;p&gt;我是买的纸质书学习的，记录笔记时发现web端的内容其实挺全面的，下方内容大部分摘录自web端页面。&lt;/p&gt;
 &lt;/blockquote&gt;
@@ -61,10 +61,10 @@
 &lt;h3 id=&#34;实例讲解&#34;&gt;实例讲解
 &lt;/h3&gt;&lt;p&gt;假设一个分布式系统有五个节点，分别命名为 S1、S2、S3、S4、S5，这个例子中只讨论正常通信的场景，不涉及网络分区。全部节点都同时扮演着提案节点和决策节点的身份。此时，有两个并发的请求分别希望将同一个值分别设定为 X（由 S1作为提案节点提出）和 Y（由 S5作为提案节点提出），以 P 代表准备阶段，以 A 代表批准阶段，这时候可能发生以下情况：&lt;/p&gt;
 &lt;p&gt;情况一：譬如，S1选定的提案 ID 是 3.1（全局唯一 ID 加上节点编号），先取得了多数派决策节点的 Promise 和 Accepted 应答，此时 S5选定提案 ID 是 4.5，发起 Prepare 请求，收到的多数派应答中至少会包含 1 个此前应答过 S1的决策节点，假设是 S3，那么 S3提供的 Promise 中必将包含 S1已设定好的值 X，S5就必须无条件地用 X 代替 Y 作为自己提案的值，由此整个系统对“取值为 X”这个事实达成一致，如图所示。&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://liusir521.github.io/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%AC%E5%BC%8F%E7%AE%97%E6%B3%95/paxos-1.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://liusir521.github.io/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/paxos-1.png&#34;
 	width=&#34;1319&#34;
 	height=&#34;576&#34;
-	srcset=&#34;https://liusir521.github.io/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%AC%E5%BC%8F%E7%AE%97%E6%B3%95/paxos-1_hu_e86934d5d31bdef1.png 480w, https://liusir521.github.io/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%AC%E5%BC%8F%E7%AE%97%E6%B3%95/paxos-1_hu_644a9e3921c91235.png 1024w&#34;
+	srcset=&#34;https://liusir521.github.io/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/paxos-1_hu_e86934d5d31bdef1.png 480w, https://liusir521.github.io/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/paxos-1_hu_644a9e3921c91235.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;整个系统对“取值为 X”达成一致&#34;
@@ -76,10 +76,10 @@
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;情况二：事实上，对于情况一，X 被选定为最终值是必然结果，但从上图中可以看出，X 被选定为最终值并不是必定需要多数派的共同批准，只取决于 S5提案时 Promise 应答中是否已包含了批准过 X 的决策节点，如下图所示，S5发起提案的 Prepare 请求时，X 并未获得多数派批准，但由于 S3已经批准的关系，最终共识的结果仍然是 X。&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://liusir521.github.io/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%AC%E5%BC%8F%E7%AE%97%E6%B3%95/paxos-2.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://liusir521.github.io/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/paxos-2.png&#34;
 	width=&#34;1235&#34;
 	height=&#34;433&#34;
-	srcset=&#34;https://liusir521.github.io/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%AC%E5%BC%8F%E7%AE%97%E6%B3%95/paxos-2_hu_e085d9d7f4437e22.png 480w, https://liusir521.github.io/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%AC%E5%BC%8F%E7%AE%97%E6%B3%95/paxos-2_hu_7689bc9014bde58a.png 1024w&#34;
+	srcset=&#34;https://liusir521.github.io/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/paxos-2_hu_e085d9d7f4437e22.png 480w, https://liusir521.github.io/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/paxos-2_hu_7689bc9014bde58a.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;X 被选定只取决于 Promise 应答中是否已批准&#34;
@@ -91,10 +91,10 @@
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;情况三：当然，另外一种可能的结果是 S5提案时 Promise 应答中并未包含批准过 X 的决策节点，譬如应答 S5提案时，节点 S1已经批准了 X，节点 S2、S3未批准但返回了 Promise 应答，此时 S5以更大的提案 ID 获得了 S3、S4、S5的 Promise，这三个节点均未批准过任何值，那么 S3将不会再接收来自 S1的 Accept 请求，因为它的提案 ID 已经不是最大的了，这三个节点将批准 Y 的取值，整个系统最终会对“取值为 Y”达成一致，如下图所示。&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://liusir521.github.io/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%AC%E5%BC%8F%E7%AE%97%E6%B3%95/paxos-3.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://liusir521.github.io/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/paxos-3.png&#34;
 	width=&#34;1205&#34;
 	height=&#34;410&#34;
-	srcset=&#34;https://liusir521.github.io/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%AC%E5%BC%8F%E7%AE%97%E6%B3%95/paxos-3_hu_bb25695c6cee48bf.png 480w, https://liusir521.github.io/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%AC%E5%BC%8F%E7%AE%97%E6%B3%95/paxos-3_hu_a162fce775672ce4.png 1024w&#34;
+	srcset=&#34;https://liusir521.github.io/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/paxos-3_hu_bb25695c6cee48bf.png 480w, https://liusir521.github.io/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/paxos-3_hu_a162fce775672ce4.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;整个系统最终会对“取值为 Y”达成一致&#34;
@@ -106,10 +106,10 @@
 	
 &gt;&lt;/p&gt;
 &lt;p&gt;情况四：从情况三可以推导出另一种极端的情况，如果两个提案节点交替使用更大的提案 ID 使得准备阶段成功，但是批准阶段失败的话，这个过程理论上可以无限持续下去，形成活锁（Live Lock），如图所示。在算法实现中会引入随机超时时间来避免活锁的产生。&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://liusir521.github.io/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%AC%E5%BC%8F%E7%AE%97%E6%B3%95/paxos-4.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://liusir521.github.io/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/paxos-4.png&#34;
 	width=&#34;1335&#34;
 	height=&#34;443&#34;
-	srcset=&#34;https://liusir521.github.io/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%AC%E5%BC%8F%E7%AE%97%E6%B3%95/paxos-4_hu_4d3f6a0404c0dbc8.png 480w, https://liusir521.github.io/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%AC%E5%BC%8F%E7%AE%97%E6%B3%95/paxos-4_hu_179742ed1a95054e.png 1024w&#34;
+	srcset=&#34;https://liusir521.github.io/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/paxos-4_hu_4d3f6a0404c0dbc8.png 480w, https://liusir521.github.io/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/paxos-4_hu_179742ed1a95054e.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;批准阶段失败，形成活锁&#34;
@@ -126,10 +126,10 @@
 &lt;/h2&gt;&lt;p&gt;Multi Paxos 对 Basic Paxos 的核心改进是增加了 &lt;code&gt;选主&lt;/code&gt; 的过程，提案节点会通过定时轮询（心跳），确定当前网络中的所有节点里是否存在有一个主提案节点，一旦没有发现主节点存在，节点就会在心跳超时后使用 Basic Paxos 中定义的准备、批准的两轮网络交互过程，向所有其他节点广播自己希望竞选主节点的请求，希望整个分布式系统对“由我作为主节点”这件事情协商达成一致共识，如果得到了决策节点中多数派的批准，便宣告竞选成功。&lt;/p&gt;
 &lt;p&gt;当选主完成之后，除非主节点失联之后发起重新竞选，否则从此往后，就只有主节点本身才能够提出提案。此时，无论哪个提案节点接收到客户端的操作请求，都会将请求转发给主节点来完成提案，而主节点提案的时候，也就无需再次经过准备过程，因为可以视作是经过选举时的那一次准备之后，后续的提案都是对相同提案 ID 的一连串的批准过程。&lt;/p&gt;
 &lt;p&gt;流程如下：&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;https://liusir521.github.io/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%AC%E5%BC%8F%E7%AE%97%E6%B3%95/multi-paxos-1.png&#34;
+&lt;p&gt;&lt;img src=&#34;https://liusir521.github.io/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/multi-paxos-1.png&#34;
 	width=&#34;1255&#34;
 	height=&#34;464&#34;
-	srcset=&#34;https://liusir521.github.io/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%AC%E5%BC%8F%E7%AE%97%E6%B3%95/multi-paxos-1_hu_af3f2d90c2fdadd9.png 480w, https://liusir521.github.io/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%AC%E5%BC%8F%E7%AE%97%E6%B3%95/multi-paxos-1_hu_21f81575e5b68cab.png 1024w&#34;
+	srcset=&#34;https://liusir521.github.io/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/multi-paxos-1_hu_af3f2d90c2fdadd9.png 480w, https://liusir521.github.io/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/multi-paxos-1_hu_21f81575e5b68cab.png 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 		alt=&#34;Multi Paxos 算法时序图&#34;
