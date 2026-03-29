@@ -1,19 +1,19 @@
 <!DOCTYPE html>
 <html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="凤凰架构之分布式共识算法学习笔记">
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="深入高可用系统原理与设计之分布式共识">
 <title>分布式共识算法</title>
 
 <link rel='canonical' href='https://liusir521.github.io/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/'>
 
 <link rel="stylesheet" href="/scss/style.min.86591c898bd806857815fbb8c47e8d3fed97c133b78e83d9bfc27b164dd0aa2b.css"><meta property='og:title' content="分布式共识算法">
-<meta property='og:description' content="凤凰架构之分布式共识算法学习笔记">
+<meta property='og:description' content="深入高可用系统原理与设计之分布式共识">
 <meta property='og:url' content='https://liusir521.github.io/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/'>
 <meta property='og:site_name' content='你怂你mua'>
-<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='学习笔记' /><meta property='article:tag' content='分布式' /><meta property='article:tag' content='凤凰架构' /><meta property='article:published_time' content='2026-03-27T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2026-03-27T00:00:00&#43;00:00'/><meta property='og:image' content='https://liusir521.github.io/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/fenix.png' />
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='学习笔记' /><meta property='article:tag' content='分布式' /><meta property='article:tag' content='深入高可用系统原理与设计' /><meta property='article:published_time' content='2026-03-27T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2026-03-27T00:00:00&#43;00:00'/><meta property='og:image' content='https://liusir521.github.io/book.png' />
 <meta name="twitter:title" content="分布式共识算法">
-<meta name="twitter:description" content="凤凰架构之分布式共识算法学习笔记"><meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content='https://liusir521.github.io/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/fenix.png' />
+<meta name="twitter:description" content="深入高可用系统原理与设计之分布式共识"><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='https://liusir521.github.io/book.png' />
     <link rel="shortcut icon" href="/favicon.png" />
 
     </head>
@@ -298,18 +298,20 @@
         <div class="widget--toc">
             <nav id="TableOfContents">
   <ol>
-    <li><a href="#paxos">Paxos</a>
+    <li><a href="#什么是共识">什么是共识</a></li>
+    <li><a href="#日志与复制状态机">日志与复制状态机</a></li>
+    <li><a href="#paxos算法">Paxos算法</a>
       <ol>
-        <li><a href="#算法流程">算法流程</a></li>
-        <li><a href="#实例讲解">实例讲解</a></li>
-        <li><a href="#总结">总结</a></li>
+        <li><a href="#算法背景">算法背景</a></li>
+        <li><a href="#paxos-算法描述">Paxos 算法描述</a></li>
       </ol>
     </li>
-    <li><a href="#multi-paxos">Multi Paxos</a></li>
-    <li><a href="#raft">Raft</a>
+    <li><a href="#raft算法">Raft算法</a>
       <ol>
-        <li><a href="#网络节点间的复制问题">网络节点间的复制问题</a></li>
-        <li><a href="#如何保证过程是安全的">如何保证过程是安全的</a></li>
+        <li><a href="#前言">前言</a></li>
+        <li><a href="#领导者选举">领导者选举</a></li>
+        <li><a href="#日志复制">日志复制</a></li>
+        <li><a href="#成员变更">成员变更</a></li>
       </ol>
     </li>
   </ol>
@@ -327,12 +329,8 @@
     <header class="article-header">
         <div class="article-image">
             <a href="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/">
-                <img src="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/fenix_hu_42ad6148763f43da.png"
-                        srcset="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/fenix_hu_42ad6148763f43da.png 800w, /p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/fenix_hu_817c63eedd0bf181.png 1600w"
-                        width="800" 
-                        height="346" 
-                        loading="lazy"
-                        alt="Featured image of post 分布式共识算法" />
+                
+                    <img src="/book.png" loading="lazy" alt="Featured image of post 分布式共识算法" />
                 
             </a>
         </div>
@@ -359,8 +357,8 @@
             
             
             
-            <a href="/categories/%E5%87%A4%E5%87%B0%E6%9E%B6%E6%9E%84/" style="background-color: hsl(167, 60%, 84%); color: hsl(167, 60%, 15%);">
-                凤凰架构
+            <a href="/categories/%E6%B7%B1%E5%85%A5%E9%AB%98%E5%8F%AF%E7%94%A8%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86%E4%B8%8E%E8%AE%BE%E8%AE%A1/" style="background-color: hsl(336, 60%, 84%); color: hsl(336, 60%, 15%);">
+                深入高可用系统原理与设计
             </a>
         
     </header>
@@ -373,7 +371,7 @@
     
         
         <h3 class="article-subtitle">
-            凤凰架构之分布式共识算法学习笔记
+            深入高可用系统原理与设计之分布式共识
         </h3>
         
     </div>
@@ -409,7 +407,7 @@
 
 
                 <time class="article-time--reading">
-                    阅读时长: 2 分钟
+                    阅读时长: 4 分钟
                 </time>
             </div>
         
@@ -425,201 +423,461 @@
     
     
     <blockquote>
-<p>原文地址：https://icyfenix.cn/distribution/consensus/</p>
+<p>原文地址：https://www.thebyte.com.cn/consensus/consensus.html</p>
 <p>我是买的纸质书学习的，记录笔记时发现web端的内容其实挺全面的，下方内容大部分摘录自web端页面。</p>
 </blockquote>
-<h2 id="paxos">Paxos
-</h2><h3 id="算法流程">算法流程
-</h3><p>Paxos算法将分布式系统中的节点分为三类：</p>
+<h2 id="什么是共识">什么是共识
+</h2><p>“共识”和“一致”意思相似，但在计算机领域，它们具有截然不同的含义。</p>
 <ul>
 <li>
-<p>提案节点：称为Proposer，提出对某个值进行设置操作的节点，设置这个值的行为被称为提案(Proposal)，值一旦设置成功，就是不会丢失也不可改变的。</p>
+<p>共识（Consensus）：指所有节点就某项操作（如选主、原子事务提交、日志复制、分布式锁管理等）达成一致的实现过程。</p>
 </li>
 <li>
-<p>决策节点：称为Acceptor，是应答提案的节点，决定该提案是否可以被投票、是否可以被接受。提案一旦获得过半数决策节点的接受，即称该提案被批准(Accept)。提案被批准即意味着该值不能被更改，也不会丢失，且最终所有节点都会接受它。</p>
-</li>
-<li>
-<p>记录节点：称为Learner，不参与提案，也不参与决策，只是单纯的从提案、决策节点中学习已经达成共识的提案，当少数派节点从网络分区中恢复时，会进入这种状态。</p>
+<p>一致性（Consistency）：描述多个节点的数据是否保持一致，关注数据最终达到稳定状态的结果。</p>
 </li>
 </ul>
-<p>在使用Paxos算法的分布式系统中，所有节点都是平等的，它们都可以承担以上一种或多种角色，不过为了便于确保有明确的多数派，决策节点的数量应该被设定为奇数个，且在系统初始化时，网络中每个节点都知道整个网络所有决策节点的数量、地址等信息。</p>
-<p>分布式系统中两个关键问题：</p>
+<p>在分布式系统中，节点故障是不可避免的，但部分节点故障不应该影响系统整体状态。通过增加节点数量，依据“少数服从多数”原则，只要多数节点（至少N/2+1）达成一致，其状态即可代表整个系统。这种依赖多数节点实现容错的机制称为 Quorum 机制。</p>
+<p>基于 Quorum 的机制，通过“少数服从多数”协商机制达成一致的决策，从而对外表现为一致的运行结果。这一过程被称为节点间的“协商共识”。一旦解决共识问题，便可提供一套屏蔽内部复杂性的抽象机制，为应用层提供一致性保证，满足多种需求。</p>
 <ul>
 <li>
-<p>系统内部各个节点通信是不可靠的</p>
+<p>主节点选举：在主从复制数据库中，所有节点需要就“谁来当主节点”达成一致。如果由于网络问题导致节点间无法通信，很容易引发争议。若争议未解决，可能会出现多个节点同时认为自己是主节点的情况，这就是分布式系统中最棘手的问题之一 —— “脑裂”。</p>
 </li>
 <li>
-<p>系统外部各个用户访问是可并发的</p>
+<p>原子事务提交：对于支持跨节点或跨分区事务的数据库，可能会发生部分节点事务成功、部分节点事务失败的情况。为维护事务的原子性（即 ACID 特性），所有节点必须就事务的最终结果达成一致。</p>
+</li>
+<li>
+<p>分布式锁管理：当多个请求尝试访问共享资源时，共识机制可确保所有节点一致认定“谁成功获取了锁”。即使发生网络故障或节点异常，也能避免锁争议，从而防止并发冲突或数据不一致。</p>
+</li>
+<li>
+<p>日志复制：日志复制指将主节点的操作日志同步到从节点。在这一过程中，所有节点必须确保日志条目的顺序一致，即日志条目必须以相同顺序写入。</p>
 </li>
 </ul>
-<p>为了这个问题，分布式环境中的锁必须是<code>可抢占</code>的。Paxos算法包括两个阶段，其中，第一阶段<code>“准备”（Prepare）</code>就相当于上面抢占锁的过程。如果某个提案节点准备发起提案，必须先向所有的决策节点广播一个许可申请（称为 Prepare 请求）。提案节点的 Prepare 请求中会附带一个<code>全局唯一</code>的数字 n 作为提案 ID，决策节点收到后，将会给予提案节点两个承诺与一个应答。</p>
-<p>两个承诺是指：</p>
-<p>承诺不会再接受提案 ID 小于或等于 n 的 <code>Prepare</code> 请求。
-承诺不会再接受提案 ID 小于 n 的 <code>Accept</code> 请求。
-一个应答是指：</p>
-<p>不违背以前作出的承诺的前提下，回复 <code>已经批准过</code> 的提案中 ID 最大的那个提案所设定的值和提案 ID，如果该值从来没有被任何提案设定过，则返回空值。如果违反此前做出的承诺，即收到的提案 ID 并不是决策节点收到过的最大的，那允许直接对此 Prepare 请求不予理会。</p>
-<p>当提案节点收到了多数派决策节点的应答（称为 Promise 应答）后，可以开始第二阶段<code>“批准”（Accept）过程</code>，这时有如下两种可能的结果：</p>
-<ul>
-<li>
-<p>如果提案节点发现所有响应的决策节点此前都没有批准过该值（即为空），那说明它是第一个设置值的节点，可以随意地决定要设定的值，将自己选定的值与提案 ID，构成一个二元组“(id, value)”，再次广播给全部的决策节点（称为 Accept 请求）。</p>
-</li>
-<li>
-<p>如果提案节点发现响应的决策节点中，已经有 <code>至少一个</code> 节点的应答中包含有值了，那它就不能够随意取值了，必须无条件地从应答中找出提案 <code>ID 最大</code> 的那个值并接受，构成一个二元组“(id, maxAcceptValue)”，再次广播给全部的决策节点（称为 Accept 请求）。</p>
-</li>
-</ul>
-<p>当每一个决策节点收到 Accept 请求时，都会在不违背以前作出的承诺的前提下，接收并持久化对当前提案 ID 和提案附带的值。如果违反此前做出的承诺，即收到的提案 ID 并不是决策节点收到过的最大的，那允许直接对此 Accept 请求不予理会。</p>
-<p>当提案节点收到了多数派决策节点的应答（称为<code> Accepted 应答</code>）后，协商结束，共识决议形成，将形成的决议发送给所有记录节点进行学习。</p>
-<h3 id="实例讲解">实例讲解
-</h3><p>假设一个分布式系统有五个节点，分别命名为 S1、S2、S3、S4、S5，这个例子中只讨论正常通信的场景，不涉及网络分区。全部节点都同时扮演着提案节点和决策节点的身份。此时，有两个并发的请求分别希望将同一个值分别设定为 X（由 S1作为提案节点提出）和 Y（由 S5作为提案节点提出），以 P 代表准备阶段，以 A 代表批准阶段，这时候可能发生以下情况：</p>
-<p>情况一：譬如，S1选定的提案 ID 是 3.1（全局唯一 ID 加上节点编号），先取得了多数派决策节点的 Promise 和 Accepted 应答，此时 S5选定提案 ID 是 4.5，发起 Prepare 请求，收到的多数派应答中至少会包含 1 个此前应答过 S1的决策节点，假设是 S3，那么 S3提供的 Promise 中必将包含 S1已设定好的值 X，S5就必须无条件地用 X 代替 Y 作为自己提案的值，由此整个系统对“取值为 X”这个事实达成一致，如图所示。</p>
-<p><img src="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/paxos-1.png"
-	width="1319"
-	height="576"
-	srcset="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/paxos-1_hu_e86934d5d31bdef1.png 480w, /p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/paxos-1_hu_644a9e3921c91235.png 1024w"
+<h2 id="日志与复制状态机">日志与复制状态机
+</h2><p>日志是有序且持久化的记录序列。新记录会从末尾追加，而读取时则按“从左到右”的顺序进行扫描。结构如下：</p>
+<p><img src="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/log.png"
+	width="635"
+	height="270"
+	srcset="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/log_hu_256983f952d664dc.png 480w, /p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/log_hu_e2d6d4265b48cc8b.png 1024w"
 	loading="lazy"
 	
-		alt="整个系统对“取值为 X”达成一致"
+		alt="日志结构"
 	
 	
 		class="gallery-image" 
-		data-flex-grow="228"
-		data-flex-basis="549px"
+		data-flex-grow="235"
+		data-flex-basis="564px"
 	
 ></p>
-<p>情况二：事实上，对于情况一，X 被选定为最终值是必然结果，但从上图中可以看出，X 被选定为最终值并不是必定需要多数派的共同批准，只取决于 S5提案时 Promise 应答中是否已包含了批准过 X 的决策节点，如下图所示，S5发起提案的 Prepare 请求时，X 并未获得多数派批准，但由于 S3已经批准的关系，最终共识的结果仍然是 X。</p>
-<p><img src="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/paxos-2.png"
-	width="1235"
-	height="433"
-	srcset="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/paxos-2_hu_e085d9d7f4437e22.png 480w, /p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/paxos-2_hu_7689bc9014bde58a.png 1024w"
+<p>有序的日志记录了“何时发生了什么”，这一点可以通过以下两种数据复制模型来理解。</p>
+<ul>
+<li>
+<p>主备模型（Primary-backup）：又称 <code>状态转移</code> 模型，主节点（Master）负责执行如“+1”、“-2”的操作，将 <code>操作结果</code> （如“1”、“3”、“6”）记录到日志中，备节点（Slave）根据日志直接同步结果。</p>
+</li>
+<li>
+<p>复制状态机模型（State-Machine Replication）：又称 <code>操作转移</code> 模型，日志记录的不是最终结果，而是具体的 <code>操作指令</code> ，如“+1”、“-2”。指令按照顺序被依次复制到各个节点（Peer）。如果每个节点按顺序执行这些指令，各个节点最终将达到一致的状态。</p>
+</li>
+</ul>
+<p><img src="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/moxing.png"
+	width="650"
+	height="335"
+	srcset="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/moxing_hu_824a9d96e5af02ba.png 480w, /p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/moxing_hu_ada1e99e6ec8629d.png 1024w"
 	loading="lazy"
 	
-		alt="X 被选定只取决于 Promise 应答中是否已批准"
+		alt="分布式系统的两种数据复制模型"
 	
 	
 		class="gallery-image" 
-		data-flex-grow="285"
-		data-flex-basis="684px"
+		data-flex-grow="194"
+		data-flex-basis="465px"
 	
 ></p>
-<p>情况三：当然，另外一种可能的结果是 S5提案时 Promise 应答中并未包含批准过 X 的决策节点，譬如应答 S5提案时，节点 S1已经批准了 X，节点 S2、S3未批准但返回了 Promise 应答，此时 S5以更大的提案 ID 获得了 S3、S4、S5的 Promise，这三个节点均未批准过任何值，那么 S3将不会再接收来自 S1的 Accept 请求，因为它的提案 ID 已经不是最大的了，这三个节点将批准 Y 的取值，整个系统最终会对“取值为 Y”达成一致，如下图所示。</p>
-<p><img src="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/paxos-3.png"
-	width="1205"
-	height="410"
-	srcset="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/paxos-3_hu_bb25695c6cee48bf.png 480w, /p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/paxos-3_hu_a162fce775672ce4.png 1024w"
+<p>无论哪一种模型，它们都揭示了：“顺序是节点之间保持一致性的关键因素”。如果打乱了操作的顺序，就会得到不同的运算结果。</p>
+<blockquote>
+<p><strong>复制状态机的基本原理</strong></p>
+<p>两个“相同的” (identical)、“确定的” (deterministic) 进程：</p>
+<ul>
+<li>相同的：进程的代码、逻辑、以及配置完全一致，它们在设计和实现上完全相同；</li>
+<li>确定的：进程的行为是完全可预测的，不能有任何非确定性的逻辑，比如随机数生成或不受控制的时间依赖。</li>
+</ul>
+<p>如果它们以相同的状态启动，按相同的顺序获取相同的输入。那么，它们一定会达到相同的状态。</p>
+</blockquote>
+<p>节点内的进程按 <code>顺序</code> 执行日志序列，操作具有全局顺序。因此，所有节点 <code>最终将达到一致</code> 的状态。多个这样的进程结合有序日志，就构成了 Apache Kafka、Zookeeper、etcd、CockroachDB 等分布式系统中的关键组件。</p>
+<h2 id="paxos算法">Paxos算法
+</h2><h3 id="算法背景">算法背景
+</h3><p>在 Paxos 算法中，节点分为三种角色。</p>
+<ul>
+<li>
+<p>提议者（Proposer）：提议者是启动共识过程的节点，它提出一个值，请求其他节点对这个值进行投票，提出值的行为称为发起“提案&quot;（Proposal），提案包含提案编号 (Proposal ID) 和提议的值 (Value)。注意的是，Paxos 算法是一个典型的为 <code>操作转移</code> 模型设计的算法，为简化表述，本文把提案类比成 <code>变量赋值</code> 操作，但你应该理解它是 <code>操作日志</code> 相似的概念，后面介绍的 Raft 算法中，直接就把“提案”称做“日志”了。</p>
+</li>
+<li>
+<p>决策者（Acceptor）：接受或拒绝提议者发起的提案，如果一个提案被超过半数的决策者接受，意味着提案被“批准”（accepted）。提案一旦被批准，意味着在所有节点中达到共识，便不可改变、永久生效。</p>
+</li>
+<li>
+<p>记录者（Learner）：记录者不发起提案，也不参与决策提案，它们学习、记录被批准的提案。</p>
+</li>
+</ul>
+<p>在 Paxos 算法中，所有节点都是平等的，能够承担一种或多种角色。例如，提议者既可以发起提案，也可以对其他提案进行表决。但为了更明确地计算 Quorum，通常建议表决提案的节点数为奇数。</p>
+<h3 id="paxos-算法描述">Paxos 算法描述
+</h3><p>简而言之，Paxos 算法本质是一个支持多次重复的 <code>二阶段提交</code> 协议。</p>
+<p>Paxos 算法的第一个阶段称 <code>准备阶段</code>（Prepare）。提议者选择一个提案编号 N（通常是单调递增的数字，相当于乐观锁中的 version，更高的编号意味着更高的优先级），向所有的决策者广播许可申请（称为 Prepare(N) 请求），如果决策者：</p>
+<ul>
+<li>
+<p>尚未承诺 ≥N 编号的提案：则“承诺”（promise）不再接受任何编号小于 N 的提案，返回一个响应，其中包含承诺的提案编号以及对应的提案值（如果有）；</p>
+</li>
+<li>
+<p>已承诺 ≥N 编号的提案：拒绝 Prepare 请求，不返回任何响应。</p>
+</li>
+</ul>
+<p>提议者从多数决策者获得了“承诺”（Promise），则“准备阶段”达成。接着，决策者选择提案值：如果决策者的响应中返回了提案值，从中选择 <code>编号最高</code> 的提案值；如果没有提案值返回，则使用决策者 <code>初始提案值</code>。</p>
+<p>完成以上操作后，进入下一个阶段。Paxos 算法的第二个阶段称 <code>批准阶段</code> （Accept）。提议者向所有决策者广播批准申请（称为 accept(N,V) 请求），请求批准：“提案编号 N 提案值 V”。如果决策者发现提案编号 N 不小于它已承诺的最大编号，则“批准”（accepted）该提案；否则拒绝该提案。当多数的决策者批准提案时，提议者认为本轮提案成功、共识达成。一旦提案成功，提议者会将最终的决议广播给所有记录者节点，供它们学习、记录最终结果。</p>
+<p><img src="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/paxos.png"
+	width="820"
+	height="510"
+	srcset="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/paxos_hu_ef0efb5ad4cab0ff.png 480w, /p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/paxos_hu_df7ea90c6b81ab3f.png 1024w"
 	loading="lazy"
 	
-		alt="整个系统最终会对“取值为 Y”达成一致"
+		alt="Paxos算法流程"
 	
 	
 		class="gallery-image" 
-		data-flex-grow="293"
-		data-flex-basis="705px"
+		data-flex-grow="160"
+		data-flex-basis="385px"
 	
 ></p>
-<p>情况四：从情况三可以推导出另一种极端的情况，如果两个提案节点交替使用更大的提案 ID 使得准备阶段成功，但是批准阶段失败的话，这个过程理论上可以无限持续下去，形成活锁（Live Lock），如图所示。在算法实现中会引入随机超时时间来避免活锁的产生。</p>
-<p><img src="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/paxos-4.png"
-	width="1335"
-	height="443"
-	srcset="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/paxos-4_hu_4d3f6a0404c0dbc8.png 480w, /p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/paxos-4_hu_179742ed1a95054e.png 1024w"
+<p>证明 Paxos 算法的正确性比重新实现 Paxos 算法还难。我们没必须推导 Paxos 的正确性，通过以下几个例子来验证 Paxos 算法。</p>
+<p>下面的示例中，X、Y 代表客户端，S1 ~ S5 是服务端，它们既是提议者又是决策者，图中的 P 代表 “准备阶段”，A 代表“批准阶段”。为了便于理解，提案编号 N 由自增序号和 Server ID 组成。例如，S1 的提案编号为 1.1、2.1、3.1&hellip;。</p>
+<p>现在，我们来分析 S1 、S5 同时发起提案，会出现什么情况。</p>
+<p>情况一：提案已批准。如图所示，S1 收到客户端的请求，于是 S1 作为提议者，向 S1&hellip;S3 广播 Prepare(3.1) 消息，决策者 S1&hellip;S3 没有接受过任何提案，所以接受该提案。接着，S1 广播 Accept(3.1, X) 消息，提案 X 成功被批准。</p>
+<p>在提案 X 被批准后，S5 收到客户端的提案 Y，S5 作为提议者向 S3&hellip;S5 广播 Prepare(4.5) 消息。对 S3 来说，4.5 比 3.1 大，且已经接受了 X，它回复提案 (3.1, X)。S5 收到 S3&hellip;S5 的回复后，使用 X 替换自己的 Y，接着进入批准阶段，广播 Accept(4.5, X) 消息。S3&hellip;S5 批准提案，所有决策者就 X 达成一致。</p>
+<p><img src="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/paxos-case1.png"
+	width="754"
+	height="380"
+	srcset="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/paxos-case1_hu_ee253627ecc618bf.png 480w, /p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/paxos-case1_hu_d05ca2bcb385d9c7.png 1024w"
 	loading="lazy"
 	
-		alt="批准阶段失败，形成活锁"
+		alt="提案已批准"
 	
 	
 		class="gallery-image" 
-		data-flex-grow="301"
-		data-flex-basis="723px"
+		data-flex-grow="198"
+		data-flex-basis="476px"
 	
 ></p>
-<h3 id="总结">总结
-</h3><p>Basic Paxos 的价值在于开拓了分布式共识算法的发展思路，但它因有如下缺陷，一般不会直接用于实践：Basic Paxos 只能对单个值形成决议，并且决议的形成至少需要两次网络请求和应答（准备和批准阶段各一次），高并发情况下将产生较大的网络开销，极端情况下甚至可能形成活锁。</p>
-<h2 id="multi-paxos">Multi Paxos
-</h2><p>Multi Paxos 对 Basic Paxos 的核心改进是增加了 <code>选主</code> 的过程，提案节点会通过定时轮询（心跳），确定当前网络中的所有节点里是否存在有一个主提案节点，一旦没有发现主节点存在，节点就会在心跳超时后使用 Basic Paxos 中定义的准备、批准的两轮网络交互过程，向所有其他节点广播自己希望竞选主节点的请求，希望整个分布式系统对“由我作为主节点”这件事情协商达成一致共识，如果得到了决策节点中多数派的批准，便宣告竞选成功。</p>
-<p>当选主完成之后，除非主节点失联之后发起重新竞选，否则从此往后，就只有主节点本身才能够提出提案。此时，无论哪个提案节点接收到客户端的操作请求，都会将请求转发给主节点来完成提案，而主节点提案的时候，也就无需再次经过准备过程，因为可以视作是经过选举时的那一次准备之后，后续的提案都是对相同提案 ID 的一连串的批准过程。</p>
-<p>流程如下：</p>
-<p><img src="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/multi-paxos-1.png"
-	width="1255"
-	height="464"
-	srcset="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/multi-paxos-1_hu_af3f2d90c2fdadd9.png 480w, /p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/multi-paxos-1_hu_21f81575e5b68cab.png 1024w"
+<p>情况二：事实上，对于情况一，也就是“取值为 X”并不是一定需要多数派批准，S5 发起提案时，准备阶段的应答中是否包含了批准过 X 的决策者也影响决策。如图所示，S3 接受了提案 (3.1, X)，但 S1、S2 还没有收到 Accept(3.1, X) 消息。此时 S3、S4、S5 收到 Prepare(4.5) 消息，S3 回复已经接受的提案 (3.1, X)，S5 将提案值 Y 替换成 X，广播 Accept(4.5, X) 消息给 S3、S4、S5，对 S3 来说，编号 4.5 大于 3.1，所以批准提案 X，最终共识的结果仍然是 X。</p>
+<p><img src="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/paxos-case2.png"
+	width="769"
+	height="299"
+	srcset="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/paxos-case2_hu_a75bdb6bdb9f176a.png 480w, /p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/paxos-case2_hu_9e4044e943c6647.png 1024w"
 	loading="lazy"
 	
-		alt="Multi Paxos 算法时序图"
+		alt="提案部分接受，新提议者可见"
 	
 	
 		class="gallery-image" 
-		data-flex-grow="270"
-		data-flex-basis="649px"
+		data-flex-grow="257"
+		data-flex-basis="617px"
 	
 ></p>
-<p>这时候的二元组(id, value)已经变成了三元组(id, i, value)，这是因为需要给主节点增加一个 <code>任期编号</code> ，这个编号必须是 <code>严格单调递增</code> 的，以应付主节点陷入网络分区后重新恢复，但另外一部分节点仍然有多数派，且已经完成了重新选主的情况，此时必须以任期编号大的主节点为准。当节点有了选主机制的支持，在整体来看，就可以进一步简化节点角色，不去区分提案、决策和记录节点了，统统以“节点”来代替，节点只有主（Leader）和从（Follower）的区别。</p>
-<h2 id="raft">Raft
-</h2><p>在上述的基础上，我们换一个角度来重新思考“分布式系统中如何对某个值达成一致”这个问题，可以把该问题划分做三个子问题来考虑，可以证明（具体证明就不列在这里了，感兴趣的读者可参考结尾给出的论文）当以下三个问题同时被解决时，即等价于达成共识：</p>
+<p>情况三：另外一种可能的情况是 S5 发起提案时，准备阶段的应答中未包含批准过 X 的决策节点。S1 接受了提案 (3.1, X)，S3 先收到 Prepare(4.5) 消息，后收到 Accept(3.1, X) 消息，由于 3.1 小于 4.5，会直接拒绝这个提案。提案 X 没有收到多数的回复，X 提案就被阻止了。提案 Y 顺利通过，整个系统最终对“取值为 Y”达成一致。</p>
+<p><img src="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/paxos-case3.png"
+	width="775"
+	height="283"
+	srcset="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/paxos-case3_hu_19cb6be0b7adeb1f.png 480w, /p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/paxos-case3_hu_b2671487ad0d964c.png 1024w"
+	loading="lazy"
+	
+		alt="提案部分接受，新提议者不可见"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="273"
+		data-flex-basis="657px"
+	
+></p>
+<p>情况四：从情况三可以推导出另一种极端的情况，多个提议者同时发起提案，在准备阶段互相抢占，反复刷新决策者上的提案编号，导致任何一方都无法达到多数派决议，这个过程理论上可以无限持续下去，形成 <code>活锁</code> （livelock）。</p>
+<p>解决这个问题并不复杂，将 <code>重试时间随机化</code> ，就能减少这种巧合发生。</p>
+<p><img src="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/paxos-case4.png"
+	width="789"
+	height="255"
+	srcset="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/paxos-case4_hu_1161ded5c2d361dc.png 480w, /p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/paxos-case4_hu_5d1134e60600ba37.png 1024w"
+	loading="lazy"
+	
+		alt="出现活锁问题"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="309"
+		data-flex-basis="742px"
+	
+></p>
+<p>以上，就是整个 Paxos 算法的工作原理。</p>
+<p>Paxos 算法只能处理单个提案，达成共识至少需要两次网络往返，高并发情况下还可能导致活锁。因此，Paxos 算法主要用于理论研究，很少直接用于工程实践。后来，Lamport 在论文《Paxos Made Simple》中提出了 Paxos 的变体 —— Multi Paxos。Multi Paxos 引入了“选主”机制，通过多轮运行 Paxos 算法来处理多个提案。</p>
+<h2 id="raft算法">Raft算法
+</h2><h3 id="前言">前言
+</h3><p>不可否认，Paxos 是一个划时代的共识算法。</p>
+<p>Raft 算法出现之前，绝大多数共识系统都是基于 Paxos 算法或者受其影响。同时，Paxos 算法也成为教学领域里讲解共识问题时的范例。不幸的是，Paxos 算法理解起来非常晦涩。此外，论文虽然提到了 Multi Paxos，但缺少实现细节。因此，无论是学术界还是工业界普遍对 Paxos 算法感到十分头疼。</p>
+<p>那段时期，虽然所有的共识系统都是从 Paxos 算法开始的，但工程师们实现过程中有很多难以逾越的难题，往往不得已开发出与 Paxos 完全不一样的算法，这导致 Lamport 的证明并没有太大价值。所以，很长的一段时间内，实际上并没有一个被大众广泛认同的 Paxos 算法。</p>
+<p>2013 年，斯坦福大学的学者 Diego Ongaro 和 John Ousterhout 发表了论文 《In Search of an Understandable Consensus Algorithm》[1]，提出了 Raft 算法。Raft 论文开篇描述了 Raft 的证明和 Paxos 等价，详细阐述了算法如何实现。也就是说，Raft 天生就是 Paxos 算法的工程化。</p>
+<p>此后，Raft 算法成为分布式系统领域的首选共识算法。</p>
+<h3 id="领导者选举">领导者选举
+</h3><p>Paxos 算法中“节点众生平等”，每个节点都可以发起提案。多个提议者并行发起提案，是活锁、以及其他异常问题的源头。那如何不破坏 Paxos 的“节点众生平等”基本原则，又能在提案节点中实现主次之分，约束提案权利？</p>
+<p>理解上面的问题，是先搞清楚 Raft 算法中节点的分类。Raft 提出了领导者角色，通过选举机制“分享”提案权利。</p>
 <ul>
 <li>
-<p>如何选主（Leader Election）。</p>
+<p>领导者（Leader）：负责处理所有客户端请求，将请求转换为 <code>日志</code> 复制到其他节点，不断地向所有节点广播心跳消息：“你们的领导还在，不要发起新的选举”。</p>
 </li>
 <li>
-<p>如何把数据复制到各个节点上（Entity Replication）。</p>
+<p>跟随者（Follower）：接收、处理领导者的消息，并向领导者反馈日志的写入情况。当领导者心跳超时时，他会主动站起来，推荐自己成为候选人。</p>
 </li>
 <li>
-<p>如何保证过程是安全的（Safety）。</p>
+<p>候选人（Candidate）：候选人属于过渡角色，他向所有的节点广播投票消息，如果他赢得多数选票，那么他将晋升为领导者。</p>
 </li>
 </ul>
-<p>选主的相关操作已经在上述Multi Paxos中讲过，我们需要研究的是剩下的问题。</p>
-<h3 id="网络节点间的复制问题">网络节点间的复制问题
-</h3><p>在正常情况下，当客户端向主节点发起一个操作请求，譬如提出“将某个值设置为 X”，此时主节点将 X 写入自己的变更日志，但先不提交，接着把变更 X 的信息在下一次心跳包中广播给所有的从节点，并要求从节点回复确认收到的消息，从节点收到信息后，将操作写入自己的变更日志，然后给主节点发送确认签收的消息，主节点收到过半数的签收消息后，提交自己的变更、应答客户端并且给从节点广播可以提交的消息，从节点收到提交消息后提交自己的变更，数据在节点间的复制宣告完成。</p>
-<p>在异常情况下，网络出现了分区，部分节点失联，但只要仍能正常工作的节点的数量能够满足多数派（过半数）的要求，分布式系统就仍然可以正常工作，这时候数据复制过程如下：</p>
-<ol>
-<li>
-<p>假设有 S1、S2、S3、S4、S5五个节点，S1是主节点，由于网络故障，导致 S1、S2和 S3、S4、S5之间彼此无法通信，形成网络分区。</p>
-</li>
-<li>
-<p>一段时间后，S3、S4、S5三个节点中的某一个（譬如是 S3）最先达到心跳超时的阈值，获知当前分区中已经不存在主节点了，它向所有节点发出自己要竞选的广播，并收到了 S4、S5节点的批准响应，加上自己一共三票，即得到了多数派的批准，竞选成功，此时系统中同时存在 S1和 S3两个主节点，但由于网络分区，它们不会知道对方的存在。</p>
-</li>
-<li>
-<p>这种情况下，客户端发起操作请求：</p>
+<p>联想到现实世界中的领导人都有一段不等的任期。自然，Raft 算法中也对应的概念 —— “任期”（term）。Raft 中的任期是一个递增的数字，贯穿于 Raft 的选举、日志复制和一致性维护过程中。</p>
 <ul>
 <li>
-<p>如果客户端连接到了 S1、S2之一，都将由 S1处理，但由于操作只能获得最多两个节点的响应，不构成多数派的批准，所以任何变更都无法成功提交。</p>
+<p>选举过程：任期确保了领导者的唯一性。在一次任期内，只有获得多数选票的节点才能成为领导者。</p>
 </li>
 <li>
-<p>如果客户端连接到了 S3、S4、S5之一，都将由 S3处理，此时操作可以获得最多三个节点的响应，构成多数派的批准，是有效的，变更可以被提交，即系统可以继续提供服务。</p>
+<p>日志一致性：任期号会附加到每条日志条目中，帮助集群判断日志的最新程度。</p>
 </li>
 <li>
-<p>事实上，以上两种“如果”情景很少机会能够并存。网络分区是由于软、硬件或者网络故障而导致的，内部网络出现了分区，但两个分区仍然能分别与外部网络的客户端正常通信的情况甚为少见。更多的场景是算法能容忍网络里下线了一部分节点，按照这个例子来说，如果下线了两个节点，系统正常工作，下线了三个节点，那剩余的两个节点也不可能继续提供服务了。</p>
+<p>冲突检测：通过比较任期号，节点可以快速判断自己是否落后，并切换到跟随者状态。</p>
 </li>
 </ul>
-</li>
-<li>
-<p>假设现在故障恢复，分区解除，五个节点可以重新通信了：</p>
+<p>Raft 集群 Leader 选举过程：</p>
+<p><img src="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/raft-chose.png"
+	width="770"
+	height="298"
+	srcset="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/raft-chose_hu_24fa66bddafb6126.png 480w, /p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/raft-chose_hu_756e7298b085edff.png 1024w"
+	loading="lazy"
+	
+		alt="Raft 选举过程"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="258"
+		data-flex-basis="620px"
+	
+></p>
+<p>初始状态下，所有的节点处于跟随者状态。如果跟随者在某个时限（通常是 150-300 毫秒的随机超时时间）未收到领导者心跳，则触发触发选举。节点的角色转为候选者，任期号递增，然后向其他节点广播“投票给我”的消息（RequestVote RPC）。</p>
+<p>RequestVote RPC 消息示例如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;term&#34;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="c1">// 候选者的当前任期号，用于通知接收方当前选举属于哪个任期。
+</span></span></span><span class="line"><span class="cl">  <span class="nt">&#34;candidateId&#34;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="c1">// 候选者的节点 ID，标识请求投票的节点。
+</span></span></span><span class="line"><span class="cl">  <span class="nt">&#34;lastLogIndex&#34;</span><span class="p">:</span> <span class="mi">12</span><span class="p">,</span> <span class="c1">// 候选者日志的最后一条日志的索引，用于比较日志的完整性。
+</span></span></span><span class="line"><span class="cl">  <span class="nt">&#34;lastLogTerm&#34;</span><span class="p">:</span> <span class="mi">4</span><span class="c1">//候选者日志的最后一条日志的任期号，用于进一步比较日志的新旧程度。
+</span></span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>其他节点收到投票消息后，根据下面的条件判断是否投票：</p>
 <ul>
 <li>
-<p>S1和 S3都向所有节点发送心跳包，从各自的心跳中可以得知两个主节点里 S3的任期编号更大，它是最新的，此时五个节点均只承认 S3是唯一的主节点。</p>
+<p>候选者的日志至少与投票者的日志一样新（根据最后一条日志的任期号和索引号判断）。</p>
 </li>
 <li>
-<p>S1、S2回滚它们所有未被提交的变更。</p>
-</li>
-<li>
-<p>S1、S2从主节点发送的心跳包中获得它们失联期间发生的所有变更，将变更提交写入本地磁盘。</p>
-</li>
-<li>
-<p>此时分布式系统各节点的状态达成最终一致。</p>
+<p>当前节点尚未在本任期投票。</p>
 </li>
 </ul>
-</li>
-</ol>
-<h3 id="如何保证过程是安全的">如何保证过程是安全的
-</h3><p>在分布式理论中，Safety和Liveness两种属性是有预定义的术语，在专业的资料中一般翻译成“协定性”和“终止性”，这两个概念也是由 Lamport 最先提出，当时给出的定义是：</p>
+<p>RequestVote 响应的示例如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;term&#34;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="c1">//接收方的当前任期号，用于告知候选者最新的任期号。如果候选者发现该值比自己大，会转为跟随者。
+</span></span></span><span class="line"><span class="cl">  <span class="nt">&#34;voteGranted&#34;</span><span class="p">:</span> <span class="kc">true</span><span class="c1">//是否投票给候选者，true 表示同意，false 表示拒绝。
+</span></span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>如果候选者获得多数（超过半数）投票，即成为领导者。之后，领导者向其他节点广播心跳消息，维持领导者地位。如果没有获得多数票，进入下一轮选举，任期号递增，重新发起投票。如果选举过程中收到任期号更高的心跳或投票请求，则转为跟随者。</p>
+<h3 id="日志复制">日志复制
+</h3><p>一旦选出一个公认的领导者，那领导者顺理成章地承担起“处理系统发生的所有变更，并将变更复制到所有跟随者节点”的职责。</p>
+<p>在 Raft 算法中，日志承载着系统所有变更。下图展示了 Raft 集群的日志模型，每个“日志条目”（log entry）包含索引、任期、指令等关键信息：</p>
 <ul>
 <li>
-<p>协定性（Safety）：所有的坏事都不会发生（something &ldquo;bad&rdquo; will never happen）。</p>
+<p>指令: 表示客户端请求的具体操作内容，也就是待“状态机”（State Machine）执行的操作。</p>
 </li>
 <li>
-<p>终止性（Liveness）：所有的好事都终将发生，但不知道是啥时候（something &ldquo;good&rdquo; will must happen, but we don&rsquo;t know when）。</p>
+<p>索引值：日志条目在仓库中的索引值，是单调递增的数字。</p>
+</li>
+<li>
+<p>任期编号：日志条目是在哪个任期中创建的，用于解决“脑裂”或日志不一致问题。</p>
 </li>
 </ul>
-<p>我们不去纠结严谨的定义，仍通过举例来说明它们的具体含义。譬如以选主问题为例，Safety 保证了选主的结果一定是有且只有唯一的一个主节点，不可能同时出现两个主节点；而 Liveness 则要保证选主过程是一定可以在某个时刻能够结束的。由前面对活锁的介绍可以得知，在 Liveness 这个属性上选主问题是存在理论上的瑕疵的，可能会由于活锁而导致一直无法选出明确的主节点，所以 Raft 论文中只写了对 Safety 的保证，但由于工程实现上的处理，现实中是几乎不可能会出现终止性的问题。</p>
-<p>最后，以上这种把共识问题分解为“Leader Election”、“Entity Replication”和“Safety”三个问题来思考、解决的解题思路，即“Raft 算法”。</p>
+<p><img src="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/raft-log.png"
+	width="784"
+	height="365"
+	srcset="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/raft-log_hu_8a15cf314e570029.png 480w, /p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/raft-log_hu_d3028350acdd0423.png 1024w"
+	loading="lazy"
+	
+		alt="Raft 集群的日志模型（x ← 3 代表x赋值为3）"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="214"
+		data-flex-basis="515px"
+	
+></p>
+<p>Raft 算法中，领导者通过广播消息（AppendEntries RPC）将日志条目复制到所有跟随者。AppendEntries RPC 的示例如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;term&#34;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="c1">// 领导者的任期号
+</span></span></span><span class="line"><span class="cl">  <span class="nt">&#34;leaderId&#34;</span><span class="p">:</span> <span class="s2">&#34;leader-123&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;prevLogIndex&#34;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span> <span class="c1">// 前一日志条目的索引
+</span></span></span><span class="line"><span class="cl">  <span class="nt">&#34;prevLogTerm&#34;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="c1">// 前一日志条目的任期
+</span></span></span><span class="line"><span class="cl">  <span class="nt">&#34;entries&#34;</span><span class="p">:</span> <span class="p">[</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span> <span class="nt">&#34;index&#34;</span><span class="p">:</span> <span class="mi">9</span><span class="p">,</span> <span class="nt">&#34;term&#34;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="nt">&#34;command&#34;</span><span class="p">:</span> <span class="s2">&#34;set x=4&#34;</span> <span class="p">},</span> <span class="c1">// 要复制的日志条目
+</span></span></span><span class="line"><span class="cl">  <span class="p">],</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;leaderCommit&#34;</span><span class="p">:</span> <span class="mi">7</span><span class="c1">// Leader 的“已提交”状态的日志条目索引号
+</span></span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>当 Raft 集群收到客户端请求（例如 set x=4）时，日志复制的过程如下：</p>
+<ul>
+<li>
+<p>若当前节点非领导者，将请求转发至领导者；</p>
+</li>
+<li>
+<p>领导者接收请求后：</p>
+<ul>
+<li>
+<p>将请求转化为日志条目，写入本地存储系统，初始状态为“未提交”（uncommitted）；</p>
+</li>
+<li>
+<p>生成日志复制消息（AppendEntries RPC），并广播至所有跟随者；</p>
+</li>
+</ul>
+</li>
+<li>
+<p>跟随者收到日志复制消息后，验证任期（确保本地任期不大于领导者任期）、日志一致性（通过 prevLogIndex 检查日志是否匹配）。若验证通过，跟随者将日志条目追加至本地存储系统，并发送确认响应；</p>
+</li>
+<li>
+<p>领导者确认日志条目已成功复制至多数节点后，将其状态标记为“已提交”（committed），并向客户端返回结果。已提交的日志条目不可回滚，指令永久生效，且可安全地“应用”（apply）至状态机。</p>
+</li>
+</ul>
+<p><img src="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/raft-logcopy.png"
+	width="750"
+	height="475"
+	srcset="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/raft-logcopy_hu_13e14fc12dcae362.png 480w, /p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/raft-logcopy_hu_fb3b0951e670f379.png 1024w"
+	loading="lazy"
+	
+		alt="日志复制的过程"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="157"
+		data-flex-basis="378px"
+	
+></p>
+<p>领导者向客户端返回结果，并不意味着日志复制过程已完全结束，跟随者尚不清楚日志条目是否已被大多数节点确认。Raft 的设计通过心跳或后续日志复制请求中携带更新的提交索引（leaderCommit），通知跟随者提交日志。此机制将“达成共识的过程”优化为一个阶段，减少了客户端约一半的等待时间。</p>
+<p>我们来看日志复制的另一种情况。在上述例子中，只有 follower-1 成功追加日志，follower-2 因为日志不连续，追加失败。日志的连续性至关重要，如果日志条目没有按正确顺序应用到状态机，各个 follower 节点的状态肯定不一致。</p>
+<p>日志不连续的问题是这样解决的：follower-2 收到日志复制请求后，它会通过 prevLogIndex 和 prevLogTerm 检查本地日志的连续性。如果日志缺失或存在冲突，follower-2 返回失败响应，指明与领导者日志不一致的部分。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;success&#34;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;term&#34;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;conflictIndex&#34;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="c1">// 表示发生缺失的日志索引，Follower 的日志中最大索引为 3，所以缺失的索引是 4。
+</span></span></span><span class="line"><span class="cl">  <span class="nt">&#34;conflictTerm&#34;</span><span class="p">:</span> <span class="mi">3</span><span class="c1">//缺失日志的“上一个有效日志条目”的任期号
+</span></span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>当领导者收到失败响应，根据 conflictIndex 和 conflictTerm 找到与跟随者日志的最大匹配索引（例如，6）。随后，领导者从该索引开始重新向跟随者（如 follower-2）发送日志条目，逐步修复日志的不一致性，直至同步完成。</p>
+<h3 id="成员变更">成员变更
+</h3><p>在前面的内容中，我们假设集群节点数固定，即集群的 Quorum 也保持不变。然而，在生产环境中，集群通常需要进行节点变更，例如因故障移除节点或扩容增加节点等。对于旨在实现容错能力的算法来说，显然不能通过“关闭集群、更新配置并重启系统”的方式来实现。</p>
+<p>在讨论如何实现成员动态变更之前，我们需要先搞明白 Raft 集群中“配置”（configuration）的概念。</p>
+<blockquote>
+<p><strong>配置</strong></p>
+<p>配置说明集群由哪些节点组成。例如，一个集群有三个节点（Server 1、Server 2、Server 3），该集群的配置就是 [Server1、Server2、Server3]。</p>
+</blockquote>
+<p>如果把“配置”当成 Raft 中的“特殊日志”。这样一来，成员动态变更需求就可以转化为“配置日志”的一致性问题。但需要注意的是，各个节点中的日志“应用”（apply）到状态机是异步的，不可能同时操作。这种情况下，apply “配置日志”很容易导致“脑裂”问题。</p>
+<p>举个具体例子，假设有一个由三个节点 [Server1、Server2 和 Server3] 组成的 Raft 集群，当前的配置为 Cold。现在，我们计划增加两个节点 [Server1、Server2、Server3、Server4、Server5]，新的配置为 Cnew。</p>
+<p>由于日志提交是异步处理的，假设 Server1 和 Server2 比较迟钝，仍在使用老配置 Cold，而 Server3、Server4、Server5 的状态机已经应用了新配置 Cnew：</p>
+<ul>
+<li>
+<p>假设 Server5 触发选举并赢得 Server3、Server4、Server5 的投票（满足 Cnew 配置下的 Quorum 3 要求），成为领导者；</p>
+</li>
+<li>
+<p>同时，假设 Server1 也触发选举并赢得 Server1、Server2 的投票（满足 Cold配置下的 Quorum 2 要求），成为领导者。</p>
+</li>
+</ul>
+<p>一个集群存在两个领导者也就是“脑裂”，同一个日志索引可能会对应不同的日志条目，最终导致集群数据不一致。</p>
+<p><img src="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/peizhi.png"
+	width="739"
+	height="445"
+	srcset="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/peizhi_hu_ebc336194e62a827.png 480w, /p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/peizhi_hu_9a8a71fcc7adb460.png 1024w"
+	loading="lazy"
+	
+		alt="某一时刻，集群存在两个 Quorum"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="166"
+		data-flex-basis="398px"
+	
+></p>
+<p>上述问题的根本原因在于，成员变更过程中形成了两个没有交集的 Quorum，即 [Server1, Server2] 和 [Server3, Server4, Server5] 各自为营。</p>
+<p>Raft 的论文中，对此提出过一种基于两阶段的“联合共识”（Joint Consensus）成员变更方案，但这种方案实现较为复杂，Diego Ongaro 后来又提出一种更为简化的方案 — <code>单成员变更</code>（Single Server Changes）。该方案思想的核心是，既然同时提交多个成员变更可能引发问题，那么每次只提交一个成员变更，需要添加多个成员，就执行多次单成员变更操作。这样不就没有问题了么！</p>
+<p>单成员变更方案很容易穷举所有情况，如下图所示，穷举奇/偶数集群下节点添加/删除情况。如果每次只操作一个节点，Cold 的 Quorum 和 Cnew 的 Quorum 一定存在交集。交集节点只会进行一次投票，要么投票给 Cold，要么投票给 Cnew。因此，不可能出现两个符合条件的 Quorum，也就不会出现两个领导者。</p>
+<p>以下图第二种情况为例，Cold 为 [Server1、Server2、Server3]，该配置的 Quorum 为 2，Cnew 为 [Server1、Server2、Server3、Server4]，该配置的 Quorum 为 3。假设 Server1、Server2 比较迟钝，还在用 Cold ，其他节点的状态机已经应用 Cnew：</p>
+<ul>
+<li>
+<p>假设 Server1 触发选举，赢得 Server1，Server2 的投票，满足 Cold Quorum 要求，当选领导者；</p>
+</li>
+<li>
+<p>假设 Server3 也触发选举，赢得 Server3，Server4 的投票，但不满足 Cnew 的 Quorum 要求，选举失效。</p>
+</li>
+</ul>
+<p><img src="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/raft-node.png"
+	width="754"
+	height="340"
+	srcset="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/raft-node_hu_32696a5a9cc118ca.png 480w, /p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/raft-node_hu_aae633fdb16945df.png 1024w"
+	loading="lazy"
+	
+		alt="穷举奇/偶数集群下节点添加/删除情况"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="221"
+		data-flex-basis="532px"
+	
+></p>
+<p>目前，绝大多数 Raft 算法的实现和系统，如 HashiCorp Raft 和 etcd，均采用单节点变更方案。</p>
 
 </section>
 
@@ -632,7 +890,7 @@
         
             <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/">分布式</a>
         
-            <a href="/tags/%E5%87%A4%E5%87%B0%E6%9E%B6%E6%9E%84/">凤凰架构</a>
+            <a href="/tags/%E6%B7%B1%E5%85%A5%E9%AB%98%E5%8F%AF%E7%94%A8%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86%E4%B8%8E%E8%AE%BE%E8%AE%A1/">深入高可用系统原理与设计</a>
         
     </section>
 
