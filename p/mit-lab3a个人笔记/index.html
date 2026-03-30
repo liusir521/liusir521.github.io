@@ -1,19 +1,19 @@
 <!DOCTYPE html>
 <html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="深入高可用系统原理与设计之分布式共识">
-<title>分布式共识算法</title>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="Mit 6.824 lab3A个人笔记">
+<title>Mit lab3A个人笔记</title>
 
-<link rel='canonical' href='https://liusir521.github.io/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/'>
+<link rel='canonical' href='https://liusir521.github.io/p/mit-lab3a%E4%B8%AA%E4%BA%BA%E7%AC%94%E8%AE%B0/'>
 
-<link rel="stylesheet" href="/scss/style.min.86591c898bd806857815fbb8c47e8d3fed97c133b78e83d9bfc27b164dd0aa2b.css"><meta property='og:title' content="分布式共识算法">
-<meta property='og:description' content="深入高可用系统原理与设计之分布式共识">
-<meta property='og:url' content='https://liusir521.github.io/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/'>
+<link rel="stylesheet" href="/scss/style.min.86591c898bd806857815fbb8c47e8d3fed97c133b78e83d9bfc27b164dd0aa2b.css"><meta property='og:title' content="Mit lab3A个人笔记">
+<meta property='og:description' content="Mit 6.824 lab3A个人笔记">
+<meta property='og:url' content='https://liusir521.github.io/p/mit-lab3a%E4%B8%AA%E4%BA%BA%E7%AC%94%E8%AE%B0/'>
 <meta property='og:site_name' content='你怂你mua'>
-<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='学习笔记' /><meta property='article:tag' content='分布式' /><meta property='article:tag' content='深入高可用系统原理与设计' /><meta property='article:published_time' content='2026-03-27T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2026-03-27T00:00:00&#43;00:00'/><meta property='og:image' content='https://liusir521.github.io/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/book.jpg' />
-<meta name="twitter:title" content="分布式共识算法">
-<meta name="twitter:description" content="深入高可用系统原理与设计之分布式共识"><meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content='https://liusir521.github.io/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/book.jpg' />
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='学习笔记' /><meta property='article:tag' content='分布式' /><meta property='article:tag' content='mit' /><meta property='article:tag' content='Raft' /><meta property='article:published_time' content='2026-03-30T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2026-03-30T00:00:00&#43;00:00'/><meta property='og:image' content='https://liusir521.github.io/p/mit-lab3a%E4%B8%AA%E4%BA%BA%E7%AC%94%E8%AE%B0/mit.jpg' />
+<meta name="twitter:title" content="Mit lab3A个人笔记">
+<meta name="twitter:description" content="Mit 6.824 lab3A个人笔记"><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='https://liusir521.github.io/p/mit-lab3a%E4%B8%AA%E4%BA%BA%E7%AC%94%E8%AE%B0/mit.jpg' />
     <link rel="shortcut icon" href="/favicon.png" />
 
     </head>
@@ -298,22 +298,14 @@
         <div class="widget--toc">
             <nav id="TableOfContents">
   <ol>
-    <li><a href="#什么是共识">什么是共识</a></li>
-    <li><a href="#日志与复制状态机">日志与复制状态机</a></li>
-    <li><a href="#paxos算法">Paxos算法</a>
+    <li><a href="#实验要求">实验要求</a></li>
+    <li><a href="#代码设计">代码设计</a>
       <ol>
-        <li><a href="#算法背景">算法背景</a></li>
-        <li><a href="#paxos-算法描述">Paxos 算法描述</a></li>
+        <li><a href="#初始化">初始化</a></li>
+        <li><a href="#选举">选举</a></li>
       </ol>
     </li>
-    <li><a href="#raft算法">Raft算法</a>
-      <ol>
-        <li><a href="#前言">前言</a></li>
-        <li><a href="#领导者选举">领导者选举</a></li>
-        <li><a href="#日志复制">日志复制</a></li>
-        <li><a href="#成员变更">成员变更</a></li>
-      </ol>
-    </li>
+    <li><a href="#测试结果">测试结果</a></li>
   </ol>
 </nav>
         </div>
@@ -328,13 +320,13 @@
     <article class="has-image main-article">
     <header class="article-header">
         <div class="article-image">
-            <a href="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/">
-                <img src="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/book_hu_6c237bc498d55aea.jpg"
-                        srcset="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/book_hu_6c237bc498d55aea.jpg 800w, /p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/book_hu_b3dd02b78174f2d7.jpg 1600w"
+            <a href="/p/mit-lab3a%E4%B8%AA%E4%BA%BA%E7%AC%94%E8%AE%B0/">
+                <img src="/p/mit-lab3a%E4%B8%AA%E4%BA%BA%E7%AC%94%E8%AE%B0/mit_hu_6c237bc498d55aea.jpg"
+                        srcset="/p/mit-lab3a%E4%B8%AA%E4%BA%BA%E7%AC%94%E8%AE%B0/mit_hu_6c237bc498d55aea.jpg 800w, /p/mit-lab3a%E4%B8%AA%E4%BA%BA%E7%AC%94%E8%AE%B0/mit_hu_b3dd02b78174f2d7.jpg 1600w"
                         width="800" 
                         height="600" 
                         loading="lazy"
-                        alt="Featured image of post 分布式共识算法" />
+                        alt="Featured image of post Mit lab3A个人笔记" />
                 
             </a>
         </div>
@@ -361,8 +353,8 @@
             
             
             
-            <a href="/categories/%E6%B7%B1%E5%85%A5%E9%AB%98%E5%8F%AF%E7%94%A8%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86%E4%B8%8E%E8%AE%BE%E8%AE%A1/" style="background-color: hsl(336, 60%, 84%); color: hsl(336, 60%, 15%);">
-                深入高可用系统原理与设计
+            <a href="/categories/mit/" style="background-color: hsl(245, 60%, 84%); color: hsl(245, 60%, 15%);">
+                Mit
             </a>
         
     </header>
@@ -370,12 +362,12 @@
 
     <div class="article-title-wrapper">
         <h2 class="article-title">
-            <a href="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/">分布式共识算法</a>
+            <a href="/p/mit-lab3a%E4%B8%AA%E4%BA%BA%E7%AC%94%E8%AE%B0/">Mit lab3A个人笔记</a>
         </h2>
     
         
         <h3 class="article-subtitle">
-            深入高可用系统原理与设计之分布式共识
+            Mit 6.824 lab3A个人笔记
         </h3>
         
     </div>
@@ -396,7 +388,7 @@
   <path d="M3 11h16" />
   <path d="M18 16.496v1.504l1 1" />
 </svg>
-                <time class="article-time--published" datetime='2026-03-27T00:00:00Z'>Mar 27, 2026</time>
+                <time class="article-time--published" datetime='2026-03-30T00:00:00Z'>Mar 30, 2026</time>
             </div>
         
 
@@ -427,316 +419,31 @@
     
     
     <blockquote>
-<p>原文地址：https://www.thebyte.com.cn/consensus/consensus.html</p>
-<p>我是买的纸质书学习的，记录笔记时发现web端的内容其实挺全面的，下方内容大部分摘录自web端页面。</p>
+<p>对raft算法不熟悉的可以参考我之前记录过的分布式共识算法文章
+<a class="link" href="https://liusir521.github.io/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/"  target="_blank" rel="noopener"
+    >https://liusir521.github.io/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/</a></p>
 </blockquote>
-<h2 id="什么是共识">什么是共识
-</h2><p>“共识”和“一致”意思相似，但在计算机领域，它们具有截然不同的含义。</p>
+<h2 id="实验要求">实验要求
+</h2><p>Lab3实验中要我们复刻raft算法，并由易到难的分为了4个部分，对应着raft算法中的三个关键点，领导者选举、日志复制以及安全性，当前是3A部分，对应的是领导者选举的部分。</p>
+<p>3A任务要求：实现 Raft 领导者选举和心跳机制（使用 AppendEntries RPC，不记录日志）。第 3A 部分的目标是：选举出一个领导者，在没有故障的情况下保持领导者地位，并在旧领导者发生故障或与旧领导者之间的数据包丢失时，由新的领导者接管。运行 <code> go test -run 3A</code>来测试你的第 3A 部分代码。</p>
+<p>关键点：</p>
 <ul>
 <li>
-<p>共识（Consensus）：指所有节点就某项操作（如选主、原子事务提交、日志复制、分布式锁管理等）达成一致的实现过程。</p>
+<p>要实现心跳机制，请定义一个 AppendEntries RPC 结构体（尽管您可能暂时不需要所有参数），并让领导者定期发送这些参数。编写一个 AppendEntries RPC 处理方法。</p>
 </li>
 <li>
-<p>一致性（Consistency）：描述多个节点的数据是否保持一致，关注数据最终达到稳定状态的结果。</p>
+<p>测试人员要求领导者每秒发送心跳 RPC 的次数不得超过 10 次。</p>
+</li>
+<li>
+<p>测试人员要求你的 Raft 在旧领导者失效后的 5 秒钟内选出新的领导者（如果大多数同伴仍然可以沟通）。</p>
 </li>
 </ul>
-<p>在分布式系统中，节点故障是不可避免的，但部分节点故障不应该影响系统整体状态。通过增加节点数量，依据“少数服从多数”原则，只要多数节点（至少N/2+1）达成一致，其状态即可代表整个系统。这种依赖多数节点实现容错的机制称为 Quorum 机制。</p>
-<p>基于 Quorum 的机制，通过“少数服从多数”协商机制达成一致的决策，从而对外表现为一致的运行结果。这一过程被称为节点间的“协商共识”。一旦解决共识问题，便可提供一套屏蔽内部复杂性的抽象机制，为应用层提供一致性保证，满足多种需求。</p>
-<ul>
-<li>
-<p>主节点选举：在主从复制数据库中，所有节点需要就“谁来当主节点”达成一致。如果由于网络问题导致节点间无法通信，很容易引发争议。若争议未解决，可能会出现多个节点同时认为自己是主节点的情况，这就是分布式系统中最棘手的问题之一 —— “脑裂”。</p>
-</li>
-<li>
-<p>原子事务提交：对于支持跨节点或跨分区事务的数据库，可能会发生部分节点事务成功、部分节点事务失败的情况。为维护事务的原子性（即 ACID 特性），所有节点必须就事务的最终结果达成一致。</p>
-</li>
-<li>
-<p>分布式锁管理：当多个请求尝试访问共享资源时，共识机制可确保所有节点一致认定“谁成功获取了锁”。即使发生网络故障或节点异常，也能避免锁争议，从而防止并发冲突或数据不一致。</p>
-</li>
-<li>
-<p>日志复制：日志复制指将主节点的操作日志同步到从节点。在这一过程中，所有节点必须确保日志条目的顺序一致，即日志条目必须以相同顺序写入。</p>
-</li>
-</ul>
-<h2 id="日志与复制状态机">日志与复制状态机
-</h2><p>日志是有序且持久化的记录序列。新记录会从末尾追加，而读取时则按“从左到右”的顺序进行扫描。结构如下：</p>
-<p><img src="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/log.png"
-	width="635"
-	height="270"
-	srcset="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/log_hu_256983f952d664dc.png 480w, /p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/log_hu_e2d6d4265b48cc8b.png 1024w"
-	loading="lazy"
-	
-		alt="日志结构"
-	
-	
-		class="gallery-image" 
-		data-flex-grow="235"
-		data-flex-basis="564px"
-	
-></p>
-<p>有序的日志记录了“何时发生了什么”，这一点可以通过以下两种数据复制模型来理解。</p>
-<ul>
-<li>
-<p>主备模型（Primary-backup）：又称 <code>状态转移</code> 模型，主节点（Master）负责执行如“+1”、“-2”的操作，将 <code>操作结果</code> （如“1”、“3”、“6”）记录到日志中，备节点（Slave）根据日志直接同步结果。</p>
-</li>
-<li>
-<p>复制状态机模型（State-Machine Replication）：又称 <code>操作转移</code> 模型，日志记录的不是最终结果，而是具体的 <code>操作指令</code> ，如“+1”、“-2”。指令按照顺序被依次复制到各个节点（Peer）。如果每个节点按顺序执行这些指令，各个节点最终将达到一致的状态。</p>
-</li>
-</ul>
-<p><img src="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/moxing.png"
-	width="650"
-	height="335"
-	srcset="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/moxing_hu_824a9d96e5af02ba.png 480w, /p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/moxing_hu_ada1e99e6ec8629d.png 1024w"
-	loading="lazy"
-	
-		alt="分布式系统的两种数据复制模型"
-	
-	
-		class="gallery-image" 
-		data-flex-grow="194"
-		data-flex-basis="465px"
-	
-></p>
-<p>无论哪一种模型，它们都揭示了：“顺序是节点之间保持一致性的关键因素”。如果打乱了操作的顺序，就会得到不同的运算结果。</p>
-<blockquote>
-<p><strong>复制状态机的基本原理</strong></p>
-<p>两个“相同的” (identical)、“确定的” (deterministic) 进程：</p>
-<ul>
-<li>相同的：进程的代码、逻辑、以及配置完全一致，它们在设计和实现上完全相同；</li>
-<li>确定的：进程的行为是完全可预测的，不能有任何非确定性的逻辑，比如随机数生成或不受控制的时间依赖。</li>
-</ul>
-<p>如果它们以相同的状态启动，按相同的顺序获取相同的输入。那么，它们一定会达到相同的状态。</p>
-</blockquote>
-<p>节点内的进程按 <code>顺序</code> 执行日志序列，操作具有全局顺序。因此，所有节点 <code>最终将达到一致</code> 的状态。多个这样的进程结合有序日志，就构成了 Apache Kafka、Zookeeper、etcd、CockroachDB 等分布式系统中的关键组件。</p>
-<h2 id="paxos算法">Paxos算法
-</h2><h3 id="算法背景">算法背景
-</h3><p>在 Paxos 算法中，节点分为三种角色。</p>
-<ul>
-<li>
-<p>提议者（Proposer）：提议者是启动共识过程的节点，它提出一个值，请求其他节点对这个值进行投票，提出值的行为称为发起“提案&quot;（Proposal），提案包含提案编号 (Proposal ID) 和提议的值 (Value)。注意的是，Paxos 算法是一个典型的为 <code>操作转移</code> 模型设计的算法，为简化表述，本文把提案类比成 <code>变量赋值</code> 操作，但你应该理解它是 <code>操作日志</code> 相似的概念，后面介绍的 Raft 算法中，直接就把“提案”称做“日志”了。</p>
-</li>
-<li>
-<p>决策者（Acceptor）：接受或拒绝提议者发起的提案，如果一个提案被超过半数的决策者接受，意味着提案被“批准”（accepted）。提案一旦被批准，意味着在所有节点中达到共识，便不可改变、永久生效。</p>
-</li>
-<li>
-<p>记录者（Learner）：记录者不发起提案，也不参与决策提案，它们学习、记录被批准的提案。</p>
-</li>
-</ul>
-<p>在 Paxos 算法中，所有节点都是平等的，能够承担一种或多种角色。例如，提议者既可以发起提案，也可以对其他提案进行表决。但为了更明确地计算 Quorum，通常建议表决提案的节点数为奇数。</p>
-<h3 id="paxos-算法描述">Paxos 算法描述
-</h3><p>简而言之，Paxos 算法本质是一个支持多次重复的 <code>二阶段提交</code> 协议。</p>
-<p>Paxos 算法的第一个阶段称 <code>准备阶段</code>（Prepare）。提议者选择一个提案编号 N（通常是单调递增的数字，相当于乐观锁中的 version，更高的编号意味着更高的优先级），向所有的决策者广播许可申请（称为 Prepare(N) 请求），如果决策者：</p>
-<ul>
-<li>
-<p>尚未承诺 ≥N 编号的提案：则“承诺”（promise）不再接受任何编号小于 N 的提案，返回一个响应，其中包含承诺的提案编号以及对应的提案值（如果有）；</p>
-</li>
-<li>
-<p>已承诺 ≥N 编号的提案：拒绝 Prepare 请求，不返回任何响应。</p>
-</li>
-</ul>
-<p>提议者从多数决策者获得了“承诺”（Promise），则“准备阶段”达成。接着，决策者选择提案值：如果决策者的响应中返回了提案值，从中选择 <code>编号最高</code> 的提案值；如果没有提案值返回，则使用决策者 <code>初始提案值</code>。</p>
-<p>完成以上操作后，进入下一个阶段。Paxos 算法的第二个阶段称 <code>批准阶段</code> （Accept）。提议者向所有决策者广播批准申请（称为 accept(N,V) 请求），请求批准：“提案编号 N 提案值 V”。如果决策者发现提案编号 N 不小于它已承诺的最大编号，则“批准”（accepted）该提案；否则拒绝该提案。当多数的决策者批准提案时，提议者认为本轮提案成功、共识达成。一旦提案成功，提议者会将最终的决议广播给所有记录者节点，供它们学习、记录最终结果。</p>
-<p><img src="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/paxos.png"
-	width="820"
-	height="510"
-	srcset="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/paxos_hu_ef0efb5ad4cab0ff.png 480w, /p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/paxos_hu_df7ea90c6b81ab3f.png 1024w"
-	loading="lazy"
-	
-		alt="Paxos算法流程"
-	
-	
-		class="gallery-image" 
-		data-flex-grow="160"
-		data-flex-basis="385px"
-	
-></p>
-<p>证明 Paxos 算法的正确性比重新实现 Paxos 算法还难。我们没必须推导 Paxos 的正确性，通过以下几个例子来验证 Paxos 算法。</p>
-<p>下面的示例中，X、Y 代表客户端，S1 ~ S5 是服务端，它们既是提议者又是决策者，图中的 P 代表 “准备阶段”，A 代表“批准阶段”。为了便于理解，提案编号 N 由自增序号和 Server ID 组成。例如，S1 的提案编号为 1.1、2.1、3.1&hellip;。</p>
-<p>现在，我们来分析 S1 、S5 同时发起提案，会出现什么情况。</p>
-<p>情况一：提案已批准。如图所示，S1 收到客户端的请求，于是 S1 作为提议者，向 S1&hellip;S3 广播 Prepare(3.1) 消息，决策者 S1&hellip;S3 没有接受过任何提案，所以接受该提案。接着，S1 广播 Accept(3.1, X) 消息，提案 X 成功被批准。</p>
-<p>在提案 X 被批准后，S5 收到客户端的提案 Y，S5 作为提议者向 S3&hellip;S5 广播 Prepare(4.5) 消息。对 S3 来说，4.5 比 3.1 大，且已经接受了 X，它回复提案 (3.1, X)。S5 收到 S3&hellip;S5 的回复后，使用 X 替换自己的 Y，接着进入批准阶段，广播 Accept(4.5, X) 消息。S3&hellip;S5 批准提案，所有决策者就 X 达成一致。</p>
-<p><img src="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/paxos-case1.png"
-	width="754"
-	height="380"
-	srcset="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/paxos-case1_hu_ee253627ecc618bf.png 480w, /p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/paxos-case1_hu_d05ca2bcb385d9c7.png 1024w"
-	loading="lazy"
-	
-		alt="提案已批准"
-	
-	
-		class="gallery-image" 
-		data-flex-grow="198"
-		data-flex-basis="476px"
-	
-></p>
-<p>情况二：事实上，对于情况一，也就是“取值为 X”并不是一定需要多数派批准，S5 发起提案时，准备阶段的应答中是否包含了批准过 X 的决策者也影响决策。如图所示，S3 接受了提案 (3.1, X)，但 S1、S2 还没有收到 Accept(3.1, X) 消息。此时 S3、S4、S5 收到 Prepare(4.5) 消息，S3 回复已经接受的提案 (3.1, X)，S5 将提案值 Y 替换成 X，广播 Accept(4.5, X) 消息给 S3、S4、S5，对 S3 来说，编号 4.5 大于 3.1，所以批准提案 X，最终共识的结果仍然是 X。</p>
-<p><img src="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/paxos-case2.png"
-	width="769"
-	height="299"
-	srcset="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/paxos-case2_hu_a75bdb6bdb9f176a.png 480w, /p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/paxos-case2_hu_9e4044e943c6647.png 1024w"
-	loading="lazy"
-	
-		alt="提案部分接受，新提议者可见"
-	
-	
-		class="gallery-image" 
-		data-flex-grow="257"
-		data-flex-basis="617px"
-	
-></p>
-<p>情况三：另外一种可能的情况是 S5 发起提案时，准备阶段的应答中未包含批准过 X 的决策节点。S1 接受了提案 (3.1, X)，S3 先收到 Prepare(4.5) 消息，后收到 Accept(3.1, X) 消息，由于 3.1 小于 4.5，会直接拒绝这个提案。提案 X 没有收到多数的回复，X 提案就被阻止了。提案 Y 顺利通过，整个系统最终对“取值为 Y”达成一致。</p>
-<p><img src="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/paxos-case3.png"
-	width="775"
-	height="283"
-	srcset="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/paxos-case3_hu_19cb6be0b7adeb1f.png 480w, /p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/paxos-case3_hu_b2671487ad0d964c.png 1024w"
-	loading="lazy"
-	
-		alt="提案部分接受，新提议者不可见"
-	
-	
-		class="gallery-image" 
-		data-flex-grow="273"
-		data-flex-basis="657px"
-	
-></p>
-<p>情况四：从情况三可以推导出另一种极端的情况，多个提议者同时发起提案，在准备阶段互相抢占，反复刷新决策者上的提案编号，导致任何一方都无法达到多数派决议，这个过程理论上可以无限持续下去，形成 <code>活锁</code> （livelock）。</p>
-<p>解决这个问题并不复杂，将 <code>重试时间随机化</code> ，就能减少这种巧合发生。</p>
-<p><img src="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/paxos-case4.png"
-	width="789"
-	height="255"
-	srcset="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/paxos-case4_hu_1161ded5c2d361dc.png 480w, /p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/paxos-case4_hu_5d1134e60600ba37.png 1024w"
-	loading="lazy"
-	
-		alt="出现活锁问题"
-	
-	
-		class="gallery-image" 
-		data-flex-grow="309"
-		data-flex-basis="742px"
-	
-></p>
-<p>以上，就是整个 Paxos 算法的工作原理。</p>
-<p>Paxos 算法只能处理单个提案，达成共识至少需要两次网络往返，高并发情况下还可能导致活锁。因此，Paxos 算法主要用于理论研究，很少直接用于工程实践。后来，Lamport 在论文《Paxos Made Simple》中提出了 Paxos 的变体 —— Multi Paxos。Multi Paxos 引入了“选主”机制，通过多轮运行 Paxos 算法来处理多个提案。</p>
-<h2 id="raft算法">Raft算法
-</h2><h3 id="前言">前言
-</h3><p>不可否认，Paxos 是一个划时代的共识算法。</p>
-<p>Raft 算法出现之前，绝大多数共识系统都是基于 Paxos 算法或者受其影响。同时，Paxos 算法也成为教学领域里讲解共识问题时的范例。不幸的是，Paxos 算法理解起来非常晦涩。此外，论文虽然提到了 Multi Paxos，但缺少实现细节。因此，无论是学术界还是工业界普遍对 Paxos 算法感到十分头疼。</p>
-<p>那段时期，虽然所有的共识系统都是从 Paxos 算法开始的，但工程师们实现过程中有很多难以逾越的难题，往往不得已开发出与 Paxos 完全不一样的算法，这导致 Lamport 的证明并没有太大价值。所以，很长的一段时间内，实际上并没有一个被大众广泛认同的 Paxos 算法。</p>
-<p>2013 年，斯坦福大学的学者 Diego Ongaro 和 John Ousterhout 发表了论文 《In Search of an Understandable Consensus Algorithm》[1]，提出了 Raft 算法。Raft 论文开篇描述了 Raft 的证明和 Paxos 等价，详细阐述了算法如何实现。也就是说，Raft 天生就是 Paxos 算法的工程化。</p>
-<p>此后，Raft 算法成为分布式系统领域的首选共识算法。</p>
-<h3 id="领导者选举">领导者选举
-</h3><p>Paxos 算法中“节点众生平等”，每个节点都可以发起提案。多个提议者并行发起提案，是活锁、以及其他异常问题的源头。那如何不破坏 Paxos 的“节点众生平等”基本原则，又能在提案节点中实现主次之分，约束提案权利？</p>
-<p>理解上面的问题，是先搞清楚 Raft 算法中节点的分类。Raft 提出了领导者角色，通过选举机制“分享”提案权利。</p>
-<ul>
-<li>
-<p>领导者（Leader）：负责处理所有客户端请求，将请求转换为 <code>日志</code> 复制到其他节点，不断地向所有节点广播心跳消息：“你们的领导还在，不要发起新的选举”。</p>
-</li>
-<li>
-<p>跟随者（Follower）：接收、处理领导者的消息，并向领导者反馈日志的写入情况。当领导者心跳超时时，他会主动站起来，推荐自己成为候选人。</p>
-</li>
-<li>
-<p>候选人（Candidate）：候选人属于过渡角色，他向所有的节点广播投票消息，如果他赢得多数选票，那么他将晋升为领导者。</p>
-</li>
-</ul>
-<p>联想到现实世界中的领导人都有一段不等的任期。自然，Raft 算法中也对应的概念 —— “任期”（term）。Raft 中的任期是一个递增的数字，贯穿于 Raft 的选举、日志复制和一致性维护过程中。</p>
-<ul>
-<li>
-<p>选举过程：任期确保了领导者的唯一性。在一次任期内，只有获得多数选票的节点才能成为领导者。</p>
-</li>
-<li>
-<p>日志一致性：任期号会附加到每条日志条目中，帮助集群判断日志的最新程度。</p>
-</li>
-<li>
-<p>冲突检测：通过比较任期号，节点可以快速判断自己是否落后，并切换到跟随者状态。</p>
-</li>
-</ul>
-<p>Raft 集群 Leader 选举过程：</p>
-<p><img src="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/raft-chose.png"
-	width="770"
-	height="298"
-	srcset="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/raft-chose_hu_24fa66bddafb6126.png 480w, /p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/raft-chose_hu_756e7298b085edff.png 1024w"
-	loading="lazy"
-	
-		alt="Raft 选举过程"
-	
-	
-		class="gallery-image" 
-		data-flex-grow="258"
-		data-flex-basis="620px"
-	
-></p>
-<p>初始状态下，所有的节点处于跟随者状态。如果跟随者在某个时限（通常是 150-300 毫秒的随机超时时间）未收到领导者心跳，则触发触发选举。节点的角色转为候选者，任期号递增，然后向其他节点广播“投票给我”的消息（RequestVote RPC）。</p>
-<p>RequestVote RPC 消息示例如下：</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="p">{</span>
-</span></span><span class="line"><span class="cl">  <span class="nt">&#34;term&#34;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="c1">// 候选者的当前任期号，用于通知接收方当前选举属于哪个任期。
-</span></span></span><span class="line"><span class="cl">  <span class="nt">&#34;candidateId&#34;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="c1">// 候选者的节点 ID，标识请求投票的节点。
-</span></span></span><span class="line"><span class="cl">  <span class="nt">&#34;lastLogIndex&#34;</span><span class="p">:</span> <span class="mi">12</span><span class="p">,</span> <span class="c1">// 候选者日志的最后一条日志的索引，用于比较日志的完整性。
-</span></span></span><span class="line"><span class="cl">  <span class="nt">&#34;lastLogTerm&#34;</span><span class="p">:</span> <span class="mi">4</span><span class="c1">//候选者日志的最后一条日志的任期号，用于进一步比较日志的新旧程度。
-</span></span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>其他节点收到投票消息后，根据下面的条件判断是否投票：</p>
-<ul>
-<li>
-<p>候选者的日志至少与投票者的日志一样新（根据最后一条日志的任期号和索引号判断）。</p>
-</li>
-<li>
-<p>当前节点尚未在本任期投票。</p>
-</li>
-</ul>
-<p>RequestVote 响应的示例如下：</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="p">{</span>
-</span></span><span class="line"><span class="cl">  <span class="nt">&#34;term&#34;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="c1">//接收方的当前任期号，用于告知候选者最新的任期号。如果候选者发现该值比自己大，会转为跟随者。
-</span></span></span><span class="line"><span class="cl">  <span class="nt">&#34;voteGranted&#34;</span><span class="p">:</span> <span class="kc">true</span><span class="c1">//是否投票给候选者，true 表示同意，false 表示拒绝。
-</span></span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>如果候选者获得多数（超过半数）投票，即成为领导者。之后，领导者向其他节点广播心跳消息，维持领导者地位。如果没有获得多数票，进入下一轮选举，任期号递增，重新发起投票。如果选举过程中收到任期号更高的心跳或投票请求，则转为跟随者。</p>
-<h3 id="日志复制">日志复制
-</h3><p>一旦选出一个公认的领导者，那领导者顺理成章地承担起“处理系统发生的所有变更，并将变更复制到所有跟随者节点”的职责。</p>
-<p>在 Raft 算法中，日志承载着系统所有变更。下图展示了 Raft 集群的日志模型，每个“日志条目”（log entry）包含索引、任期、指令等关键信息：</p>
-<ul>
-<li>
-<p>指令: 表示客户端请求的具体操作内容，也就是待“状态机”（State Machine）执行的操作。</p>
-</li>
-<li>
-<p>索引值：日志条目在仓库中的索引值，是单调递增的数字。</p>
-</li>
-<li>
-<p>任期编号：日志条目是在哪个任期中创建的，用于解决“脑裂”或日志不一致问题。</p>
-</li>
-</ul>
-<p><img src="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/raft-log.png"
-	width="784"
-	height="365"
-	srcset="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/raft-log_hu_8a15cf314e570029.png 480w, /p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/raft-log_hu_d3028350acdd0423.png 1024w"
-	loading="lazy"
-	
-		alt="Raft 集群的日志模型（x ← 3 代表x赋值为3）"
-	
-	
-		class="gallery-image" 
-		data-flex-grow="214"
-		data-flex-basis="515px"
-	
-></p>
-<p>Raft 算法中，领导者通过广播消息（AppendEntries RPC）将日志条目复制到所有跟随者。AppendEntries RPC 的示例如下：</p>
+<h2 id="代码设计">代码设计
+</h2><p>在写代码之前建议先结合实验要求过一下代码，加深一下对代码中定义的理解。在我第一眼看到代码的时候，我有一个很大的疑惑，就是Raft结构体是给每个节点使用的，还是说相当于是一个中间调配者的角色，在我结合着代码阅读了几遍实验要求之后，才意识到其实每个节点都是一个Raft结构体实例。（在config.go文件中也可以看出cfg.rafts = make([]*Raft, cfg.n)，用于测试文件中的初始化）</p>
+<p>在3A中，我们需要实现的功能并不复杂，主要是领导者选举。这意味着我们只需要先定义好相关的结构体，然后在Make函数中进行初始化之后(初始化默认节点是跟随者)，等待领导者发送心跳包即可，如果在规定时间内未收到，就进入选举过程，当某个节点完成选举成为主节点后，再继续向其他节点发送心跳包确认即可。(其中心跳包暂时使用AppendEntries函数实现)</p>
+<h3 id="初始化">初始化
+</h3><p>需要我们在Raft结构体中完善相关的定义，关键字段包括当前任期、当前节点的身份以及最后一次收到心跳的时间等等。然后在Make函数中进行初始化。</p>
+<p>关键代码如下：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -749,139 +456,442 @@
 </span><span class="lnt"> 8
 </span><span class="lnt"> 9
 </span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="p">{</span>
-</span></span><span class="line"><span class="cl">  <span class="nt">&#34;term&#34;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="c1">// 领导者的任期号
-</span></span></span><span class="line"><span class="cl">  <span class="nt">&#34;leaderId&#34;</span><span class="p">:</span> <span class="s2">&#34;leader-123&#34;</span><span class="p">,</span>
-</span></span><span class="line"><span class="cl">  <span class="nt">&#34;prevLogIndex&#34;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span> <span class="c1">// 前一日志条目的索引
-</span></span></span><span class="line"><span class="cl">  <span class="nt">&#34;prevLogTerm&#34;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="c1">// 前一日志条目的任期
-</span></span></span><span class="line"><span class="cl">  <span class="nt">&#34;entries&#34;</span><span class="p">:</span> <span class="p">[</span>
-</span></span><span class="line"><span class="cl">    <span class="p">{</span> <span class="nt">&#34;index&#34;</span><span class="p">:</span> <span class="mi">9</span><span class="p">,</span> <span class="nt">&#34;term&#34;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="nt">&#34;command&#34;</span><span class="p">:</span> <span class="s2">&#34;set x=4&#34;</span> <span class="p">},</span> <span class="c1">// 要复制的日志条目
-</span></span></span><span class="line"><span class="cl">  <span class="p">],</span>
-</span></span><span class="line"><span class="cl">  <span class="nt">&#34;leaderCommit&#34;</span><span class="p">:</span> <span class="mi">7</span><span class="c1">// Leader 的“已提交”状态的日志条目索引号
-</span></span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></td></tr></table>
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">type</span><span class="w"> </span><span class="nx">Raft</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">mu</span><span class="w">        </span><span class="nx">sync</span><span class="p">.</span><span class="nx">Mutex</span><span class="w">          </span><span class="c1">// Lock to protect shared access to this peer&#39;s state</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">peers</span><span class="w">     </span><span class="p">[]</span><span class="o">*</span><span class="nx">labrpc</span><span class="p">.</span><span class="nx">ClientEnd</span><span class="w"> </span><span class="c1">// RPC end points of all peers</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">persister</span><span class="w"> </span><span class="o">*</span><span class="nx">Persister</span><span class="w">          </span><span class="c1">// Object to hold this peer&#39;s persisted state</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">me</span><span class="w">        </span><span class="kt">int</span><span class="w">                 </span><span class="c1">// this peer&#39;s index into peers[]</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">dead</span><span class="w">      </span><span class="kt">int32</span><span class="w">               </span><span class="c1">// set by Kill()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="c1">// Your data here (3A, 3B, 3C).</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="c1">// Look at the paper&#39;s Figure 2 for a description of what</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="c1">// state a Raft server must maintain.</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">currentTerm</span><span class="w">       </span><span class="kt">int</span><span class="w">        </span><span class="c1">// 当前任期</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">votedFor</span><span class="w">          </span><span class="kt">int</span><span class="w">        </span><span class="c1">// 投票给的节点</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">log</span><span class="w">               </span><span class="p">[]</span><span class="nx">LogEntry</span><span class="w"> </span><span class="c1">// 日志</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">state</span><span class="w">             </span><span class="kt">int</span><span class="w">        </span><span class="c1">// 当前节点状态：跟随者、候选者、领导者</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">lastheartbeattime</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Time</span><span class="w">  </span><span class="c1">// 最后一次收到心跳的时间</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="kd">type</span><span class="w"> </span><span class="nx">LogEntry</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">Command</span><span class="w"> </span><span class="kt">any</span><span class="w"> </span><span class="c1">// 日志内容</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">Term</span><span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="c1">// 日志的任期</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="kd">const</span><span class="w"> </span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">FOLLOWER</span><span class="w">  </span><span class="p">=</span><span class="w"> </span><span class="kc">iota</span><span class="w"> </span><span class="c1">// 跟随者</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">CANDIDATE</span><span class="w">        </span><span class="c1">// 候选者</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">LEADER</span><span class="w">           </span><span class="c1">// 领导者</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">rf</span><span class="w"> </span><span class="o">*</span><span class="nx">Raft</span><span class="p">)</span><span class="w"> </span><span class="nf">GetState</span><span class="p">()</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="kt">bool</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">rf</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nf">Lock</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">defer</span><span class="w"> </span><span class="nx">rf</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nf">Unlock</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="nx">rf</span><span class="p">.</span><span class="nx">currentTerm</span><span class="p">,</span><span class="w"> </span><span class="nx">rf</span><span class="p">.</span><span class="nx">state</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nx">LEADER</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="kd">func</span><span class="w"> </span><span class="nf">Make</span><span class="p">(</span><span class="nx">peers</span><span class="w"> </span><span class="p">[]</span><span class="o">*</span><span class="nx">labrpc</span><span class="p">.</span><span class="nx">ClientEnd</span><span class="p">,</span><span class="w"> </span><span class="nx">me</span><span class="w"> </span><span class="kt">int</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">persister</span><span class="w"> </span><span class="o">*</span><span class="nx">Persister</span><span class="p">,</span><span class="w"> </span><span class="nx">applyCh</span><span class="w"> </span><span class="kd">chan</span><span class="w"> </span><span class="nx">ApplyMsg</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="nx">Raft</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">rf</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">Raft</span><span class="p">{}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">rf</span><span class="p">.</span><span class="nx">peers</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">peers</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">rf</span><span class="p">.</span><span class="nx">persister</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">persister</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">rf</span><span class="p">.</span><span class="nx">me</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">me</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="c1">// Your initialization code here (3A, 3B, 3C).</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">rf</span><span class="p">.</span><span class="nx">currentTerm</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="mi">0</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">rf</span><span class="p">.</span><span class="nx">votedFor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">rf</span><span class="p">.</span><span class="nx">log</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nb">make</span><span class="p">([]</span><span class="nx">LogEntry</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">rf</span><span class="p">.</span><span class="nx">state</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">FOLLOWER</span><span class="w"> </span><span class="c1">// 初始状态都为跟随者</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">rf</span><span class="p">.</span><span class="nx">lastheartbeattime</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nf">Now</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="c1">// initialize from state persisted before a crash</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">rf</span><span class="p">.</span><span class="nf">readPersist</span><span class="p">(</span><span class="nx">persister</span><span class="p">.</span><span class="nf">ReadRaftState</span><span class="p">())</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="c1">// 计时器守护进程，检测到超时后，开始选举，投自己</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">go</span><span class="w"> </span><span class="nx">rf</span><span class="p">.</span><span class="nf">ticker</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="nx">rf</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
 </div>
-</div><p>当 Raft 集群收到客户端请求（例如 set x=4）时，日志复制的过程如下：</p>
-<ul>
-<li>
-<p>若当前节点非领导者，将请求转发至领导者；</p>
-</li>
-<li>
-<p>领导者接收请求后：</p>
-<ul>
-<li>
-<p>将请求转化为日志条目，写入本地存储系统，初始状态为“未提交”（uncommitted）；</p>
-</li>
-<li>
-<p>生成日志复制消息（AppendEntries RPC），并广播至所有跟随者；</p>
-</li>
-</ul>
-</li>
-<li>
-<p>跟随者收到日志复制消息后，验证任期（确保本地任期不大于领导者任期）、日志一致性（通过 prevLogIndex 检查日志是否匹配）。若验证通过，跟随者将日志条目追加至本地存储系统，并发送确认响应；</p>
-</li>
-<li>
-<p>领导者确认日志条目已成功复制至多数节点后，将其状态标记为“已提交”（committed），并向客户端返回结果。已提交的日志条目不可回滚，指令永久生效，且可安全地“应用”（apply）至状态机。</p>
-</li>
-</ul>
-<p><img src="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/raft-logcopy.png"
-	width="750"
-	height="475"
-	srcset="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/raft-logcopy_hu_13e14fc12dcae362.png 480w, /p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/raft-logcopy_hu_fb3b0951e670f379.png 1024w"
-	loading="lazy"
-	
-		alt="日志复制的过程"
-	
-	
-		class="gallery-image" 
-		data-flex-grow="157"
-		data-flex-basis="378px"
-	
-></p>
-<p>领导者向客户端返回结果，并不意味着日志复制过程已完全结束，跟随者尚不清楚日志条目是否已被大多数节点确认。Raft 的设计通过心跳或后续日志复制请求中携带更新的提交索引（leaderCommit），通知跟随者提交日志。此机制将“达成共识的过程”优化为一个阶段，减少了客户端约一半的等待时间。</p>
-<p>我们来看日志复制的另一种情况。在上述例子中，只有 follower-1 成功追加日志，follower-2 因为日志不连续，追加失败。日志的连续性至关重要，如果日志条目没有按正确顺序应用到状态机，各个 follower 节点的状态肯定不一致。</p>
-<p>日志不连续的问题是这样解决的：follower-2 收到日志复制请求后，它会通过 prevLogIndex 和 prevLogTerm 检查本地日志的连续性。如果日志缺失或存在冲突，follower-2 返回失败响应，指明与领导者日志不一致的部分。</p>
+</div><h3 id="选举">选举
+</h3><p>在初始化时，起初应该都是跟随者，当某个跟随者等待心跳包超时之后就会发起选举，进入选举流程，然后通过rpc请求向除了自己之外的在peers数组中的其他节点发送选举请求，如果获得了多数派的同意，就成为领导者，成为领导者之后向其他跟随者发送心跳包，如果收到了任期比自己大的则变为跟随者。</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
+<pre tabindex="0" class="chroma"><code><span class="lnt">  1
+</span><span class="lnt">  2
+</span><span class="lnt">  3
+</span><span class="lnt">  4
+</span><span class="lnt">  5
+</span><span class="lnt">  6
+</span><span class="lnt">  7
+</span><span class="lnt">  8
+</span><span class="lnt">  9
+</span><span class="lnt"> 10
+</span><span class="lnt"> 11
+</span><span class="lnt"> 12
+</span><span class="lnt"> 13
+</span><span class="lnt"> 14
+</span><span class="lnt"> 15
+</span><span class="lnt"> 16
+</span><span class="lnt"> 17
+</span><span class="lnt"> 18
+</span><span class="lnt"> 19
+</span><span class="lnt"> 20
+</span><span class="lnt"> 21
+</span><span class="lnt"> 22
+</span><span class="lnt"> 23
+</span><span class="lnt"> 24
+</span><span class="lnt"> 25
+</span><span class="lnt"> 26
+</span><span class="lnt"> 27
+</span><span class="lnt"> 28
+</span><span class="lnt"> 29
+</span><span class="lnt"> 30
+</span><span class="lnt"> 31
+</span><span class="lnt"> 32
+</span><span class="lnt"> 33
+</span><span class="lnt"> 34
+</span><span class="lnt"> 35
+</span><span class="lnt"> 36
+</span><span class="lnt"> 37
+</span><span class="lnt"> 38
+</span><span class="lnt"> 39
+</span><span class="lnt"> 40
+</span><span class="lnt"> 41
+</span><span class="lnt"> 42
+</span><span class="lnt"> 43
+</span><span class="lnt"> 44
+</span><span class="lnt"> 45
+</span><span class="lnt"> 46
+</span><span class="lnt"> 47
+</span><span class="lnt"> 48
+</span><span class="lnt"> 49
+</span><span class="lnt"> 50
+</span><span class="lnt"> 51
+</span><span class="lnt"> 52
+</span><span class="lnt"> 53
+</span><span class="lnt"> 54
+</span><span class="lnt"> 55
+</span><span class="lnt"> 56
+</span><span class="lnt"> 57
+</span><span class="lnt"> 58
+</span><span class="lnt"> 59
+</span><span class="lnt"> 60
+</span><span class="lnt"> 61
+</span><span class="lnt"> 62
+</span><span class="lnt"> 63
+</span><span class="lnt"> 64
+</span><span class="lnt"> 65
+</span><span class="lnt"> 66
+</span><span class="lnt"> 67
+</span><span class="lnt"> 68
+</span><span class="lnt"> 69
+</span><span class="lnt"> 70
+</span><span class="lnt"> 71
+</span><span class="lnt"> 72
+</span><span class="lnt"> 73
+</span><span class="lnt"> 74
+</span><span class="lnt"> 75
+</span><span class="lnt"> 76
+</span><span class="lnt"> 77
+</span><span class="lnt"> 78
+</span><span class="lnt"> 79
+</span><span class="lnt"> 80
+</span><span class="lnt"> 81
+</span><span class="lnt"> 82
+</span><span class="lnt"> 83
+</span><span class="lnt"> 84
+</span><span class="lnt"> 85
+</span><span class="lnt"> 86
+</span><span class="lnt"> 87
+</span><span class="lnt"> 88
+</span><span class="lnt"> 89
+</span><span class="lnt"> 90
+</span><span class="lnt"> 91
+</span><span class="lnt"> 92
+</span><span class="lnt"> 93
+</span><span class="lnt"> 94
+</span><span class="lnt"> 95
+</span><span class="lnt"> 96
+</span><span class="lnt"> 97
+</span><span class="lnt"> 98
+</span><span class="lnt"> 99
+</span><span class="lnt">100
+</span><span class="lnt">101
+</span><span class="lnt">102
+</span><span class="lnt">103
+</span><span class="lnt">104
+</span><span class="lnt">105
+</span><span class="lnt">106
+</span><span class="lnt">107
+</span><span class="lnt">108
+</span><span class="lnt">109
+</span><span class="lnt">110
+</span><span class="lnt">111
+</span><span class="lnt">112
+</span><span class="lnt">113
+</span><span class="lnt">114
+</span><span class="lnt">115
+</span><span class="lnt">116
+</span><span class="lnt">117
+</span><span class="lnt">118
+</span><span class="lnt">119
+</span><span class="lnt">120
+</span><span class="lnt">121
+</span><span class="lnt">122
+</span><span class="lnt">123
+</span><span class="lnt">124
+</span><span class="lnt">125
+</span><span class="lnt">126
+</span><span class="lnt">127
+</span><span class="lnt">128
+</span><span class="lnt">129
+</span><span class="lnt">130
+</span><span class="lnt">131
+</span><span class="lnt">132
+</span><span class="lnt">133
+</span><span class="lnt">134
+</span><span class="lnt">135
+</span><span class="lnt">136
+</span><span class="lnt">137
+</span><span class="lnt">138
+</span><span class="lnt">139
+</span><span class="lnt">140
+</span><span class="lnt">141
+</span><span class="lnt">142
+</span><span class="lnt">143
+</span><span class="lnt">144
+</span><span class="lnt">145
+</span><span class="lnt">146
+</span><span class="lnt">147
+</span><span class="lnt">148
+</span><span class="lnt">149
+</span><span class="lnt">150
+</span><span class="lnt">151
+</span><span class="lnt">152
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="p">{</span>
-</span></span><span class="line"><span class="cl">  <span class="nt">&#34;success&#34;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
-</span></span><span class="line"><span class="cl">  <span class="nt">&#34;term&#34;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
-</span></span><span class="line"><span class="cl">  <span class="nt">&#34;conflictIndex&#34;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="c1">// 表示发生缺失的日志索引，Follower 的日志中最大索引为 3，所以缺失的索引是 4。
-</span></span></span><span class="line"><span class="cl">  <span class="nt">&#34;conflictTerm&#34;</span><span class="p">:</span> <span class="mi">3</span><span class="c1">//缺失日志的“上一个有效日志条目”的任期号
-</span></span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></td></tr></table>
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">rf</span><span class="w"> </span><span class="o">*</span><span class="nx">Raft</span><span class="p">)</span><span class="w"> </span><span class="nf">ticker</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">for</span><span class="w"> </span><span class="nx">rf</span><span class="p">.</span><span class="nf">killed</span><span class="p">()</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">false</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="c1">// pause for a random amount of time between 50 and 350</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="c1">// milliseconds.</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">ms</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">50</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="nx">rand</span><span class="p">.</span><span class="nf">Int63</span><span class="p">()</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">300</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">time</span><span class="p">.</span><span class="nf">Sleep</span><span class="p">(</span><span class="nx">time</span><span class="p">.</span><span class="nf">Duration</span><span class="p">(</span><span class="nx">ms</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Millisecond</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">rf</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nf">Lock</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="c1">// Your code here (3A)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="c1">// Check if a leader election should be started.</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="c1">// 只有 follower 和 candidate 才需要检查选举超时</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="k">if</span><span class="w"> </span><span class="nx">rf</span><span class="p">.</span><span class="nx">state</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nx">FOLLOWER</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nx">rf</span><span class="p">.</span><span class="nx">state</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nx">CANDIDATE</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="nx">electionTimeout</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">150</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">rand</span><span class="p">.</span><span class="nf">Int63n</span><span class="p">(</span><span class="mi">150</span><span class="p">)</span><span class="w"> </span><span class="c1">// 150-300ms 随机超时</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="k">if</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nf">Since</span><span class="p">(</span><span class="nx">rf</span><span class="p">.</span><span class="nx">lastheartbeattime</span><span class="p">)</span><span class="w"> </span><span class="p">&gt;</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nf">Duration</span><span class="p">(</span><span class="nx">electionTimeout</span><span class="p">)</span><span class="o">*</span><span class="nx">time</span><span class="p">.</span><span class="nx">Millisecond</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">				</span><span class="c1">// 超时，开始选举</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">				</span><span class="nx">rf</span><span class="p">.</span><span class="nf">startElection</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">				</span><span class="c1">// startElection 会重置 electionStart，所以这里不需要重复设置</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">rf</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nf">Unlock</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">rf</span><span class="w"> </span><span class="o">*</span><span class="nx">Raft</span><span class="p">)</span><span class="w"> </span><span class="nf">startElection</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="c1">// 任期+1，状态为候选者</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">rf</span><span class="p">.</span><span class="nx">currentTerm</span><span class="o">++</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">rf</span><span class="p">.</span><span class="nx">state</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">CANDIDATE</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">rf</span><span class="p">.</span><span class="nx">votedFor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">rf</span><span class="p">.</span><span class="nx">me</span><span class="w">               </span><span class="c1">// 投给自己</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">rf</span><span class="p">.</span><span class="nx">lastheartbeattime</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nf">Now</span><span class="p">()</span><span class="w"> </span><span class="c1">// 重置选举超时时间</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">rf</span><span class="p">.</span><span class="nf">persist</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="c1">// 获取最后一条日志的索引和任期</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">lastLogIndex</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">rf</span><span class="p">.</span><span class="nx">log</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">lastLogTerm</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">0</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">lastLogIndex</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">lastLogTerm</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">rf</span><span class="p">.</span><span class="nx">log</span><span class="p">[</span><span class="nx">lastLogIndex</span><span class="p">].</span><span class="nx">Term</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">args</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">RequestVoteArgs</span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">Term</span><span class="p">:</span><span class="w">         </span><span class="nx">rf</span><span class="p">.</span><span class="nx">currentTerm</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">CandidateId</span><span class="p">:</span><span class="w">  </span><span class="nx">rf</span><span class="p">.</span><span class="nx">me</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">LastLogIndex</span><span class="p">:</span><span class="w"> </span><span class="nx">lastLogIndex</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">LastLogTerm</span><span class="p">:</span><span class="w">  </span><span class="nx">lastLogTerm</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">votesReceived</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="c1">// 记录收到的投票数</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="kd">var</span><span class="w"> </span><span class="nx">mu</span><span class="w"> </span><span class="nx">sync</span><span class="p">.</span><span class="nx">Mutex</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="c1">// 向除了自己之外的所有节点发送投票请求</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="p">&lt;</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">rf</span><span class="p">.</span><span class="nx">peers</span><span class="p">);</span><span class="w"> </span><span class="nx">i</span><span class="o">++</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="k">if</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nx">rf</span><span class="p">.</span><span class="nx">me</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="k">continue</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="k">go</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">server</span><span class="w"> </span><span class="kt">int</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="nx">reply</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">RequestVoteReply</span><span class="p">{}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="nx">ok</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">rf</span><span class="p">.</span><span class="nf">sendRequestVote</span><span class="p">(</span><span class="nx">server</span><span class="p">,</span><span class="w"> </span><span class="nx">args</span><span class="p">,</span><span class="w"> </span><span class="nx">reply</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="nx">mu</span><span class="p">.</span><span class="nf">Lock</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="k">defer</span><span class="w"> </span><span class="nx">mu</span><span class="p">.</span><span class="nf">Unlock</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="k">if</span><span class="w"> </span><span class="p">!</span><span class="nx">ok</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">				</span><span class="k">return</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="c1">// 如果成功且收到投票，则记录</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="k">if</span><span class="w"> </span><span class="nx">reply</span><span class="p">.</span><span class="nx">VoteGranted</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">				</span><span class="nx">rf</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nf">Lock</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">				</span><span class="k">if</span><span class="w"> </span><span class="nx">args</span><span class="p">.</span><span class="nx">Term</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nx">rf</span><span class="p">.</span><span class="nx">currentTerm</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">rf</span><span class="p">.</span><span class="nx">state</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nx">CANDIDATE</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">					</span><span class="nx">votesReceived</span><span class="o">++</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">					</span><span class="c1">// 获得大多数的投票，转换成领导者</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">					</span><span class="k">if</span><span class="w"> </span><span class="nx">votesReceived</span><span class="w"> </span><span class="p">&gt;</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">rf</span><span class="p">.</span><span class="nx">peers</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">						</span><span class="nx">rf</span><span class="p">.</span><span class="nx">state</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">LEADER</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">						</span><span class="nx">rf</span><span class="p">.</span><span class="nx">lastheartbeattime</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nf">Now</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">					</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">					</span><span class="k">go</span><span class="w"> </span><span class="nx">rf</span><span class="p">.</span><span class="nf">sendHeartbeat</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">				</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">				</span><span class="nx">rf</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nf">Unlock</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="c1">// 如果收到新的任期大于当前任期，则转换成跟随者</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="k">if</span><span class="w"> </span><span class="nx">reply</span><span class="p">.</span><span class="nx">Term</span><span class="w"> </span><span class="p">&gt;</span><span class="w"> </span><span class="nx">rf</span><span class="p">.</span><span class="nx">currentTerm</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">				</span><span class="nx">rf</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nf">Lock</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">				</span><span class="k">if</span><span class="w"> </span><span class="nx">reply</span><span class="p">.</span><span class="nx">Term</span><span class="w"> </span><span class="p">&gt;</span><span class="w"> </span><span class="nx">rf</span><span class="p">.</span><span class="nx">currentTerm</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">					</span><span class="nx">rf</span><span class="p">.</span><span class="nx">currentTerm</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">reply</span><span class="p">.</span><span class="nx">Term</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">					</span><span class="nx">rf</span><span class="p">.</span><span class="nx">state</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">FOLLOWER</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">					</span><span class="nx">rf</span><span class="p">.</span><span class="nx">votedFor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">					</span><span class="nx">rf</span><span class="p">.</span><span class="nx">lastheartbeattime</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nf">Now</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">					</span><span class="nx">rf</span><span class="p">.</span><span class="nf">persist</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">				</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">				</span><span class="nx">rf</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nf">Unlock</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">				</span><span class="k">return</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="p">}(</span><span class="nx">i</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="c1">// 共用发送投票请求</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">rf</span><span class="w"> </span><span class="o">*</span><span class="nx">Raft</span><span class="p">)</span><span class="w"> </span><span class="nf">sendRequestVote</span><span class="p">(</span><span class="nx">server</span><span class="w"> </span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="nx">args</span><span class="w"> </span><span class="o">*</span><span class="nx">RequestVoteArgs</span><span class="p">,</span><span class="w"> </span><span class="nx">reply</span><span class="w"> </span><span class="o">*</span><span class="nx">RequestVoteReply</span><span class="p">)</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">ok</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">rf</span><span class="p">.</span><span class="nx">peers</span><span class="p">[</span><span class="nx">server</span><span class="p">].</span><span class="nf">Call</span><span class="p">(</span><span class="s">&#34;Raft.RequestVote&#34;</span><span class="p">,</span><span class="w"> </span><span class="nx">args</span><span class="p">,</span><span class="w"> </span><span class="nx">reply</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">return</span><span class="w"> </span><span class="nx">ok</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="c1">// 选举rpc函数</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">rf</span><span class="w"> </span><span class="o">*</span><span class="nx">Raft</span><span class="p">)</span><span class="w"> </span><span class="nf">RequestVote</span><span class="p">(</span><span class="nx">args</span><span class="w"> </span><span class="o">*</span><span class="nx">RequestVoteArgs</span><span class="p">,</span><span class="w"> </span><span class="nx">reply</span><span class="w"> </span><span class="o">*</span><span class="nx">RequestVoteReply</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">rf</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nf">Lock</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">defer</span><span class="w"> </span><span class="nx">rf</span><span class="p">.</span><span class="nx">mu</span><span class="p">.</span><span class="nf">Unlock</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">reply</span><span class="p">.</span><span class="nx">Term</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">rf</span><span class="p">.</span><span class="nx">currentTerm</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">reply</span><span class="p">.</span><span class="nx">VoteGranted</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="kc">false</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">rf</span><span class="p">.</span><span class="nx">lastheartbeattime</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nf">Now</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="c1">// 如果请求中的任期小于当前任期，拒绝投票</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">args</span><span class="p">.</span><span class="nx">Term</span><span class="w"> </span><span class="p">&lt;</span><span class="w"> </span><span class="nx">rf</span><span class="p">.</span><span class="nx">currentTerm</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="k">return</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="c1">// 如果当前任期小于请求的任期，更新任期并转为跟随者</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">args</span><span class="p">.</span><span class="nx">Term</span><span class="w"> </span><span class="p">&gt;</span><span class="w"> </span><span class="nx">rf</span><span class="p">.</span><span class="nx">currentTerm</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">rf</span><span class="p">.</span><span class="nx">currentTerm</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">args</span><span class="p">.</span><span class="nx">Term</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">rf</span><span class="p">.</span><span class="nx">votedFor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">rf</span><span class="p">.</span><span class="nx">state</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">FOLLOWER</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="c1">// 如果尚未投票，或者是已经投给CandidateId，则校验日志进行投票</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">args</span><span class="p">.</span><span class="nx">Term</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nx">rf</span><span class="p">.</span><span class="nx">currentTerm</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="p">(</span><span class="nx">rf</span><span class="p">.</span><span class="nx">votedFor</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nx">rf</span><span class="p">.</span><span class="nx">votedFor</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nx">args</span><span class="p">.</span><span class="nx">CandidateId</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="c1">// 检查日志</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">lastLogIndex</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">rf</span><span class="p">.</span><span class="nx">log</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">lastLogTerm</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">0</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="k">if</span><span class="w"> </span><span class="nx">lastLogIndex</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="nx">lastLogTerm</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">rf</span><span class="p">.</span><span class="nx">log</span><span class="p">[</span><span class="nx">lastLogIndex</span><span class="p">].</span><span class="nx">Term</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">candidateLogUpToDate</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="p">(</span><span class="nx">args</span><span class="p">.</span><span class="nx">LastLogTerm</span><span class="w"> </span><span class="p">&gt;</span><span class="w"> </span><span class="nx">lastLogTerm</span><span class="p">)</span><span class="w"> </span><span class="o">||</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="p">(</span><span class="nx">args</span><span class="p">.</span><span class="nx">LastLogTerm</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nx">lastLogTerm</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">args</span><span class="p">.</span><span class="nx">LastLogIndex</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="nx">lastLogIndex</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="k">if</span><span class="w"> </span><span class="nx">candidateLogUpToDate</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="nx">reply</span><span class="p">.</span><span class="nx">VoteGranted</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">			</span><span class="nx">rf</span><span class="p">.</span><span class="nx">votedFor</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">args</span><span class="p">.</span><span class="nx">CandidateId</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">rf</span><span class="p">.</span><span class="nf">persist</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="p">}</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
 </div>
-</div><p>当领导者收到失败响应，根据 conflictIndex 和 conflictTerm 找到与跟随者日志的最大匹配索引（例如，6）。随后，领导者从该索引开始重新向跟随者（如 follower-2）发送日志条目，逐步修复日志的不一致性，直至同步完成。</p>
-<h3 id="成员变更">成员变更
-</h3><p>在前面的内容中，我们假设集群节点数固定，即集群的 Quorum 也保持不变。然而，在生产环境中，集群通常需要进行节点变更，例如因故障移除节点或扩容增加节点等。对于旨在实现容错能力的算法来说，显然不能通过“关闭集群、更新配置并重启系统”的方式来实现。</p>
-<p>在讨论如何实现成员动态变更之前，我们需要先搞明白 Raft 集群中“配置”（configuration）的概念。</p>
-<blockquote>
-<p><strong>配置</strong></p>
-<p>配置说明集群由哪些节点组成。例如，一个集群有三个节点（Server 1、Server 2、Server 3），该集群的配置就是 [Server1、Server2、Server3]。</p>
-</blockquote>
-<p>如果把“配置”当成 Raft 中的“特殊日志”。这样一来，成员动态变更需求就可以转化为“配置日志”的一致性问题。但需要注意的是，各个节点中的日志“应用”（apply）到状态机是异步的，不可能同时操作。这种情况下，apply “配置日志”很容易导致“脑裂”问题。</p>
-<p>举个具体例子，假设有一个由三个节点 [Server1、Server2 和 Server3] 组成的 Raft 集群，当前的配置为 Cold。现在，我们计划增加两个节点 [Server1、Server2、Server3、Server4、Server5]，新的配置为 Cnew。</p>
-<p>由于日志提交是异步处理的，假设 Server1 和 Server2 比较迟钝，仍在使用老配置 Cold，而 Server3、Server4、Server5 的状态机已经应用了新配置 Cnew：</p>
-<ul>
-<li>
-<p>假设 Server5 触发选举并赢得 Server3、Server4、Server5 的投票（满足 Cnew 配置下的 Quorum 3 要求），成为领导者；</p>
-</li>
-<li>
-<p>同时，假设 Server1 也触发选举并赢得 Server1、Server2 的投票（满足 Cold配置下的 Quorum 2 要求），成为领导者。</p>
-</li>
-</ul>
-<p>一个集群存在两个领导者也就是“脑裂”，同一个日志索引可能会对应不同的日志条目，最终导致集群数据不一致。</p>
-<p><img src="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/peizhi.png"
-	width="739"
-	height="445"
-	srcset="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/peizhi_hu_ebc336194e62a827.png 480w, /p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/peizhi_hu_9a8a71fcc7adb460.png 1024w"
+</div><h2 id="测试结果">测试结果
+</h2><p>测试如图所示</p>
+<p><img src="/p/mit-lab3a%E4%B8%AA%E4%BA%BA%E7%AC%94%E8%AE%B0/res.png"
+	width="531"
+	height="155"
+	srcset="/p/mit-lab3a%E4%B8%AA%E4%BA%BA%E7%AC%94%E8%AE%B0/res_hu_1aa4e95e139024b9.png 480w, /p/mit-lab3a%E4%B8%AA%E4%BA%BA%E7%AC%94%E8%AE%B0/res_hu_1056e5c42a336399.png 1024w"
 	loading="lazy"
 	
-		alt="某一时刻，集群存在两个 Quorum"
+		alt="测试结果"
 	
 	
 		class="gallery-image" 
-		data-flex-grow="166"
-		data-flex-basis="398px"
+		data-flex-grow="342"
+		data-flex-basis="822px"
 	
 ></p>
-<p>上述问题的根本原因在于，成员变更过程中形成了两个没有交集的 Quorum，即 [Server1, Server2] 和 [Server3, Server4, Server5] 各自为营。</p>
-<p>Raft 的论文中，对此提出过一种基于两阶段的“联合共识”（Joint Consensus）成员变更方案，但这种方案实现较为复杂，Diego Ongaro 后来又提出一种更为简化的方案 — <code>单成员变更</code>（Single Server Changes）。该方案思想的核心是，既然同时提交多个成员变更可能引发问题，那么每次只提交一个成员变更，需要添加多个成员，就执行多次单成员变更操作。这样不就没有问题了么！</p>
-<p>单成员变更方案很容易穷举所有情况，如下图所示，穷举奇/偶数集群下节点添加/删除情况。如果每次只操作一个节点，Cold 的 Quorum 和 Cnew 的 Quorum 一定存在交集。交集节点只会进行一次投票，要么投票给 Cold，要么投票给 Cnew。因此，不可能出现两个符合条件的 Quorum，也就不会出现两个领导者。</p>
-<p>以下图第二种情况为例，Cold 为 [Server1、Server2、Server3]，该配置的 Quorum 为 2，Cnew 为 [Server1、Server2、Server3、Server4]，该配置的 Quorum 为 3。假设 Server1、Server2 比较迟钝，还在用 Cold ，其他节点的状态机已经应用 Cnew：</p>
-<ul>
-<li>
-<p>假设 Server1 触发选举，赢得 Server1，Server2 的投票，满足 Cold Quorum 要求，当选领导者；</p>
-</li>
-<li>
-<p>假设 Server3 也触发选举，赢得 Server3，Server4 的投票，但不满足 Cnew 的 Quorum 要求，选举失效。</p>
-</li>
-</ul>
-<p><img src="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/raft-node.png"
-	width="754"
-	height="340"
-	srcset="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/raft-node_hu_32696a5a9cc118ca.png 480w, /p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/raft-node_hu_aae633fdb16945df.png 1024w"
-	loading="lazy"
-	
-		alt="穷举奇/偶数集群下节点添加/删除情况"
-	
-	
-		class="gallery-image" 
-		data-flex-grow="221"
-		data-flex-basis="532px"
-	
-></p>
-<p>目前，绝大多数 Raft 算法的实现和系统，如 HashiCorp Raft 和 etcd，均采用单节点变更方案。</p>
 
 </section>
 
@@ -894,7 +904,9 @@
         
             <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/">分布式</a>
         
-            <a href="/tags/%E6%B7%B1%E5%85%A5%E9%AB%98%E5%8F%AF%E7%94%A8%E7%B3%BB%E7%BB%9F%E5%8E%9F%E7%90%86%E4%B8%8E%E8%AE%BE%E8%AE%A1/">深入高可用系统原理与设计</a>
+            <a href="/tags/mit/">Mit</a>
+        
+            <a href="/tags/raft/">Raft</a>
         
     </section>
 
@@ -925,30 +937,6 @@
     <h2 class="section-title">相关文章</h2>
     <div class="related-content">
         <div class="flex article-list--tile">
-            
-                
-<article class="has-image">
-    <a href="/p/mit-lab3a%E4%B8%AA%E4%BA%BA%E7%AC%94%E8%AE%B0/">
-        
-        
-            <div class="article-image">
-                <img src="/p/mit-lab3a%E4%B8%AA%E4%BA%BA%E7%AC%94%E8%AE%B0/mit.46f61e8ea6a2df8fc5bf1d24a17c44a6_hu_475718dfbe334a9a.jpg" 
-                        width="250" 
-                        height="150" 
-                        loading="lazy"
-                        alt="Featured image of post Mit lab3A个人笔记"
-                        
-                        data-hash="md5-RvYejqai34/Fvx0koXxEpg==">
-                
-            </div>
-        
-
-        <div class="article-details">
-            <h2 class="article-title">Mit lab3A个人笔记</h2>
-        </div>
-    </a>
-</article>
-
             
                 
 <article class="has-image">
@@ -993,6 +981,30 @@
 
         <div class="article-details">
             <h2 class="article-title">Mit lab2个人笔记</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/">
+        
+        
+            <div class="article-image">
+                <img src="/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/book.46f61e8ea6a2df8fc5bf1d24a17c44a6_hu_475718dfbe334a9a.jpg" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post 分布式共识算法"
+                        
+                        data-hash="md5-RvYejqai34/Fvx0koXxEpg==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">分布式共识算法</h2>
         </div>
     </a>
 </article>
