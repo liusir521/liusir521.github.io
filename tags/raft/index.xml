@@ -14,8 +14,9 @@
         
         <guid>https://liusir521.github.io/p/mit-lab3b%E4%B8%AA%E4%BA%BA%E7%AC%94%E8%AE%B0/</guid>
         <description>&lt;img src="https://liusir521.github.io/p/mit-lab3b%E4%B8%AA%E4%BA%BA%E7%AC%94%E8%AE%B0/mit.jpg" alt="Featured image of post Mit lab3B个人笔记" /&gt;&lt;blockquote&gt;
-&lt;p&gt;lab3B实验中主要实现的功能是raft的日志复制功能，建议多看几遍关于raft日志复制功能的过程。
-原文pdf:http://nil.csail.mit.edu/6.5840/2024/papers/raft-extended.pdf&lt;/p&gt;
+&lt;p&gt;lab3B实验中主要实现的功能是raft的日志复制功能，建议多看几遍关于raft日志复制功能的过程。&lt;/p&gt;
+&lt;p&gt;原文pdf:http://nil.csail.mit.edu/6.5840/2024/papers/raft-extended.pdf&lt;/p&gt;
+&lt;p&gt;源码地址：https://github.com/liusir521/mit6.5840&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;h2 id=&#34;实验要求&#34;&gt;实验要求
 &lt;/h2&gt;&lt;p&gt;实现领导者和追随者代码以追加新的日志条目，以便go test -run 3B测试通过。&lt;/p&gt;
@@ -906,9 +907,10 @@
         
         <guid>https://liusir521.github.io/p/mit-lab3a%E4%B8%AA%E4%BA%BA%E7%AC%94%E8%AE%B0/</guid>
         <description>&lt;img src="https://liusir521.github.io/p/mit-lab3a%E4%B8%AA%E4%BA%BA%E7%AC%94%E8%AE%B0/mit.jpg" alt="Featured image of post Mit lab3A个人笔记" /&gt;&lt;blockquote&gt;
-&lt;p&gt;对raft算法不熟悉的可以参考我之前记录过的分布式共识算法文章
-&lt;a class=&#34;link&#34; href=&#34;https://liusir521.github.io/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;p&gt;对raft算法不熟悉的可以参考我之前记录过的分布式共识算法文章&lt;/p&gt;
+&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://liusir521.github.io/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;https://liusir521.github.io/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;源码地址：https://github.com/liusir521/mit6.5840&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;h2 id=&#34;实验要求&#34;&gt;实验要求
 &lt;/h2&gt;&lt;p&gt;Lab3实验中要我们复刻raft算法，并由易到难的分为了4个部分，对应着raft算法中的三个关键点，领导者选举、日志复制以及安全性，当前是3A部分，对应的是领导者选举的部分。&lt;/p&gt;

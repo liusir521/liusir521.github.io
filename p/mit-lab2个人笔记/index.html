@@ -419,7 +419,10 @@
     <section class="article-content">
     
     
-    <h2 id="简介">简介
+    <blockquote>
+<p>源码地址：https://github.com/liusir521/mit6.5840</p>
+</blockquote>
+<h2 id="简介">简介
 </h2><p>实验二要求我们实现一个单机版的键值服务器，并实现Get\Put\Append方法。需要考虑的重点是多个客户端并发访问的问题以及由于网络原因导致的客户端请求重试问题（幂等性）。</p>
 <p>实验二其实并不难，针对Get操作我们不需要做过多的处理，主要是Put和Append操作。我们只需要在服务端定义好存储客户端id与该客户端请求id的对应关系，以及客户端id和上次缓存的结果即可(用于Append请求)。</p>
 <h2 id="代码实现">代码实现
