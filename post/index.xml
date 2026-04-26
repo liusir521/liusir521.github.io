@@ -7,10 +7,10 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>zh-cn</language>
         <copyright>Example Person</copyright>
-        <lastBuildDate>Sun, 26 Apr 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://liusir521.github.io/post/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Fri, 10 Apr 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://liusir521.github.io/post/index.xml" rel="self" type="application/rss+xml" /><item>
         <title>AI Agent 架构详解：范式、记忆、规划与工具系统</title>
         <link>https://liusir521.github.io/p/ai-agent-%E6%9E%B6%E6%9E%84%E8%AF%A6%E8%A7%A3%E8%8C%83%E5%BC%8F%E8%AE%B0%E5%BF%86%E8%A7%84%E5%88%92%E4%B8%8E%E5%B7%A5%E5%85%B7%E7%B3%BB%E7%BB%9F/</link>
-        <pubDate>Sun, 26 Apr 2026 00:00:00 +0000</pubDate>
+        <pubDate>Fri, 10 Apr 2026 00:00:00 +0000</pubDate>
         
         <guid>https://liusir521.github.io/p/ai-agent-%E6%9E%B6%E6%9E%84%E8%AF%A6%E8%A7%A3%E8%8C%83%E5%BC%8F%E8%AE%B0%E5%BF%86%E8%A7%84%E5%88%92%E4%B8%8E%E5%B7%A5%E5%85%B7%E7%B3%BB%E7%BB%9F/</guid>
         <description>&lt;img src="https://liusir521.github.io/p/ai-agent-%E6%9E%B6%E6%9E%84%E8%AF%A6%E8%A7%A3%E8%8C%83%E5%BC%8F%E8%AE%B0%E5%BF%86%E8%A7%84%E5%88%92%E4%B8%8E%E5%B7%A5%E5%85%B7%E7%B3%BB%E7%BB%9F/agent.png" alt="Featured image of post AI Agent 架构详解：范式、记忆、规划与工具系统" /&gt;&lt;h2 id=&#34;从-llm-到-agent&#34;&gt;从 LLM 到 Agent
