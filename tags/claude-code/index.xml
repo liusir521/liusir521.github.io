@@ -13,7 +13,7 @@
         <pubDate>Sun, 26 Apr 2026 00:00:00 +0000</pubDate>
         
         <guid>https://liusir521.github.io/p/claude-code-skills-%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B/</guid>
-        <description>&lt;img src="https://liusir521.github.io/claude-code.jpg" alt="Featured image of post Claude Code Skills 使用教程" /&gt;&lt;h2 id=&#34;什么是-skills&#34;&gt;什么是 Skills
+        <description>&lt;img src="https://liusir521.github.io/claude-code.png" alt="Featured image of post Claude Code Skills 使用教程" /&gt;&lt;h2 id=&#34;什么是-skills&#34;&gt;什么是 Skills
 &lt;/h2&gt;&lt;p&gt;Skills（技能）是 Claude Code 的扩展机制，类似于 IDE 的插件系统。每个 Skill 封装了特定领域的知识、工作流程和工具集成，安装后 Claude Code 便自动获得该领域的能力。&lt;/p&gt;
 &lt;p&gt;打个比方：&lt;strong&gt;MCP 是给 Claude 接上外部工具（手），Skills 是教会 Claude 特定的工作方法（脑）。&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;Skills 生态基于 &lt;code&gt;npx skills&lt;/code&gt; CLI 管理，社区贡献的 Skills 托管在 &lt;a class=&#34;link&#34; href=&#34;https://skills.sh/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
