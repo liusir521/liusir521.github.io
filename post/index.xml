@@ -7,7 +7,376 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>zh-cn</language>
         <copyright>Example Person</copyright>
-        <lastBuildDate>Wed, 01 Apr 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://liusir521.github.io/post/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Sun, 26 Apr 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://liusir521.github.io/post/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>Claude Code Skills 使用教程</title>
+        <link>https://liusir521.github.io/p/claude-code-skills-%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B/</link>
+        <pubDate>Sun, 26 Apr 2026 00:00:00 +0000</pubDate>
+        
+        <guid>https://liusir521.github.io/p/claude-code-skills-%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B/</guid>
+        <description>&lt;img src="https://liusir521.github.io/claude-code.jpg" alt="Featured image of post Claude Code Skills 使用教程" /&gt;&lt;h2 id=&#34;什么是-skills&#34;&gt;什么是 Skills
+&lt;/h2&gt;&lt;p&gt;Skills（技能）是 Claude Code 的扩展机制，类似于 IDE 的插件系统。每个 Skill 封装了特定领域的知识、工作流程和工具集成，安装后 Claude Code 便自动获得该领域的能力。&lt;/p&gt;
+&lt;p&gt;打个比方：&lt;strong&gt;MCP 是给 Claude 接上外部工具（手），Skills 是教会 Claude 特定的工作方法（脑）。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Skills 生态基于 &lt;code&gt;npx skills&lt;/code&gt; CLI 管理，社区贡献的 Skills 托管在 &lt;a class=&#34;link&#34; href=&#34;https://skills.sh/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;skills.sh&lt;/a&gt;，可以自由查找和安装。&lt;/p&gt;
+&lt;h2 id=&#34;skills-vs-mcp&#34;&gt;Skills vs MCP
+&lt;/h2&gt;&lt;p&gt;很多同学会把两者搞混，先区分一下：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;维度&lt;/th&gt;
+          &lt;th&gt;Skills&lt;/th&gt;
+          &lt;th&gt;MCP&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;本质&lt;/td&gt;
+          &lt;td&gt;提示词 + 工作流模板&lt;/td&gt;
+          &lt;td&gt;工具/数据源连接协议&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;作用&lt;/td&gt;
+          &lt;td&gt;教 Claude&amp;quot;怎么做&amp;quot;&lt;/td&gt;
+          &lt;td&gt;让 Claude&amp;quot;能访问什么&amp;quot;&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;配置&lt;/td&gt;
+          &lt;td&gt;&lt;code&gt;npx skills add&lt;/code&gt; 安装&lt;/td&gt;
+          &lt;td&gt;&lt;code&gt;.claude/claude.json&lt;/code&gt; 配置&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;示例&lt;/td&gt;
+          &lt;td&gt;自动生成 commit、代码审查&lt;/td&gt;
+          &lt;td&gt;文件系统、GitHub API&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;两者互补，经常配合使用。比如安装了 &lt;code&gt;gh-cli&lt;/code&gt; Skill，还需要 GitHub MCP 提供 API 访问能力。&lt;/p&gt;
+&lt;h2 id=&#34;查找-skills&#34;&gt;查找 Skills
+&lt;/h2&gt;&lt;h3 id=&#34;方式一命令行搜索&#34;&gt;方式一：命令行搜索
+&lt;/h3&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;npx skills find &amp;lt;关键词&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;例如：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;npx skills find github     &lt;span class=&#34;c1&#34;&gt;# 搜索 GitHub 相关 Skill&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;npx skills find react      &lt;span class=&#34;c1&#34;&gt;# 搜索 React 相关 Skill&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;npx skills find testing    &lt;span class=&#34;c1&#34;&gt;# 搜索测试相关 Skill&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;搜索结果会显示 Skill 名称、安装量和详情链接。&lt;/p&gt;
+&lt;h3 id=&#34;方式二浏览在线市场&#34;&gt;方式二：浏览在线市场
+&lt;/h3&gt;&lt;p&gt;访问 &lt;a class=&#34;link&#34; href=&#34;https://skills.sh/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;skills.sh&lt;/a&gt; 查看排行榜，按安装量排序。热门 Skill 通常更可靠。&lt;/p&gt;
+&lt;p&gt;目前最受欢迎的 Skill 系列：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;系列&lt;/th&gt;
+          &lt;th&gt;来源&lt;/th&gt;
+          &lt;th&gt;热门 Skill&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;code&gt;vercel-labs/agent-skills&lt;/code&gt;&lt;/td&gt;
+          &lt;td&gt;Vercel 官方&lt;/td&gt;
+          &lt;td&gt;react-best-practices, next-js, web-design&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;code&gt;github/awesome-copilot&lt;/code&gt;&lt;/td&gt;
+          &lt;td&gt;GitHub&lt;/td&gt;
+          &lt;td&gt;git-commit, gh-cli, prd&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;code&gt;anthropics/skills&lt;/code&gt;&lt;/td&gt;
+          &lt;td&gt;Anthropic 官方&lt;/td&gt;
+          &lt;td&gt;frontend-design, document-processing&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id=&#34;挑选-skill-的三条原则&#34;&gt;挑选 Skill 的三条原则
+&lt;/h3&gt;&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;安装量优先&lt;/strong&gt; — 选 1K+ 安装量的，避开 &amp;lt; 100 的&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;来源可靠&lt;/strong&gt; — 官方来源（&lt;code&gt;vercel-labs&lt;/code&gt;、&lt;code&gt;anthropics&lt;/code&gt;、&lt;code&gt;github&lt;/code&gt;）优先&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;安全审计通过&lt;/strong&gt; — 安装时注意看 Gen、Socket、Snyk 的审计结果&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id=&#34;安装-skills&#34;&gt;安装 Skills
+&lt;/h2&gt;&lt;h3 id=&#34;基本命令&#34;&gt;基本命令
+&lt;/h3&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;npx skills add &amp;lt;owner/repo@skill-name&amp;gt; -g -y
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;参数说明：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;-g&lt;/code&gt;：全局安装（用户级，所有项目可用）&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;-y&lt;/code&gt;：跳过确认提示&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;安装示例&#34;&gt;安装示例
+&lt;/h3&gt;&lt;p&gt;安装 git-commit Skill，用于自动生成规范的 commit 信息：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;npx skills add github/awesome-copilot@git-commit -g -y
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;安装 gh-cli Skill，辅助 GitHub CLI 操作：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;npx skills add github/awesome-copilot@gh-cli -g -y
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;安装成功后，Skill 文件存放于 &lt;code&gt;~/.agents/skills/&lt;/code&gt; 目录。&lt;/p&gt;
+&lt;h3 id=&#34;安装输出解读&#34;&gt;安装输出解读
+&lt;/h3&gt;&lt;p&gt;安装过程会显示：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;14
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;15
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;16
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;17
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;◇  Source: https://github.com/github/awesome-copilot.git@git-commit
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;◇  Repository cloned
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;◇  Found 308 skills
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;●  Selected 1 skill: git-commit
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;◇  45 agents
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;●  Installing to: Claude Code, OpenClaw, Codex, Trae CN
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;◇  Installation Summary
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  ~\.agents\skills\git-commit
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    universal: Codex, Amp, Antigravity, Cline, Cursor +7 more
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    symlink → Claude Code, OpenClaw, Trae CN
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;◇  Security Risk Assessments
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  git-commit  Safe  0 alerts  Low Risk
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;◇  Installed 1 skill
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;✓ ~\.agents\skills\git-commit
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;关键信息：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;agents&lt;/strong&gt;：支持 45 种 AI 编程工具&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Security Risk&lt;/strong&gt;：Gen 评为 Safe、Socket 0 alerts 即安全&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;symlink&lt;/strong&gt;：Claude Code 通过符号链接加载&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;使用-skills&#34;&gt;使用 Skills
+&lt;/h2&gt;&lt;p&gt;安装后无需额外配置，Skill 会自动生效。有两种触发方式：&lt;/p&gt;
+&lt;h3 id=&#34;自动触发&#34;&gt;自动触发
+&lt;/h3&gt;&lt;p&gt;当对话内容命中 Skill 的适用场景时，Claude Code 会自动调用。例如安装了 &lt;code&gt;git-commit&lt;/code&gt; 后，说&amp;quot;帮我提交代码&amp;quot;，Claude 就会用该 Skill 生成规范 commit。&lt;/p&gt;
+&lt;h3 id=&#34;手动调用&#34;&gt;手动调用
+&lt;/h3&gt;&lt;p&gt;使用 &lt;code&gt;/&lt;/code&gt; 斜杠命令显式调用：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;/git-commit
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;blockquote&gt;
+&lt;p&gt;&lt;code&gt;/skills&lt;/code&gt; 命令可以查看当前已安装的所有 Skill。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;管理-skills&#34;&gt;管理 Skills
+&lt;/h2&gt;&lt;h3 id=&#34;查看已安装&#34;&gt;查看已安装
+&lt;/h3&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;npx skills list
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id=&#34;检查更新&#34;&gt;检查更新
+&lt;/h3&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;npx skills check
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id=&#34;更新所有-skill&#34;&gt;更新所有 Skill
+&lt;/h3&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;npx skills update
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id=&#34;锁定版本&#34;&gt;锁定版本
+&lt;/h3&gt;&lt;p&gt;安装 Skill 后会自动生成 &lt;code&gt;skills-lock.json&lt;/code&gt;（类似 &lt;code&gt;package-lock.json&lt;/code&gt;），锁定版本到当前 tag 对应的 commit。将该文件提交到 Git 仓库，团队成员拉取后可用 &lt;code&gt;npx skills install&lt;/code&gt; 安装完全相同的版本。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;git add skills-lock.json
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;git commit -m &lt;span class=&#34;s2&#34;&gt;&amp;#34;chore: lock skill versions&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h2 id=&#34;常用-skill-推荐&#34;&gt;常用 Skill 推荐
+&lt;/h2&gt;&lt;h3 id=&#34;开发效率&#34;&gt;开发效率
+&lt;/h3&gt;&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;Skill&lt;/th&gt;
+          &lt;th&gt;用途&lt;/th&gt;
+          &lt;th&gt;安装量&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;code&gt;github/awesome-copilot@git-commit&lt;/code&gt;&lt;/td&gt;
+          &lt;td&gt;自动生成规范 commit&lt;/td&gt;
+          &lt;td&gt;26.7K&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;code&gt;github/awesome-copilot@gh-cli&lt;/code&gt;&lt;/td&gt;
+          &lt;td&gt;GitHub CLI 辅助&lt;/td&gt;
+          &lt;td&gt;19.3K&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;code&gt;github/awesome-copilot@prd&lt;/code&gt;&lt;/td&gt;
+          &lt;td&gt;自动生成 PR 描述&lt;/td&gt;
+          &lt;td&gt;15.8K&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;安装：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;npx skills add github/awesome-copilot@git-commit -g -y
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;npx skills add github/awesome-copilot@gh-cli -g -y
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id=&#34;代码质量&#34;&gt;代码质量
+&lt;/h3&gt;&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;Skill&lt;/th&gt;
+          &lt;th&gt;用途&lt;/th&gt;
+          &lt;th&gt;安装量&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;code&gt;simplify&lt;/code&gt; (内置)&lt;/td&gt;
+          &lt;td&gt;审查代码质量和效率&lt;/td&gt;
+          &lt;td&gt;内置&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;code&gt;security-review&lt;/code&gt; (内置)&lt;/td&gt;
+          &lt;td&gt;安全审查&lt;/td&gt;
+          &lt;td&gt;内置&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;code&gt;review&lt;/code&gt; (内置)&lt;/td&gt;
+          &lt;td&gt;PR Review&lt;/td&gt;
+          &lt;td&gt;内置&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;注：&lt;code&gt;simplify&lt;/code&gt;、&lt;code&gt;security-review&lt;/code&gt;、&lt;code&gt;review&lt;/code&gt; 是 Claude Code 自带的基础 Skill，无需额外安装。&lt;/p&gt;
+&lt;h3 id=&#34;前端开发&#34;&gt;前端开发
+&lt;/h3&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;npx skills add vercel-labs/agent-skills@react-best-practices -g -y
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h2 id=&#34;skill-与-claudemd-配合&#34;&gt;Skill 与 CLAUDE.md 配合
+&lt;/h2&gt;&lt;p&gt;CLAUDE.md 是项目级的指令文件，告诉 Claude 项目的上下文信息。Skills + CLAUDE.md 的组合效果最佳：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;项目根目录/
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;├── CLAUDE.md          # 项目说明（技术栈、目录结构、约定）
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;├── skills-lock.json   # Skill 版本锁定
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;└── .claude/
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    └── claude.json    # MCP 配置
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;三者分工明确：CLAUDE.md 描述项目，Skills 赋予领域能力，MCP 连接外部工具。&lt;/p&gt;
+&lt;h2 id=&#34;常见问题&#34;&gt;常见问题
+&lt;/h2&gt;&lt;h3 id=&#34;安装时-clone-很慢&#34;&gt;安装时 clone 很慢
+&lt;/h3&gt;&lt;p&gt;GitHub 仓库克隆失败或速度慢时，可以设置代理：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;git config --global http.proxy http://127.0.0.1:7890
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id=&#34;skill-不生效&#34;&gt;Skill 不生效
+&lt;/h3&gt;&lt;ol&gt;
+&lt;li&gt;确认 Skill 已安装成功：&lt;code&gt;npx skills list&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;重启 Claude Code&lt;/li&gt;
+&lt;li&gt;确认项目根目录下没有冲突的 &lt;code&gt;.agents/&lt;/code&gt; 目录&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id=&#34;多个-agent-工具的-skill-隔离&#34;&gt;多个 Agent 工具的 Skill 隔离
+&lt;/h3&gt;&lt;p&gt;&lt;code&gt;~/.agents/skills/&lt;/code&gt; 是通用 Skill 目录，Claude Code 通过 symlink 引用。如果你同时使用 Codex、Cursor 等工具，同一个 Skill 会被共享，这是预期行为。&lt;/p&gt;
+&lt;h2 id=&#34;小结&#34;&gt;小结
+&lt;/h2&gt;&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;查找&lt;/strong&gt;：&lt;code&gt;npx skills find &amp;lt;关键词&amp;gt;&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;安装&lt;/strong&gt;：&lt;code&gt;npx skills add &amp;lt;owner/repo@skill&amp;gt; -g -y&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;使用&lt;/strong&gt;：自动触发或 &lt;code&gt;/skill名&lt;/code&gt; 手动调用&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;管理&lt;/strong&gt;：&lt;code&gt;npx skills list / check / update&lt;/code&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Skills 让 Claude Code 从通用助手变成领域专家，是提升效率的核心手段。&lt;/p&gt;
+</description>
+        </item>
+        <item>
         <title>Claude Code 安装配置 MCP 教程</title>
         <link>https://liusir521.github.io/p/claude-code-%E5%AE%89%E8%A3%85%E9%85%8D%E7%BD%AE-mcp-%E6%95%99%E7%A8%8B/</link>
         <pubDate>Wed, 01 Apr 2026 00:00:00 +0000</pubDate>
