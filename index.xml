@@ -13,7 +13,7 @@
         <pubDate>Sun, 26 Apr 2026 00:00:00 +0000</pubDate>
         
         <guid>https://liusir521.github.io/p/ai-agent-%E6%9E%B6%E6%9E%84%E8%AF%A6%E8%A7%A3%E8%8C%83%E5%BC%8F%E8%AE%B0%E5%BF%86%E8%A7%84%E5%88%92%E4%B8%8E%E5%B7%A5%E5%85%B7%E7%B3%BB%E7%BB%9F/</guid>
-        <description>&lt;img src="https://liusir521.github.io/agent.png" alt="Featured image of post AI Agent 架构详解：范式、记忆、规划与工具系统" /&gt;&lt;h2 id=&#34;从-llm-到-agent&#34;&gt;从 LLM 到 Agent
+        <description>&lt;img src="https://liusir521.github.io/p/ai-agent-%E6%9E%B6%E6%9E%84%E8%AF%A6%E8%A7%A3%E8%8C%83%E5%BC%8F%E8%AE%B0%E5%BF%86%E8%A7%84%E5%88%92%E4%B8%8E%E5%B7%A5%E5%85%B7%E7%B3%BB%E7%BB%9F/agent.png" alt="Featured image of post AI Agent 架构详解：范式、记忆、规划与工具系统" /&gt;&lt;h2 id=&#34;从-llm-到-agent&#34;&gt;从 LLM 到 Agent
 &lt;/h2&gt;&lt;p&gt;大语言模型本质上是&amp;quot;函数&amp;quot;：输入文本，输出文本。它不会主动做事——不会上网搜索、不会读写文件、不会执行代码。人们发现，只要给 LLM 配上工具、记忆和规划能力，它就能像人类一样完成复杂任务。&lt;/p&gt;
 &lt;p&gt;这就是 &lt;strong&gt;AI Agent（智能体）&lt;/strong&gt;。&lt;/p&gt;
 &lt;p&gt;2023 年以来，AutoGPT、LangChain Agent、Claude Code、Cursor Agent 等项目将 Agent 从学术概念推向工程实践。当下最先进的 AI 编程工具，本质都是 Agent 架构的产物。&lt;/p&gt;
