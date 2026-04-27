@@ -2,18 +2,18 @@
 <html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
 <meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="深入拆解 AI Agent 的三层工程体系：Prompt Engineering 设计智能、Context Engineering 管理记忆、Harness Engineering 编排执行">
-<title>Agent 工程三支柱：Prompt、Context 与 Harness Engineering</title>
+<title>AI Agent 工程体系详解：提示工程、上下文工程与编排工程</title>
 
-<link rel='canonical' href='https://liusir521.github.io/p/agent-%E5%B7%A5%E7%A8%8B%E4%B8%89%E6%94%AF%E6%9F%B1promptcontext-%E4%B8%8E-harness-engineering/'>
+<link rel='canonical' href='https://liusir521.github.io/p/ai-agent-%E5%B7%A5%E7%A8%8B%E4%BD%93%E7%B3%BB%E8%AF%A6%E8%A7%A3%E6%8F%90%E7%A4%BA%E5%B7%A5%E7%A8%8B%E4%B8%8A%E4%B8%8B%E6%96%87%E5%B7%A5%E7%A8%8B%E4%B8%8E%E7%BC%96%E6%8E%92%E5%B7%A5%E7%A8%8B/'>
 
-<link rel="stylesheet" href="/scss/style.min.86591c898bd806857815fbb8c47e8d3fed97c133b78e83d9bfc27b164dd0aa2b.css"><meta property='og:title' content="Agent 工程三支柱：Prompt、Context 与 Harness Engineering">
+<link rel="stylesheet" href="/scss/style.min.86591c898bd806857815fbb8c47e8d3fed97c133b78e83d9bfc27b164dd0aa2b.css"><meta property='og:title' content="AI Agent 工程体系详解：提示工程、上下文工程与编排工程">
 <meta property='og:description' content="深入拆解 AI Agent 的三层工程体系：Prompt Engineering 设计智能、Context Engineering 管理记忆、Harness Engineering 编排执行">
-<meta property='og:url' content='https://liusir521.github.io/p/agent-%E5%B7%A5%E7%A8%8B%E4%B8%89%E6%94%AF%E6%9F%B1promptcontext-%E4%B8%8E-harness-engineering/'>
+<meta property='og:url' content='https://liusir521.github.io/p/ai-agent-%E5%B7%A5%E7%A8%8B%E4%BD%93%E7%B3%BB%E8%AF%A6%E8%A7%A3%E6%8F%90%E7%A4%BA%E5%B7%A5%E7%A8%8B%E4%B8%8A%E4%B8%8B%E6%96%87%E5%B7%A5%E7%A8%8B%E4%B8%8E%E7%BC%96%E6%8E%92%E5%B7%A5%E7%A8%8B/'>
 <meta property='og:site_name' content='你怂你mua'>
-<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Agent' /><meta property='article:tag' content='Prompt Engineering' /><meta property='article:tag' content='Context Engineering' /><meta property='article:tag' content='Harness Engineering' /><meta property='article:tag' content='AI' /><meta property='article:tag' content='LLM' /><meta property='article:published_time' content='2026-04-16T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2026-04-16T00:00:00&#43;00:00'/><meta property='og:image' content='https://liusir521.github.io/p/agent-%E5%B7%A5%E7%A8%8B%E4%B8%89%E6%94%AF%E6%9F%B1promptcontext-%E4%B8%8E-harness-engineering/agent.png' />
-<meta name="twitter:title" content="Agent 工程三支柱：Prompt、Context 与 Harness Engineering">
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Agent' /><meta property='article:tag' content='Prompt Engineering' /><meta property='article:tag' content='Context Engineering' /><meta property='article:tag' content='Harness Engineering' /><meta property='article:tag' content='AI' /><meta property='article:tag' content='LLM' /><meta property='article:published_time' content='2026-04-16T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2026-04-16T00:00:00&#43;00:00'/><meta property='og:image' content='https://liusir521.github.io/p/ai-agent-%E5%B7%A5%E7%A8%8B%E4%BD%93%E7%B3%BB%E8%AF%A6%E8%A7%A3%E6%8F%90%E7%A4%BA%E5%B7%A5%E7%A8%8B%E4%B8%8A%E4%B8%8B%E6%96%87%E5%B7%A5%E7%A8%8B%E4%B8%8E%E7%BC%96%E6%8E%92%E5%B7%A5%E7%A8%8B/agent.png' />
+<meta name="twitter:title" content="AI Agent 工程体系详解：提示工程、上下文工程与编排工程">
 <meta name="twitter:description" content="深入拆解 AI Agent 的三层工程体系：Prompt Engineering 设计智能、Context Engineering 管理记忆、Harness Engineering 编排执行"><meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content='https://liusir521.github.io/p/agent-%E5%B7%A5%E7%A8%8B%E4%B8%89%E6%94%AF%E6%9F%B1promptcontext-%E4%B8%8E-harness-engineering/agent.png' />
+    <meta name="twitter:image" content='https://liusir521.github.io/p/ai-agent-%E5%B7%A5%E7%A8%8B%E4%BD%93%E7%B3%BB%E8%AF%A6%E8%A7%A3%E6%8F%90%E7%A4%BA%E5%B7%A5%E7%A8%8B%E4%B8%8A%E4%B8%8B%E6%96%87%E5%B7%A5%E7%A8%8B%E4%B8%8E%E7%BC%96%E6%8E%92%E5%B7%A5%E7%A8%8B/agent.png' />
     <link rel="shortcut icon" href="/favicon.png" />
 
     </head>
@@ -358,13 +358,13 @@
     <article class="has-image main-article">
     <header class="article-header">
         <div class="article-image">
-            <a href="/p/agent-%E5%B7%A5%E7%A8%8B%E4%B8%89%E6%94%AF%E6%9F%B1promptcontext-%E4%B8%8E-harness-engineering/">
-                <img src="/p/agent-%E5%B7%A5%E7%A8%8B%E4%B8%89%E6%94%AF%E6%9F%B1promptcontext-%E4%B8%8E-harness-engineering/agent_hu_b35b85d51dfd1aea.png"
-                        srcset="/p/agent-%E5%B7%A5%E7%A8%8B%E4%B8%89%E6%94%AF%E6%9F%B1promptcontext-%E4%B8%8E-harness-engineering/agent_hu_b35b85d51dfd1aea.png 800w, /p/agent-%E5%B7%A5%E7%A8%8B%E4%B8%89%E6%94%AF%E6%9F%B1promptcontext-%E4%B8%8E-harness-engineering/agent_hu_6e2b77297debb6de.png 1600w"
+            <a href="/p/ai-agent-%E5%B7%A5%E7%A8%8B%E4%BD%93%E7%B3%BB%E8%AF%A6%E8%A7%A3%E6%8F%90%E7%A4%BA%E5%B7%A5%E7%A8%8B%E4%B8%8A%E4%B8%8B%E6%96%87%E5%B7%A5%E7%A8%8B%E4%B8%8E%E7%BC%96%E6%8E%92%E5%B7%A5%E7%A8%8B/">
+                <img src="/p/ai-agent-%E5%B7%A5%E7%A8%8B%E4%BD%93%E7%B3%BB%E8%AF%A6%E8%A7%A3%E6%8F%90%E7%A4%BA%E5%B7%A5%E7%A8%8B%E4%B8%8A%E4%B8%8B%E6%96%87%E5%B7%A5%E7%A8%8B%E4%B8%8E%E7%BC%96%E6%8E%92%E5%B7%A5%E7%A8%8B/agent_hu_b35b85d51dfd1aea.png"
+                        srcset="/p/ai-agent-%E5%B7%A5%E7%A8%8B%E4%BD%93%E7%B3%BB%E8%AF%A6%E8%A7%A3%E6%8F%90%E7%A4%BA%E5%B7%A5%E7%A8%8B%E4%B8%8A%E4%B8%8B%E6%96%87%E5%B7%A5%E7%A8%8B%E4%B8%8E%E7%BC%96%E6%8E%92%E5%B7%A5%E7%A8%8B/agent_hu_b35b85d51dfd1aea.png 800w, /p/ai-agent-%E5%B7%A5%E7%A8%8B%E4%BD%93%E7%B3%BB%E8%AF%A6%E8%A7%A3%E6%8F%90%E7%A4%BA%E5%B7%A5%E7%A8%8B%E4%B8%8A%E4%B8%8B%E6%96%87%E5%B7%A5%E7%A8%8B%E4%B8%8E%E7%BC%96%E6%8E%92%E5%B7%A5%E7%A8%8B/agent_hu_6e2b77297debb6de.png 1600w"
                         width="800" 
                         height="533" 
                         loading="lazy"
-                        alt="Featured image of post Agent 工程三支柱：Prompt、Context 与 Harness Engineering" />
+                        alt="Featured image of post AI Agent 工程体系详解：提示工程、上下文工程与编排工程" />
                 
             </a>
         </div>
@@ -393,7 +393,7 @@
 
     <div class="article-title-wrapper">
         <h2 class="article-title">
-            <a href="/p/agent-%E5%B7%A5%E7%A8%8B%E4%B8%89%E6%94%AF%E6%9F%B1promptcontext-%E4%B8%8E-harness-engineering/">Agent 工程三支柱：Prompt、Context 与 Harness Engineering</a>
+            <a href="/p/ai-agent-%E5%B7%A5%E7%A8%8B%E4%BD%93%E7%B3%BB%E8%AF%A6%E8%A7%A3%E6%8F%90%E7%A4%BA%E5%B7%A5%E7%A8%8B%E4%B8%8A%E4%B8%8B%E6%96%87%E5%B7%A5%E7%A8%8B%E4%B8%8E%E7%BC%96%E6%8E%92%E5%B7%A5%E7%A8%8B/">AI Agent 工程体系详解：提示工程、上下文工程与编排工程</a>
         </h2>
     
         

@@ -8,12 +8,12 @@
         <language>zh-cn</language>
         <copyright>Example Person</copyright>
         <lastBuildDate>Thu, 16 Apr 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://liusir521.github.io/index.xml" rel="self" type="application/rss+xml" /><item>
-        <title>Agent 工程三支柱：Prompt、Context 与 Harness Engineering</title>
-        <link>https://liusir521.github.io/p/agent-%E5%B7%A5%E7%A8%8B%E4%B8%89%E6%94%AF%E6%9F%B1promptcontext-%E4%B8%8E-harness-engineering/</link>
+        <title>AI Agent 工程体系详解：提示工程、上下文工程与编排工程</title>
+        <link>https://liusir521.github.io/p/ai-agent-%E5%B7%A5%E7%A8%8B%E4%BD%93%E7%B3%BB%E8%AF%A6%E8%A7%A3%E6%8F%90%E7%A4%BA%E5%B7%A5%E7%A8%8B%E4%B8%8A%E4%B8%8B%E6%96%87%E5%B7%A5%E7%A8%8B%E4%B8%8E%E7%BC%96%E6%8E%92%E5%B7%A5%E7%A8%8B/</link>
         <pubDate>Thu, 16 Apr 2026 00:00:00 +0000</pubDate>
         
-        <guid>https://liusir521.github.io/p/agent-%E5%B7%A5%E7%A8%8B%E4%B8%89%E6%94%AF%E6%9F%B1promptcontext-%E4%B8%8E-harness-engineering/</guid>
-        <description>&lt;img src="https://liusir521.github.io/p/agent-%E5%B7%A5%E7%A8%8B%E4%B8%89%E6%94%AF%E6%9F%B1promptcontext-%E4%B8%8E-harness-engineering/agent.png" alt="Featured image of post Agent 工程三支柱：Prompt、Context 与 Harness Engineering" /&gt;&lt;h2 id=&#34;引言&#34;&gt;引言
+        <guid>https://liusir521.github.io/p/ai-agent-%E5%B7%A5%E7%A8%8B%E4%BD%93%E7%B3%BB%E8%AF%A6%E8%A7%A3%E6%8F%90%E7%A4%BA%E5%B7%A5%E7%A8%8B%E4%B8%8A%E4%B8%8B%E6%96%87%E5%B7%A5%E7%A8%8B%E4%B8%8E%E7%BC%96%E6%8E%92%E5%B7%A5%E7%A8%8B/</guid>
+        <description>&lt;img src="https://liusir521.github.io/p/ai-agent-%E5%B7%A5%E7%A8%8B%E4%BD%93%E7%B3%BB%E8%AF%A6%E8%A7%A3%E6%8F%90%E7%A4%BA%E5%B7%A5%E7%A8%8B%E4%B8%8A%E4%B8%8B%E6%96%87%E5%B7%A5%E7%A8%8B%E4%B8%8E%E7%BC%96%E6%8E%92%E5%B7%A5%E7%A8%8B/agent.png" alt="Featured image of post AI Agent 工程体系详解：提示工程、上下文工程与编排工程" /&gt;&lt;h2 id=&#34;引言&#34;&gt;引言
 &lt;/h2&gt;&lt;p&gt;上一篇文章中，我们介绍了 AI Agent 的四个核心模块：范式、记忆、规划、工具。这些模块构成了 Agent 的&amp;quot;功能地图&amp;quot;，但要把它们真正工程化落地，需要从三个工程维度系统性地设计和优化。&lt;/p&gt;
 &lt;p&gt;业界逐渐形成共识：&lt;strong&gt;Agent 工程 = Prompt Engineering + Context Engineering + Harness Engineering&lt;/strong&gt;。三者分别对应&amp;quot;大脑怎么思考&amp;quot;、&amp;ldquo;大脑记住什么&amp;rdquo;、&amp;ldquo;大脑如何行动&amp;rdquo;。&lt;/p&gt;
 &lt;p&gt;这三个概念最早由 Anthropic 的开发者关系团队在 2025 年公开提出，作为 Agent 系统设计的核心框架。本文将逐一拆解。&lt;/p&gt;
