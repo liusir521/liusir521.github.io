@@ -300,47 +300,47 @@
   <ol>
     <li><a href="#引言">引言</a></li>
     <li><a href="#总览三层工程体系">总览：三层工程体系</a></li>
-    <li><a href="#一prompt-engineering让模型想对">一、Prompt Engineering：让模型&quot;想对&quot;</a>
+    <li><a href="#prompt-engineering让模型想对">Prompt Engineering：让模型想对</a>
       <ol>
-        <li><a href="#11-系统提示system-prompt">1.1 系统提示（System Prompt）</a></li>
-        <li><a href="#12-指令设计原则">1.2 指令设计原则</a></li>
-        <li><a href="#13-思维链chain-of-thought">1.3 思维链（Chain of Thought）</a></li>
-        <li><a href="#14-prompt-模板与变量注入">1.4 Prompt 模板与变量注入</a></li>
-        <li><a href="#15-prompt-engineering-的局限">1.5 Prompt Engineering 的局限</a></li>
+        <li><a href="#系统提示">系统提示</a></li>
+        <li><a href="#指令设计原则">指令设计原则</a></li>
+        <li><a href="#思维链">思维链</a></li>
+        <li><a href="#prompt-模板与变量注入">Prompt 模板与变量注入</a></li>
+        <li><a href="#prompt-engineering-的局限">Prompt Engineering 的局限</a></li>
       </ol>
     </li>
-    <li><a href="#二context-engineering让模型记住">二、Context Engineering：让模型&quot;记住&quot;</a>
+    <li><a href="#context-engineering让模型记住">Context Engineering：让模型记住</a>
       <ol>
-        <li><a href="#21-上下文即资产">2.1 上下文即资产</a></li>
-        <li><a href="#22-上下文组装">2.2 上下文组装</a></li>
-        <li><a href="#23-上下文压缩">2.3 上下文压缩</a></li>
-        <li><a href="#24-记忆系统设计">2.4 记忆系统设计</a></li>
-        <li><a href="#25-检索增强上下文">2.5 检索增强上下文</a></li>
+        <li><a href="#上下文即资产">上下文即资产</a></li>
+        <li><a href="#上下文组装">上下文组装</a></li>
+        <li><a href="#上下文压缩">上下文压缩</a></li>
+        <li><a href="#记忆系统设计">记忆系统设计</a></li>
+        <li><a href="#检索增强上下文">检索增强上下文</a></li>
       </ol>
     </li>
-    <li><a href="#三harness-engineering让模型能做">三、Harness Engineering：让模型&quot;能做&quot;</a>
+    <li><a href="#harness-engineering让模型能做">Harness Engineering：让模型能做</a>
       <ol>
-        <li><a href="#31-什么是-harness">3.1 什么是 Harness</a></li>
-        <li><a href="#32-事件循环">3.2 事件循环</a></li>
-        <li><a href="#33-工具系统设计">3.3 工具系统设计</a></li>
-        <li><a href="#34-错误处理">3.4 错误处理</a></li>
-        <li><a href="#35-并行与并发">3.5 并行与并发</a></li>
-        <li><a href="#36-权限与安全">3.6 权限与安全</a></li>
+        <li><a href="#什么是-harness">什么是 Harness</a></li>
+        <li><a href="#事件循环">事件循环</a></li>
+        <li><a href="#工具系统设计">工具系统设计</a></li>
+        <li><a href="#错误处理">错误处理</a></li>
+        <li><a href="#并行与并发">并行与并发</a></li>
+        <li><a href="#权限与安全">权限与安全</a></li>
       </ol>
     </li>
-    <li><a href="#四三层协同">四、三层协同</a>
+    <li><a href="#三层协同">三层协同</a>
       <ol>
-        <li><a href="#41-三层如何协作">4.1 三层如何协作</a></li>
-        <li><a href="#42-三者的投入分配">4.2 三者的投入分配</a></li>
-        <li><a href="#43-常见反模式">4.3 常见反模式</a></li>
+        <li><a href="#三层如何协作">三层如何协作</a></li>
+        <li><a href="#三者的投入分配">三者的投入分配</a></li>
+        <li><a href="#常见反模式">常见反模式</a></li>
       </ol>
     </li>
-    <li><a href="#五工程建议">五、工程建议</a>
+    <li><a href="#工程建议">工程建议</a>
       <ol>
-        <li><a href="#51-从-prompt-开始但不要止于-prompt">5.1 从 Prompt 开始，但不要止于 Prompt</a></li>
-        <li><a href="#52-上下文是最值得投资的部分">5.2 上下文是最值得投资的部分</a></li>
-        <li><a href="#53-harness-做得稳比快重要">5.3 Harness 做得&quot;稳&quot;比&quot;快&quot;重要</a></li>
-        <li><a href="#54-保持可观测性">5.4 保持可观测性</a></li>
+        <li><a href="#从-prompt-开始但不要止于-prompt">从 Prompt 开始，但不要止于 Prompt</a></li>
+        <li><a href="#上下文是最值得投资的部分">上下文是最值得投资的部分</a></li>
+        <li><a href="#harness-做得稳比快重要">Harness 做得稳比快重要</a></li>
+        <li><a href="#保持可观测性">保持可观测性</a></li>
       </ol>
     </li>
     <li><a href="#小结">小结</a></li>
@@ -488,9 +488,9 @@
 </div>
 </div><p>三层从底向上逐层扩展 Agent 的能力边界：Prompt 决定推理质量，Context 决定知识边界，Harness 决定行为能力。三者缺一不可。</p>
 <hr>
-<h2 id="一prompt-engineering让模型想对">一、Prompt Engineering：让模型&quot;想对&quot;
+<h2 id="prompt-engineering让模型想对">Prompt Engineering：让模型想对
 </h2><p>Prompt Engineering 是最基础也是最先被关注的一层。它的目标是<strong>最大化模型在给定任务上的推理质量</strong>。</p>
-<h3 id="11-系统提示system-prompt">1.1 系统提示（System Prompt）
+<h3 id="系统提示">系统提示
 </h3><p>系统提示是 Agent 的&quot;宪法&quot;——定义角色、约束行为边界、设定工作规范。</p>
 <p>一个结构化的系统提示通常包含：</p>
 <div class="highlight"><div class="chroma">
@@ -510,7 +510,7 @@
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>以 Claude Code 为例，它的系统提示实质上是多层次的指令集合：CLI 内置指令 + CLAUDE.md 项目指令 + Skills 领域指令。这种分层设计让 Agent 在不同场景下自动加载最相关的规则。</p>
-<h3 id="12-指令设计原则">1.2 指令设计原则
+<h3 id="指令设计原则">指令设计原则
 </h3><p>给 Agent 写指令和给人写需求文档有相通之处。经过大量工程实践验证的设计原则：</p>
 <p><strong>具体胜于抽象</strong>：</p>
 <div class="highlight"><div class="chroma">
@@ -553,7 +553,7 @@
 </span></span><span class="line"><span class="cl">4. 步骤：具体执行步骤&#34;
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h3 id="13-思维链chain-of-thought">1.3 思维链（Chain of Thought）
+</div><h3 id="思维链">思维链
 </h3><p>引导模型逐步推理，而非直接输出答案。这是最广泛验证的 Prompt 技术之一。</p>
 <p><strong>Zero-shot CoT</strong>：在 prompt 中加入&quot;Let&rsquo;s think step by step&quot;，触发模型的分步推理能力。</p>
 <p><strong>Few-shot CoT</strong>：提供 2~3 个带推理过程的示例，让模型学会特定领域的推理模式：</p>
@@ -583,7 +583,7 @@
 </span></span><span class="line"><span class="cl">答案：...
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h3 id="14-prompt-模板与变量注入">1.4 Prompt 模板与变量注入
+</div><h3 id="prompt-模板与变量注入">Prompt 模板与变量注入
 </h3><p>生产环境中，Prompt 是动态拼接的。典型结构：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -610,30 +610,30 @@
 <pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="n">prompt</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&#34;&#34;&#34;
 </span></span></span><span class="line"><span class="cl"><span class="si">{</span><span class="n">system_prompt</span><span class="si">}</span><span class="s2">
 </span></span></span><span class="line"><span class="cl"><span class="s2">
-</span></span></span><span class="line"><span class="cl"><span class="s2">## 项目上下文
-</span></span></span><span class="line"><span class="cl"><span class="si">{</span><span class="n">project_context</span><span class="si">}</span><span class="s2">      # 从 CLAUDE.md 注入
+</span></span></span><span class="line"><span class="cl"><span class="s2"># === 项目上下文 ===
+</span></span></span><span class="line"><span class="cl"><span class="si">{</span><span class="n">project_context</span><span class="si">}</span><span class="s2">
 </span></span></span><span class="line"><span class="cl"><span class="s2">
-</span></span></span><span class="line"><span class="cl"><span class="s2">## 相关文档
-</span></span></span><span class="line"><span class="cl"><span class="si">{</span><span class="n">retrieved_docs</span><span class="si">}</span><span class="s2">        # 从 RAG 检索注入
+</span></span></span><span class="line"><span class="cl"><span class="s2"># === 相关文档 ===
+</span></span></span><span class="line"><span class="cl"><span class="si">{</span><span class="n">retrieved_docs</span><span class="si">}</span><span class="s2">
 </span></span></span><span class="line"><span class="cl"><span class="s2">
-</span></span></span><span class="line"><span class="cl"><span class="s2">## 对话历史
-</span></span></span><span class="line"><span class="cl"><span class="si">{</span><span class="n">conversation_history</span><span class="si">}</span><span class="s2">  # 从记忆系统注入
+</span></span></span><span class="line"><span class="cl"><span class="s2"># === 对话历史 ===
+</span></span></span><span class="line"><span class="cl"><span class="si">{</span><span class="n">conversation_history</span><span class="si">}</span><span class="s2">
 </span></span></span><span class="line"><span class="cl"><span class="s2">
-</span></span></span><span class="line"><span class="cl"><span class="s2">## 当前任务
+</span></span></span><span class="line"><span class="cl"><span class="s2"># === 当前任务 ===
 </span></span></span><span class="line"><span class="cl"><span class="si">{</span><span class="n">user_input</span><span class="si">}</span><span class="s2">
 </span></span></span><span class="line"><span class="cl"><span class="s2">
-</span></span></span><span class="line"><span class="cl"><span class="s2">## 补充指令
-</span></span></span><span class="line"><span class="cl"><span class="si">{</span><span class="n">skill_instructions</span><span class="si">}</span><span class="s2">    # 从匹配的 Skill 注入
+</span></span></span><span class="line"><span class="cl"><span class="s2"># === 补充指令 ===
+</span></span></span><span class="line"><span class="cl"><span class="si">{</span><span class="n">skill_instructions</span><span class="si">}</span><span class="s2">
 </span></span></span><span class="line"><span class="cl"><span class="s2">&#34;&#34;&#34;</span>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>要点：变量注入的位置和顺序影响模型对信息权重的判断。通常越靠后的内容越被&quot;重视&quot;。</p>
-<h3 id="15-prompt-engineering-的局限">1.5 Prompt Engineering 的局限
+<h3 id="prompt-engineering-的局限">Prompt Engineering 的局限
 </h3><p>Prompt 不是万能的。它改变的是模型的&quot;推理方式&quot;，但改变不了模型的&quot;知识边界&quot;和&quot;行动能力&quot;。一个精心设计的 Prompt 无法让模型回答训练数据中不存在的事实，也无法让模型读写文件——这正是 Context Engineering 和 Harness Engineering 的用武之地。</p>
 <hr>
-<h2 id="二context-engineering让模型记住">二、Context Engineering：让模型&quot;记住&quot;
+<h2 id="context-engineering让模型记住">Context Engineering：让模型记住
 </h2><p>Context Engineering 管理<strong>什么信息在什么时候进入模型的注意力窗口</strong>。它是 Prompt Engineering 的自然延伸——Prompt 决定&quot;怎么想&quot;，Context 决定&quot;基于什么想&quot;。</p>
-<h3 id="21-上下文即资产">2.1 上下文即资产
+<h3 id="上下文即资产">上下文即资产
 </h3><p>上下文窗口中的每一个 token 都是有限的资源。把上下文窗口看作一种&quot;资产&quot;需要管理：</p>
 <div class="table-wrapper"><table>
   <thead>
@@ -661,7 +661,7 @@
       </tr>
   </tbody>
 </table></div>
-<h3 id="22-上下文组装">2.2 上下文组装
+<h3 id="上下文组装">上下文组装
 </h3><p>每一次 LLM 推理前，Agent 都在做<strong>上下文组装</strong>——从多个信息源汇聚当前决策所需的最小信息集：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -702,7 +702,7 @@
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>组装的核心权衡：太少→缺乏信息→输出质量差；太多→噪声淹没关键信息→输出质量同样差。</p>
-<h3 id="23-上下文压缩">2.3 上下文压缩
+<h3 id="上下文压缩">上下文压缩
 </h3><p>当对话积累到接近上下文窗口上限时，需要压缩。常用策略：</p>
 <p><strong>摘要压缩</strong>：让 LLM 将历史对话压缩为关键信息摘要。</p>
 <div class="highlight"><div class="chroma">
@@ -733,7 +733,7 @@
 <li>第 3 层：20 轮以上 → 批量摘要</li>
 </ul>
 <p>Claude Code 的 <code>/compact</code> 命令和自动压缩机制就是这三种策略的组合。</p>
-<h3 id="24-记忆系统设计">2.4 记忆系统设计
+<h3 id="记忆系统设计">记忆系统设计
 </h3><p>记忆是 Context Engineering 的核心子系统。三层记忆架构的实际工程考量：</p>
 <p><strong>短期记忆（会话内）</strong>：</p>
 <div class="highlight"><div class="chroma">
@@ -775,7 +775,7 @@
 </div>
 </div><p><strong>工作记忆（当前任务）</strong>：</p>
 <p>工作记忆 = 当前对话上下文。不需要持久化，但需要高效管理。原则：信息越&quot;热&quot;越靠近上下文顶部，越&quot;冷&quot;越靠后或被压缩取代。</p>
-<h3 id="25-检索增强上下文">2.5 检索增强上下文
+<h3 id="检索增强上下文">检索增强上下文
 </h3><p>Context Engineering 和 RAG 有天然交集。检索到的外部文档要经过&quot;上下文适配&quot;才能进入推理窗口：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -801,9 +801,9 @@
 </div>
 </div><p>不是检索到多少塞多少。需要根据 token 预算做截断和优先级排序。</p>
 <hr>
-<h2 id="三harness-engineering让模型能做">三、Harness Engineering：让模型&quot;能做&quot;
+<h2 id="harness-engineering让模型能做">Harness Engineering：让模型能做
 </h2><p>Harness Engineering 是最容易被忽视的一层，却是 Agent 从&quot;对话机器人&quot;进化为&quot;行动系统&quot;的关键。它负责<strong>工具调用、状态管理、错误恢复、并发控制</strong>等基础设施。</p>
-<h3 id="31-什么是-harness">3.1 什么是 Harness
+<h3 id="什么是-harness">什么是 Harness
 </h3><p>Harness 直译为&quot;马具&quot;或&quot;线束&quot;——把 LLM 这匹&quot;野马&quot;套上笼头，让它能干活。可以理解为 Agent 的<strong>运行时引擎</strong>。</p>
 <p>它的核心职责：</p>
 <div class="highlight"><div class="chroma">
@@ -832,7 +832,7 @@
 </span></span><span class="line"><span class="cl"><span class="err">└──────────────────────────────────────────┘</span>
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h3 id="32-事件循环">3.2 事件循环
+</div><h3 id="事件循环">事件循环
 </h3><p>Agent 的核心执行流程是一个事件循环：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -907,7 +907,7 @@
 <li><strong>工具调用格式化</strong>：遵循 function calling 协议（JSON Schema）</li>
 <li><strong>结果注入位置</strong>：工具结果紧跟在调用指令之后，维持对话的因果链</li>
 </ul>
-<h3 id="33-工具系统设计">3.3 工具系统设计
+<h3 id="工具系统设计">工具系统设计
 </h3><p>工具定义需要清晰、可解析、低歧义。核心原则：</p>
 <p><strong>描述精确化</strong>：</p>
 <div class="highlight"><div class="chroma">
@@ -1005,7 +1005,7 @@
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>LLM 需要准确理解工具返回了什么，标准化结构能大幅降低误判。</p>
-<h3 id="34-错误处理">3.4 错误处理
+<h3 id="错误处理">错误处理
 </h3><p>工具执行不可靠——可能超时、返回异常、权限不足。Harness 需要应对：</p>
 <p><strong>重试策略</strong>：</p>
 <div class="highlight"><div class="chroma">
@@ -1055,7 +1055,7 @@
 </span></span><span class="line"><span class="cl">  └── 报告用户（无法自行解决）
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h3 id="35-并行与并发">3.5 并行与并发
+</div><h3 id="并行与并发">并行与并发
 </h3><p>无依赖的多个工具调用应该并发执行。这是 Harness 的关键优化点。</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -1080,7 +1080,7 @@
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>不需要复杂的锁机制——工具调用天然无副作用（只读）或独立（各自写不同文件）。Claude Code 的并行文件读取就是这个模式。</p>
-<h3 id="36-权限与安全">3.6 权限与安全
+<h3 id="权限与安全">权限与安全
 </h3><p>Harness 是 Agent 的安全闸门——在工具真正执行前做最终拦截：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -1134,9 +1134,9 @@
   </tbody>
 </table></div>
 <hr>
-<h2 id="四三层协同">四、三层协同
+<h2 id="三层协同">三层协同
 </h2><p>理解了三层各自职责后，关键是理解它们的协作关系。</p>
-<h3 id="41-三层如何协作">4.1 三层如何协作
+<h3 id="三层如何协作">三层如何协作
 </h3><p>以一个实际的 Agent 执行为例——用户说&quot;帮我找到项目中所有未处理的 TODO 并创建一个 GitHub Issue&quot;：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -1190,7 +1190,7 @@
 </span></span><span class="line"><span class="cl">      ↑ 提供决策所需信息
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h3 id="42-三者的投入分配">4.2 三者的投入分配
+</div><h3 id="三者的投入分配">三者的投入分配
 </h3><p>在实际工程中，三层并非平均用力。根据实践经验的投入建议：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -1205,21 +1205,21 @@
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>Context Engineering 占比最高，因为它是三者中最快变化、最难做对的——每增加一个信息源、每更换一个场景，上下文组装策略都需要调整。</p>
-<h3 id="43-常见反模式">4.3 常见反模式
+<h3 id="常见反模式">常见反模式
 </h3><p><strong>过度依赖 Prompt</strong>：试图用越来越长的 Prompt 解决所有问题，把模型当成唯一工程手段。结果是 prompt 臃肿、token 用量飙升、效果提升边际递减。</p>
 <p><strong>忽视 Context 质量</strong>：只关心&quot;塞了什么&quot;，不关心&quot;塞得对不对&quot;。检索到的文档不相关、记忆过时、压缩丢失关键信息，这些比 Prompt 写得差更致命。</p>
 <p><strong>Harness 过于简陋</strong>：工具描述模糊、错误处理缺位、没有重试机制。Agent 的&quot;智商&quot;被 Harness 拖累——不是 LLM 不知道怎么做，而是 Harness 没给它好的执行环境。</p>
 <p><strong>三层耦合过紧</strong>：Prompt 中硬编码了工具名、Context 组装逻辑嵌在 Harness 代码中。任何一层的改动都需要修改其他层，维护成本高。</p>
 <hr>
-<h2 id="五工程建议">五、工程建议
-</h2><h3 id="51-从-prompt-开始但不要止于-prompt">5.1 从 Prompt 开始，但不要止于 Prompt
+<h2 id="工程建议">工程建议
+</h2><h3 id="从-prompt-开始但不要止于-prompt">从 Prompt 开始，但不要止于 Prompt
 </h3><p>搭建 Agent 的正确顺序：先用简单 Prompt 验证 LLM 能否理解任务 → 加入 Harness 赋予行动能力 → 用 Context Engineering 扩展知识边界。</p>
 <p>这三步对应了 Agent 从&quot;能对话&quot;到&quot;能行动&quot;再到&quot;能规模化&quot;的演进路径。</p>
-<h3 id="52-上下文是最值得投资的部分">5.2 上下文是最值得投资的部分
+<h3 id="上下文是最值得投资的部分">上下文是最值得投资的部分
 </h3><p>Prompt 写出 80 分的版本后，更多的优化收益来自 Context Engineering。一个信息准确、时效性好、噪声低的上下文，比一个精心雕琢的 Prompt 对输出质量的影响更大。</p>
-<h3 id="53-harness-做得稳比快重要">5.3 Harness 做得&quot;稳&quot;比&quot;快&quot;重要
+<h3 id="harness-做得稳比快重要">Harness 做得稳比快重要
 </h3><p>工具调用的可靠性是 Agent 可用性的基础。宁可多花 1 秒做重试和校验，也不要让 Agent 在用户面前崩溃。</p>
-<h3 id="54-保持可观测性">5.4 保持可观测性
+<h3 id="保持可观测性">保持可观测性
 </h3><p>在每层加入日志和指标：</p>
 <ul>
 <li>Prompt：记录模板版本、token 用量</li>
