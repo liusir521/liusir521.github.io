@@ -7,10 +7,10 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>zh-cn</language>
         <copyright>Example Person</copyright>
-        <lastBuildDate>Fri, 10 Apr 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://liusir521.github.io/tags/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Thu, 16 Apr 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://liusir521.github.io/tags/index.xml" rel="self" type="application/rss+xml" /><item>
         <title>Agent</title>
         <link>https://liusir521.github.io/tags/agent/</link>
-        <pubDate>Fri, 10 Apr 2026 00:00:00 +0000</pubDate>
+        <pubDate>Thu, 16 Apr 2026 00:00:00 +0000</pubDate>
         
         <guid>https://liusir521.github.io/tags/agent/</guid>
         <description></description>
@@ -18,17 +18,41 @@
         <item>
         <title>AI</title>
         <link>https://liusir521.github.io/tags/ai/</link>
-        <pubDate>Fri, 10 Apr 2026 00:00:00 +0000</pubDate>
+        <pubDate>Thu, 16 Apr 2026 00:00:00 +0000</pubDate>
         
         <guid>https://liusir521.github.io/tags/ai/</guid>
         <description></description>
         </item>
         <item>
+        <title>Context Engineering</title>
+        <link>https://liusir521.github.io/tags/context-engineering/</link>
+        <pubDate>Thu, 16 Apr 2026 00:00:00 +0000</pubDate>
+        
+        <guid>https://liusir521.github.io/tags/context-engineering/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Harness Engineering</title>
+        <link>https://liusir521.github.io/tags/harness-engineering/</link>
+        <pubDate>Thu, 16 Apr 2026 00:00:00 +0000</pubDate>
+        
+        <guid>https://liusir521.github.io/tags/harness-engineering/</guid>
+        <description></description>
+        </item>
+        <item>
         <title>LLM</title>
         <link>https://liusir521.github.io/tags/llm/</link>
-        <pubDate>Fri, 10 Apr 2026 00:00:00 +0000</pubDate>
+        <pubDate>Thu, 16 Apr 2026 00:00:00 +0000</pubDate>
         
         <guid>https://liusir521.github.io/tags/llm/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Prompt Engineering</title>
+        <link>https://liusir521.github.io/tags/prompt-engineering/</link>
+        <pubDate>Thu, 16 Apr 2026 00:00:00 +0000</pubDate>
+        
+        <guid>https://liusir521.github.io/tags/prompt-engineering/</guid>
         <description></description>
         </item>
         <item>
