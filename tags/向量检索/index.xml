@@ -7,10 +7,10 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>zh-cn</language>
         <copyright>Example Person</copyright>
-        <lastBuildDate>Sun, 26 Apr 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://liusir521.github.io/tags/%E5%90%91%E9%87%8F%E6%A3%80%E7%B4%A2/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Wed, 08 Apr 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://liusir521.github.io/tags/%E5%90%91%E9%87%8F%E6%A3%80%E7%B4%A2/index.xml" rel="self" type="application/rss+xml" /><item>
         <title>RAG向量检索策略与召回优化详解</title>
         <link>https://liusir521.github.io/p/rag%E5%90%91%E9%87%8F%E6%A3%80%E7%B4%A2%E7%AD%96%E7%95%A5%E4%B8%8E%E5%8F%AC%E5%9B%9E%E4%BC%98%E5%8C%96%E8%AF%A6%E8%A7%A3/</link>
-        <pubDate>Sun, 26 Apr 2026 00:00:00 +0000</pubDate>
+        <pubDate>Wed, 08 Apr 2026 00:00:00 +0000</pubDate>
         
         <guid>https://liusir521.github.io/p/rag%E5%90%91%E9%87%8F%E6%A3%80%E7%B4%A2%E7%AD%96%E7%95%A5%E4%B8%8E%E5%8F%AC%E5%9B%9E%E4%BC%98%E5%8C%96%E8%AF%A6%E8%A7%A3/</guid>
         <description>&lt;img src="https://liusir521.github.io/p/rag%E5%90%91%E9%87%8F%E6%A3%80%E7%B4%A2%E7%AD%96%E7%95%A5%E4%B8%8E%E5%8F%AC%E5%9B%9E%E4%BC%98%E5%8C%96%E8%AF%A6%E8%A7%A3/rag.png" alt="Featured image of post RAG向量检索策略与召回优化详解" /&gt;&lt;h2 id=&#34;为什么检索是-rag-的瓶颈&#34;&gt;为什么检索是 RAG 的瓶颈

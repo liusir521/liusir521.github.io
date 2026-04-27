@@ -7,579 +7,7 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>zh-cn</language>
         <copyright>Example Person</copyright>
-        <lastBuildDate>Sun, 26 Apr 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://liusir521.github.io/tags/ai/index.xml" rel="self" type="application/rss+xml" /><item>
-        <title>RAG向量检索策略与召回优化详解</title>
-        <link>https://liusir521.github.io/p/rag%E5%90%91%E9%87%8F%E6%A3%80%E7%B4%A2%E7%AD%96%E7%95%A5%E4%B8%8E%E5%8F%AC%E5%9B%9E%E4%BC%98%E5%8C%96%E8%AF%A6%E8%A7%A3/</link>
-        <pubDate>Sun, 26 Apr 2026 00:00:00 +0000</pubDate>
-        
-        <guid>https://liusir521.github.io/p/rag%E5%90%91%E9%87%8F%E6%A3%80%E7%B4%A2%E7%AD%96%E7%95%A5%E4%B8%8E%E5%8F%AC%E5%9B%9E%E4%BC%98%E5%8C%96%E8%AF%A6%E8%A7%A3/</guid>
-        <description>&lt;img src="https://liusir521.github.io/p/rag%E5%90%91%E9%87%8F%E6%A3%80%E7%B4%A2%E7%AD%96%E7%95%A5%E4%B8%8E%E5%8F%AC%E5%9B%9E%E4%BC%98%E5%8C%96%E8%AF%A6%E8%A7%A3/rag.png" alt="Featured image of post RAG向量检索策略与召回优化详解" /&gt;&lt;h2 id=&#34;为什么检索是-rag-的瓶颈&#34;&gt;为什么检索是 RAG 的瓶颈
-&lt;/h2&gt;&lt;p&gt;RAG 系统的回答质量取决于 LLM 生成质量，但生成质量的天花板由&lt;strong&gt;检索环节&lt;/strong&gt;决定。检索回来的文档如果不相关，LLM 再强也给不出正确答案——垃圾进，垃圾出。&lt;/p&gt;
-&lt;p&gt;RAG 的核心瓶颈不是生成，是&lt;strong&gt;召回（Recall）&lt;/strong&gt;。&lt;/p&gt;
-&lt;p&gt;据统计，企业 RAG 项目失败的案例中，60% 以上根因在检索环节：检索不到、检索不准、检索到的内容噪声太大。本文深入 RAG 检索模块，系统性地梳理向量检索策略和召回优化手段。&lt;/p&gt;
-&lt;h2 id=&#34;基础文本如何变成向量&#34;&gt;基础：文本如何变成向量
-&lt;/h2&gt;&lt;h3 id=&#34;嵌入模型embedding-model&#34;&gt;嵌入模型（Embedding Model）
-&lt;/h3&gt;&lt;p&gt;嵌入模型将文本映射到高维向量空间。语义相近的文本，向量距离也相近。&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
-&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
-&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&amp;#34;今天天气真好&amp;#34; → [0.12, -0.34, 0.56, ...]  (1536维)
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&amp;#34;今日气候宜人&amp;#34; → [0.11, -0.32, 0.54, ...]  (向量距离很近)
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&amp;#34;数据库索引优化&amp;#34; → [-0.78, 0.23, 0.91, ...] (向量距离很远)
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-&lt;/div&gt;
-&lt;/div&gt;&lt;h3 id=&#34;主流嵌入模型选型&#34;&gt;主流嵌入模型选型
-&lt;/h3&gt;&lt;table&gt;
-  &lt;thead&gt;
-      &lt;tr&gt;
-          &lt;th&gt;模型&lt;/th&gt;
-          &lt;th&gt;维度&lt;/th&gt;
-          &lt;th&gt;最大输入&lt;/th&gt;
-          &lt;th&gt;多语言&lt;/th&gt;
-          &lt;th&gt;开源&lt;/th&gt;
-      &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-      &lt;tr&gt;
-          &lt;td&gt;OpenAI text-embedding-3-large&lt;/td&gt;
-          &lt;td&gt;256~3072&lt;/td&gt;
-          &lt;td&gt;8192 token&lt;/td&gt;
-          &lt;td&gt;一般&lt;/td&gt;
-          &lt;td&gt;否&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;OpenAI text-embedding-3-small&lt;/td&gt;
-          &lt;td&gt;512~1536&lt;/td&gt;
-          &lt;td&gt;8192 token&lt;/td&gt;
-          &lt;td&gt;一般&lt;/td&gt;
-          &lt;td&gt;否&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;BGE-M3 (BAAI)&lt;/td&gt;
-          &lt;td&gt;1024&lt;/td&gt;
-          &lt;td&gt;8192 token&lt;/td&gt;
-          &lt;td&gt;优&lt;/td&gt;
-          &lt;td&gt;是&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;Cohere Embed v3&lt;/td&gt;
-          &lt;td&gt;1024&lt;/td&gt;
-          &lt;td&gt;512 token&lt;/td&gt;
-          &lt;td&gt;优&lt;/td&gt;
-          &lt;td&gt;否&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;jina-embeddings-v3&lt;/td&gt;
-          &lt;td&gt;1024&lt;/td&gt;
-          &lt;td&gt;8192 token&lt;/td&gt;
-          &lt;td&gt;优&lt;/td&gt;
-          &lt;td&gt;是&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;E5-mistral-7b-instruct&lt;/td&gt;
-          &lt;td&gt;4096&lt;/td&gt;
-          &lt;td&gt;32768 token&lt;/td&gt;
-          &lt;td&gt;良&lt;/td&gt;
-          &lt;td&gt;是&lt;/td&gt;
-      &lt;/tr&gt;
-  &lt;/tbody&gt;
-&lt;/table&gt;
-&lt;p&gt;选型建议：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;中文为主&lt;/strong&gt;：BGE-M3 是首选，多语言能力强&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;对维度敏感&lt;/strong&gt;：OpenAI 支持自定义维度，可平衡精度和效率&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;本地部署&lt;/strong&gt;：BGE-M3 或 E5 系列&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;长文档&lt;/strong&gt;：jina-embeddings-v3 或 E5-mistral&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h3 id=&#34;相似度度量&#34;&gt;相似度度量
-&lt;/h3&gt;&lt;p&gt;检索的本质是在向量空间中找最接近的 top-k 个向量：&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;余弦相似度&lt;/strong&gt;（最常用）：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
-&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
-&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;cos(u, v) = (u·v) / (|u|·|v|)
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-&lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;值域 [-1, 1]，越接近 1 越相似。对方向敏感，不受向量长度影响。&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;欧氏距离&lt;/strong&gt;：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
-&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
-&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;d(u, v) = sqrt(Σ(ui - vi)²)
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-&lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;对向量长度敏感，适合归一化后的向量。&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;内积（Dot Product）&lt;/strong&gt;：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
-&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
-&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;u·v = Σ(ui × vi)
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-&lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;适合预归一化的向量（如 OpenAI 嵌入），计算开销最小。&lt;/p&gt;
-&lt;p&gt;多数向量数据库默认使用余弦相似度，这也是嵌入模型训练时最常用的一致性目标。&lt;/p&gt;
-&lt;h2 id=&#34;基础检索策略&#34;&gt;基础检索策略
-&lt;/h2&gt;&lt;h3 id=&#34;密集检索dense-retrieval&#34;&gt;密集检索（Dense Retrieval）
-&lt;/h3&gt;&lt;p&gt;纯向量检索，直接用 query 向量在向量库中做 ANN（近似最近邻）搜索：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
-&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
-&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# 伪代码&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;query_vec&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;embedding_model&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;encode&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;用户的提问&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;results&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;vector_db&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;search&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;query_vec&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;top_k&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;10&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-&lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;优点：语义理解强，能召回字面不同但意思相同的文档。&lt;/p&gt;
-&lt;p&gt;缺点：对专有名词、精确 ID、数字等不敏感。比如&amp;quot;订单号 ORD-2024001&amp;quot;这种情况，纯向量检索容易跑偏。&lt;/p&gt;
-&lt;h3 id=&#34;稀疏检索sparse-retrieval--bm25&#34;&gt;稀疏检索（Sparse Retrieval / BM25）
-&lt;/h3&gt;&lt;p&gt;传统搜索引擎的核心算法，基于词频-逆文档频率（TF-IDF）：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
-&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
-&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;BM25(q, d) = Σ IDF(qi) × TF(qi, d) × (k1 + 1) / (TF(qi, d) + k1 × ...)
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-&lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;优点：精确关键词匹配，专有名词、编码、数字等场景表现好。&lt;/p&gt;
-&lt;p&gt;缺点：不懂语义。搜索&amp;quot;怎么连接到数据库&amp;quot;匹配不到&amp;quot;如何建立数据库连接&amp;quot;。&lt;/p&gt;
-&lt;h3 id=&#34;混合检索hybrid-search&#34;&gt;混合检索（Hybrid Search）
-&lt;/h3&gt;&lt;p&gt;密集 + 稀疏 = 互补融合，这是目前工业界的主流方案：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
-&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
-&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# 伪代码&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;dense_results&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;vector_db&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;search&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;query_vec&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;top_k&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;20&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;   &lt;span class=&#34;c1&#34;&gt;# 语义检索&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;sparse_results&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;bm25_index&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;search&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;query_text&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;top_k&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;20&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;c1&#34;&gt;# 关键词检索&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;final_results&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;fusion&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;dense_results&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;sparse_results&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;    &lt;span class=&#34;c1&#34;&gt;# 融合排序&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-&lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;&lt;strong&gt;融合策略&lt;/strong&gt;：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;RRF（Reciprocal Rank Fusion）&lt;/strong&gt;：&lt;code&gt;score(d) = Σ 1/(k + rank_i(d))&lt;/code&gt;，简单有效，无需调权&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;加权求和&lt;/strong&gt;：&lt;code&gt;score(d) = α × dense_score + β × sparse_score&lt;/code&gt;，需要调超参数&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;学习融合&lt;/strong&gt;：用一个小模型学习 dense 和 sparse 的融合权重&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;RRF 因其无需调参、效果稳定，是目前混合检索最常用的融合策略。&lt;/p&gt;
-&lt;h2 id=&#34;召回优化&#34;&gt;召回优化
-&lt;/h2&gt;&lt;h3 id=&#34;查询改写query-rewriting&#34;&gt;查询改写（Query Rewriting）
-&lt;/h3&gt;&lt;p&gt;用户自然的提问方式，和文档的书写风格，往往存在巨大差异。&lt;/p&gt;
-&lt;p&gt;用户问：&amp;ldquo;上次那个登录报错的 bug 修好了吗？&amp;rdquo;&lt;/p&gt;
-&lt;p&gt;但知识库里的文档写的是：&amp;ldquo;2026-04-15 修复 auth 模块 session 过期导致 401 的问题&amp;rdquo;。&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;直接用原问题检索，大概率召回不到&lt;/strong&gt;。&lt;/p&gt;
-&lt;p&gt;解决方案——用 LLM 改写查询：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
-&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
-&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;原始查询 → LLM 改写 → 多个标准化查询 → 检索 → 合并去重
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Prompt:
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&amp;#34;请将用户的问题改写为多个适合知识库检索的关键词查询。提取关键实体、技术术语和可能的同义表达。
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;用户问题：上次那个登录报错的 bug 修好了吗？
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;输出：
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;1. 登录 报错 bug 修复
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;2. auth 认证 错误 修复记录
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;3. session 过期 401 错误 fix
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;4. 登录失败 问题修复 changelog&amp;#34;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-&lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;查询改写的常见模式：&lt;/p&gt;
-&lt;table&gt;
-  &lt;thead&gt;
-      &lt;tr&gt;
-          &lt;th&gt;模式&lt;/th&gt;
-          &lt;th&gt;做法&lt;/th&gt;
-          &lt;th&gt;适用&lt;/th&gt;
-      &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-      &lt;tr&gt;
-          &lt;td&gt;关键词提取&lt;/td&gt;
-          &lt;td&gt;LLM 提取关键实体和术语&lt;/td&gt;
-          &lt;td&gt;用户问题口语化&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;多角度生成&lt;/td&gt;
-          &lt;td&gt;从不同角度生成多个查询&lt;/td&gt;
-          &lt;td&gt;问题模糊、维度多&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;假设文档&lt;/td&gt;
-          &lt;td&gt;让 LLM 先生成假想答案，用答案当 query 检索&lt;/td&gt;
-          &lt;td&gt;问题复杂需要推理&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;逐步细化&lt;/td&gt;
-          &lt;td&gt;根据检索结果迭代改写 query&lt;/td&gt;
-          &lt;td&gt;初检不理想时&lt;/td&gt;
-      &lt;/tr&gt;
-  &lt;/tbody&gt;
-&lt;/table&gt;
-&lt;h3 id=&#34;多路召回multi-channel-recall&#34;&gt;多路召回（Multi-Channel Recall）
-&lt;/h3&gt;&lt;p&gt;一条检索路径容易漏，多条路径交叉覆盖：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
-&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;7
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;8
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
-&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;query
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  ├── 路径1：原始 query → 密集检索 → Top-20
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  ├── 路径2：改写 query → 密集检索 → Top-20
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  ├── 路径3：原始 query → BM25 稀疏检索 → Top-20
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  ├── 路径4：提取实体 → 精确过滤检索 → Top-10
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  └── 路径5：query 向量 → 跨模态检索 → Top-10
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;            ↓
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;         RRF 融合 → 最终 Top-10
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-&lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;这个架构是目前生产级 RAG 的标配。多路召回的本质是&lt;strong&gt;用冗余换覆盖&lt;/strong&gt;，用融合算法保证最终结果的质量。&lt;/p&gt;
-&lt;h3 id=&#34;重排序re-ranking&#34;&gt;重排序（Re-ranking）
-&lt;/h3&gt;&lt;p&gt;初检的 Top-K 只是&amp;quot;粗排&amp;quot;——向量相似度高不代表真正语义相关。重排序用小模型对初检结果做精排。&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
-&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
-&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;初检 Top-50 → Re-ranker → 精排 Top-5 → 送 LLM 生成
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-&lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;&lt;strong&gt;常用 Re-ranker&lt;/strong&gt;：&lt;/p&gt;
-&lt;table&gt;
-  &lt;thead&gt;
-      &lt;tr&gt;
-          &lt;th&gt;模型&lt;/th&gt;
-          &lt;th&gt;特点&lt;/th&gt;
-      &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-      &lt;tr&gt;
-          &lt;td&gt;Cohere Rerank v3&lt;/td&gt;
-          &lt;td&gt;云服务，效果优秀&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;BGE-Reranker-v2-m3&lt;/td&gt;
-          &lt;td&gt;开源，支持多语言&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;Cross-Encoder (SBERT)&lt;/td&gt;
-          &lt;td&gt;经典方案，准确但较慢&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;LLM as Reranker&lt;/td&gt;
-          &lt;td&gt;用 LLM 直接打分排序&lt;/td&gt;
-      &lt;/tr&gt;
-  &lt;/tbody&gt;
-&lt;/table&gt;
-&lt;p&gt;Re-ranker 本质是 Cross-Encoder 架构：将 query 和 document 拼接后送入模型，输出一个 0~1 的相关性分数。比向量余弦相似度更准确，但计算开销大，所以只对初检 Top-K 使用。&lt;/p&gt;
-&lt;p&gt;重排序的关键权衡：K 越大，精排效果越好，但延迟和成本也越高。经验值 20~50 是一个不错的起点。&lt;/p&gt;
-&lt;h3 id=&#34;分段检索与上下文扩展&#34;&gt;分段检索与上下文扩展
-&lt;/h3&gt;&lt;p&gt;检索时只返回匹配的 chunk，但 chunk 前后可能有重要上下文。需要在检索后做上下文扩展：&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;窗口扩展&lt;/strong&gt;：返回匹配 chunk + 前后各 N 个 chunk&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
-&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
-&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;检索命中 chunk 5 → 实际返回 chunk 3, 4, 5, 6, 7
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-&lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;&lt;strong&gt;句子滑动窗口&lt;/strong&gt;：以匹配句子为中心，前后各取 M 个句子&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;父文档检索&lt;/strong&gt;：检索小 chunk，返回其所属的父文档&lt;/p&gt;
-&lt;p&gt;这就是 &lt;strong&gt;Small-to-Big&lt;/strong&gt; 策略：用小粒度做检索（避免噪声），用大粒度喂 LLM（保留上下文）。&lt;/p&gt;
-&lt;h2 id=&#34;索引优化&#34;&gt;索引优化
-&lt;/h2&gt;&lt;h3 id=&#34;分块策略对检索的影响&#34;&gt;分块策略对检索的影响
-&lt;/h3&gt;&lt;p&gt;分块是 RAG 的&amp;quot;基础工程&amp;quot;，分块方式直接决定检索质量：&lt;/p&gt;
-&lt;table&gt;
-  &lt;thead&gt;
-      &lt;tr&gt;
-          &lt;th&gt;策略&lt;/th&gt;
-          &lt;th&gt;做法&lt;/th&gt;
-          &lt;th&gt;检索影响&lt;/th&gt;
-      &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-      &lt;tr&gt;
-          &lt;td&gt;固定 Token 分块&lt;/td&gt;
-          &lt;td&gt;每 512/1024 token 切一块&lt;/td&gt;
-          &lt;td&gt;简单但容易割裂语义&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;递归字符分割&lt;/td&gt;
-          &lt;td&gt;按段落→句子→词的优先级切&lt;/td&gt;
-          &lt;td&gt;尽量保留自然边界&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;语义分块&lt;/td&gt;
-          &lt;td&gt;LLM 判断分块边界&lt;/td&gt;
-          &lt;td&gt;效果最好但成本高&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;层级分块&lt;/td&gt;
-          &lt;td&gt;父子文档多层索引&lt;/td&gt;
-          &lt;td&gt;支持多粒度检索&lt;/td&gt;
-      &lt;/tr&gt;
-  &lt;/tbody&gt;
-&lt;/table&gt;
-&lt;p&gt;&lt;strong&gt;经验分块参数&lt;/strong&gt;：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;文档问答：256~512 token&lt;/li&gt;
-&lt;li&gt;技术文档：512~1024 token&lt;/li&gt;
-&lt;li&gt;长文总结：1024~2048 token&lt;/li&gt;
-&lt;li&gt;chunk 重叠度：10%~20%&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h3 id=&#34;元数据过滤&#34;&gt;元数据过滤
-&lt;/h3&gt;&lt;p&gt;纯向量检索是在全库中搜索。加上元数据过滤，可以先缩小搜索范围：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
-&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
-&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# 伪代码：带过滤的向量检索&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;results&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;vector_db&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;search&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;query_vec&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;top_k&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;20&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;nb&#34;&gt;filter&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;s2&#34;&gt;&amp;#34;doc_type&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;技术文档&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;    &lt;span class=&#34;c1&#34;&gt;# 只搜技术文档&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;s2&#34;&gt;&amp;#34;date&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;&amp;gt;2026-01-01&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;     &lt;span class=&#34;c1&#34;&gt;# 只看今年&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;s2&#34;&gt;&amp;#34;department&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;后端组&amp;#34;&lt;/span&gt;      &lt;span class=&#34;c1&#34;&gt;# 只看本组&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-&lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;元数据设计原则：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;记录时间戳（时效性过滤）&lt;/li&gt;
-&lt;li&gt;标注文档类型（分类过滤）&lt;/li&gt;
-&lt;li&gt;保留来源路径（可追溯）&lt;/li&gt;
-&lt;li&gt;添加自定义标签（业务过滤）&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h3 id=&#34;层级索引hierarchical-index&#34;&gt;层级索引（Hierarchical Index）
-&lt;/h3&gt;&lt;p&gt;对于大型知识库，全库平面检索效率低、精度差。层级索引先定位范围再精细检索：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
-&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
-&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;用户 query
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  │
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  ▼
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;第一层：粗粒度检索（文档/章节级）
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  → 定位到 &amp;#34;后端-数据库-MySQL&amp;#34; 目录下的 5 篇文档
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  │
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  ▼
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;第二层：细粒度检索（段落/chunk级）
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  → 在这 5 篇文档的 chunk 中检索
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  │
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  ▼
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;返回 Top-10
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-&lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;适合文档数量 &amp;gt; 10,000 的大规模场景。&lt;/p&gt;
-&lt;h2 id=&#34;高级检索技术&#34;&gt;高级检索技术
-&lt;/h2&gt;&lt;h3 id=&#34;hydehypothetical-document-embeddings&#34;&gt;HyDE（Hypothetical Document Embeddings）
-&lt;/h3&gt;&lt;p&gt;用 LLM 先生成假想答案，再用假想答案的向量去检索：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
-&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
-&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;用户问题 → LLM 生成假设答案 → 假设答案向量化 → 检索 → 真实文档
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-&lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;为什么有效？因为真实文档和&amp;quot;假设答案&amp;quot;往往比和&amp;quot;简短问题&amp;quot;在向量空间中更接近。尤其在问答类场景中效果显著。&lt;/p&gt;
-&lt;p&gt;代价：多一次 LLM 调用，增加延迟和成本。&lt;/p&gt;
-&lt;h3 id=&#34;自查询检索self-query-retrieval&#34;&gt;自查询检索（Self-Query Retrieval）
-&lt;/h3&gt;&lt;p&gt;让 LLM 从用户问题中提取结构化查询条件 + 语义向量：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
-&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
-&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;用户：&amp;#34;2026 年 3 月之后后端组写的关于 Redis 的文章&amp;#34;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;LLM 提取：
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;{
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &amp;#34;semantic_query&amp;#34;: &amp;#34;Redis 文章&amp;#34;,
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &amp;#34;filter&amp;#34;: {
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &amp;#34;date&amp;#34;: &amp;#34;&amp;gt;2026-03-01&amp;#34;,
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &amp;#34;department&amp;#34;: &amp;#34;后端组&amp;#34;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  }
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;}
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-&lt;/div&gt;
-&lt;/div&gt;&lt;h3 id=&#34;多跳检索multi-hop-retrieval&#34;&gt;多跳检索（Multi-hop Retrieval）
-&lt;/h3&gt;&lt;p&gt;复杂问题需要多步检索，每一步的结果指导下一步：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
-&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
-&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;问题：张三所在部门的数据库负责人是谁？
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Hop 1：检索 &amp;#34;张三&amp;#34; → 得到 &amp;#34;张三，后端开发部&amp;#34;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Hop 2：检索 &amp;#34;后端开发部 数据库负责人&amp;#34; → 得到 &amp;#34;李四&amp;#34;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-&lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;需要 Agent 范式配合——Agent 判断是否需要多跳、何时终止。&lt;/p&gt;
-&lt;h3 id=&#34;查询分解query-decomposition&#34;&gt;查询分解（Query Decomposition）
-&lt;/h3&gt;&lt;p&gt;复杂问题拆解为多个子问题分别检索：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
-&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;7
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
-&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;问题：Redis Cluster 和 Codis 的对比，以及各自的适用场景
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;拆解：
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;1. &amp;#34;Redis Cluster 架构特点优势劣势&amp;#34;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;2. &amp;#34;Codis 架构特点优势劣势&amp;#34;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;3. &amp;#34;Redis Cluster 适用场景&amp;#34;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;4. &amp;#34;Codis 适用场景&amp;#34;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-&lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;各子问题检索结果汇总去重后送给 LLM。&lt;/p&gt;
-&lt;h2 id=&#34;检索效果评估&#34;&gt;检索效果评估
-&lt;/h2&gt;&lt;h3 id=&#34;关键指标&#34;&gt;关键指标
-&lt;/h3&gt;&lt;table&gt;
-  &lt;thead&gt;
-      &lt;tr&gt;
-          &lt;th&gt;指标&lt;/th&gt;
-          &lt;th&gt;含义&lt;/th&gt;
-          &lt;th&gt;目标&lt;/th&gt;
-      &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-      &lt;tr&gt;
-          &lt;td&gt;Recall@K&lt;/td&gt;
-          &lt;td&gt;Top-K 中相关文档占全部相关文档的比例&lt;/td&gt;
-          &lt;td&gt;越高越好（&amp;gt;80%）&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;Precision@K&lt;/td&gt;
-          &lt;td&gt;Top-K 中相关文档的比例&lt;/td&gt;
-          &lt;td&gt;越高越好&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;MRR&lt;/td&gt;
-          &lt;td&gt;第一个相关文档排名的倒数均值&lt;/td&gt;
-          &lt;td&gt;越高越好&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;NDCG@K&lt;/td&gt;
-          &lt;td&gt;考虑排序位置的归一化指标&lt;/td&gt;
-          &lt;td&gt;越高越好（&amp;gt;0.7）&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;Hit Rate&lt;/td&gt;
-          &lt;td&gt;至少命中一个相关文档的比例&lt;/td&gt;
-          &lt;td&gt;越高越好（&amp;gt;90%）&lt;/td&gt;
-      &lt;/tr&gt;
-  &lt;/tbody&gt;
-&lt;/table&gt;
-&lt;h3 id=&#34;构建评估集&#34;&gt;构建评估集
-&lt;/h3&gt;&lt;p&gt;需要一个&amp;quot;黄金测试集&amp;quot;——(问题, 正确答案/相关文档)对：&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;从历史问答中收集 100~500 个真实问题&lt;/li&gt;
-&lt;li&gt;人工标注每个问题对应的正确答案和应该召回的文档&lt;/li&gt;
-&lt;li&gt;用评估集测试不同检索策略的效果&lt;/li&gt;
-&lt;/ol&gt;
-&lt;p&gt;没有评估集的调优是盲调——你不知道改了参数到底是变好了还是变坏了。&lt;/p&gt;
-&lt;h2 id=&#34;实践检索优化清单&#34;&gt;实践：检索优化清单
-&lt;/h2&gt;&lt;p&gt;按优先级排列的调试清单：&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;&lt;strong&gt;[必做] 检查嵌入模型&lt;/strong&gt;：模型和语料语言是否匹配？中文用 BGE-M3 通常比 OpenAI 好&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;[必做] 检查分块质量&lt;/strong&gt;：切出来的 chunk 语义完整吗？相邻 chunk 之间有信息断层吗？&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;[必做] 上混合检索&lt;/strong&gt;：密集 + BM25，用 RRF 融合，这个改动通常能带来 10%~20% 的召回提升&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;[推荐] 加上重排序&lt;/strong&gt;：初检 Top-50 + BGE-Reranker 精排 Top-5，对最终答案质量提升显著&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;[推荐] 查询改写&lt;/strong&gt;：如果用户提问偏口语化，加一层 LLM 改写&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;[进阶] 多路召回&lt;/strong&gt;：在混合检索基础上增加改写查询、实体匹配等召回通道&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;[进阶] Small-to-Big&lt;/strong&gt;：小粒度检索 + 父文档上下文扩展&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;[高阶] HyDE&lt;/strong&gt;：问答类场景效果明显，但需评估额外延迟&lt;/li&gt;
-&lt;/ol&gt;
-&lt;h2 id=&#34;小结&#34;&gt;小结
-&lt;/h2&gt;&lt;p&gt;RAG 的检索优化本质是做减法：从海量文档中筛出最相关的那几条，同时尽可能不遗漏。&lt;/p&gt;
-&lt;p&gt;核心链路：&lt;strong&gt;好的嵌入模型 → 合理的分块 → 混合检索（密集+稀疏）→ 重排序 → 上下文扩展 → 喂给 LLM&lt;/strong&gt;&lt;/p&gt;
-&lt;p&gt;在这个链路上，每一个环节都有优化空间，但混合检索 + 重排序是高性价比的组合——一个保证覆盖，一个保证精度。在这套基本功之上，再按实际场景评估是否需要查询改写、多路召回、HyDE 等高级策略。&lt;/p&gt;
-</description>
-        </item>
-        <item>
+        <lastBuildDate>Fri, 10 Apr 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://liusir521.github.io/tags/ai/index.xml" rel="self" type="application/rss+xml" /><item>
         <title>AI Agent 架构详解：范式、记忆、规划与工具系统</title>
         <link>https://liusir521.github.io/p/ai-agent-%E6%9E%B6%E6%9E%84%E8%AF%A6%E8%A7%A3%E8%8C%83%E5%BC%8F%E8%AE%B0%E5%BF%86%E8%A7%84%E5%88%92%E4%B8%8E%E5%B7%A5%E5%85%B7%E7%B3%BB%E7%BB%9F/</link>
         <pubDate>Fri, 10 Apr 2026 00:00:00 +0000</pubDate>
@@ -1167,6 +595,578 @@
 &lt;li&gt;&lt;strong&gt;工具&lt;/strong&gt;是 Agent 与世界的接口：定义清晰、错误容忍、权限可控、并行高效&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;理解这四个模块，就能系统性地设计和改进 Agent 系统，而不仅仅是&amp;quot;给 LLM 加一些工具然后祈祷它能跑通&amp;quot;。&lt;/p&gt;
+</description>
+        </item>
+        <item>
+        <title>RAG向量检索策略与召回优化详解</title>
+        <link>https://liusir521.github.io/p/rag%E5%90%91%E9%87%8F%E6%A3%80%E7%B4%A2%E7%AD%96%E7%95%A5%E4%B8%8E%E5%8F%AC%E5%9B%9E%E4%BC%98%E5%8C%96%E8%AF%A6%E8%A7%A3/</link>
+        <pubDate>Wed, 08 Apr 2026 00:00:00 +0000</pubDate>
+        
+        <guid>https://liusir521.github.io/p/rag%E5%90%91%E9%87%8F%E6%A3%80%E7%B4%A2%E7%AD%96%E7%95%A5%E4%B8%8E%E5%8F%AC%E5%9B%9E%E4%BC%98%E5%8C%96%E8%AF%A6%E8%A7%A3/</guid>
+        <description>&lt;img src="https://liusir521.github.io/p/rag%E5%90%91%E9%87%8F%E6%A3%80%E7%B4%A2%E7%AD%96%E7%95%A5%E4%B8%8E%E5%8F%AC%E5%9B%9E%E4%BC%98%E5%8C%96%E8%AF%A6%E8%A7%A3/rag.png" alt="Featured image of post RAG向量检索策略与召回优化详解" /&gt;&lt;h2 id=&#34;为什么检索是-rag-的瓶颈&#34;&gt;为什么检索是 RAG 的瓶颈
+&lt;/h2&gt;&lt;p&gt;RAG 系统的回答质量取决于 LLM 生成质量，但生成质量的天花板由&lt;strong&gt;检索环节&lt;/strong&gt;决定。检索回来的文档如果不相关，LLM 再强也给不出正确答案——垃圾进，垃圾出。&lt;/p&gt;
+&lt;p&gt;RAG 的核心瓶颈不是生成，是&lt;strong&gt;召回（Recall）&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;据统计，企业 RAG 项目失败的案例中，60% 以上根因在检索环节：检索不到、检索不准、检索到的内容噪声太大。本文深入 RAG 检索模块，系统性地梳理向量检索策略和召回优化手段。&lt;/p&gt;
+&lt;h2 id=&#34;基础文本如何变成向量&#34;&gt;基础：文本如何变成向量
+&lt;/h2&gt;&lt;h3 id=&#34;嵌入模型embedding-model&#34;&gt;嵌入模型（Embedding Model）
+&lt;/h3&gt;&lt;p&gt;嵌入模型将文本映射到高维向量空间。语义相近的文本，向量距离也相近。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&amp;#34;今天天气真好&amp;#34; → [0.12, -0.34, 0.56, ...]  (1536维)
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&amp;#34;今日气候宜人&amp;#34; → [0.11, -0.32, 0.54, ...]  (向量距离很近)
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&amp;#34;数据库索引优化&amp;#34; → [-0.78, 0.23, 0.91, ...] (向量距离很远)
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id=&#34;主流嵌入模型选型&#34;&gt;主流嵌入模型选型
+&lt;/h3&gt;&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;模型&lt;/th&gt;
+          &lt;th&gt;维度&lt;/th&gt;
+          &lt;th&gt;最大输入&lt;/th&gt;
+          &lt;th&gt;多语言&lt;/th&gt;
+          &lt;th&gt;开源&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;OpenAI text-embedding-3-large&lt;/td&gt;
+          &lt;td&gt;256~3072&lt;/td&gt;
+          &lt;td&gt;8192 token&lt;/td&gt;
+          &lt;td&gt;一般&lt;/td&gt;
+          &lt;td&gt;否&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;OpenAI text-embedding-3-small&lt;/td&gt;
+          &lt;td&gt;512~1536&lt;/td&gt;
+          &lt;td&gt;8192 token&lt;/td&gt;
+          &lt;td&gt;一般&lt;/td&gt;
+          &lt;td&gt;否&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;BGE-M3 (BAAI)&lt;/td&gt;
+          &lt;td&gt;1024&lt;/td&gt;
+          &lt;td&gt;8192 token&lt;/td&gt;
+          &lt;td&gt;优&lt;/td&gt;
+          &lt;td&gt;是&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Cohere Embed v3&lt;/td&gt;
+          &lt;td&gt;1024&lt;/td&gt;
+          &lt;td&gt;512 token&lt;/td&gt;
+          &lt;td&gt;优&lt;/td&gt;
+          &lt;td&gt;否&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;jina-embeddings-v3&lt;/td&gt;
+          &lt;td&gt;1024&lt;/td&gt;
+          &lt;td&gt;8192 token&lt;/td&gt;
+          &lt;td&gt;优&lt;/td&gt;
+          &lt;td&gt;是&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;E5-mistral-7b-instruct&lt;/td&gt;
+          &lt;td&gt;4096&lt;/td&gt;
+          &lt;td&gt;32768 token&lt;/td&gt;
+          &lt;td&gt;良&lt;/td&gt;
+          &lt;td&gt;是&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;选型建议：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;中文为主&lt;/strong&gt;：BGE-M3 是首选，多语言能力强&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;对维度敏感&lt;/strong&gt;：OpenAI 支持自定义维度，可平衡精度和效率&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;本地部署&lt;/strong&gt;：BGE-M3 或 E5 系列&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;长文档&lt;/strong&gt;：jina-embeddings-v3 或 E5-mistral&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;相似度度量&#34;&gt;相似度度量
+&lt;/h3&gt;&lt;p&gt;检索的本质是在向量空间中找最接近的 top-k 个向量：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;余弦相似度&lt;/strong&gt;（最常用）：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;cos(u, v) = (u·v) / (|u|·|v|)
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;值域 [-1, 1]，越接近 1 越相似。对方向敏感，不受向量长度影响。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;欧氏距离&lt;/strong&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;d(u, v) = sqrt(Σ(ui - vi)²)
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;对向量长度敏感，适合归一化后的向量。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;内积（Dot Product）&lt;/strong&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;u·v = Σ(ui × vi)
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;适合预归一化的向量（如 OpenAI 嵌入），计算开销最小。&lt;/p&gt;
+&lt;p&gt;多数向量数据库默认使用余弦相似度，这也是嵌入模型训练时最常用的一致性目标。&lt;/p&gt;
+&lt;h2 id=&#34;基础检索策略&#34;&gt;基础检索策略
+&lt;/h2&gt;&lt;h3 id=&#34;密集检索dense-retrieval&#34;&gt;密集检索（Dense Retrieval）
+&lt;/h3&gt;&lt;p&gt;纯向量检索，直接用 query 向量在向量库中做 ANN（近似最近邻）搜索：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# 伪代码&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;query_vec&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;embedding_model&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;encode&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;用户的提问&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;results&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;vector_db&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;search&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;query_vec&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;top_k&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;10&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;优点：语义理解强，能召回字面不同但意思相同的文档。&lt;/p&gt;
+&lt;p&gt;缺点：对专有名词、精确 ID、数字等不敏感。比如&amp;quot;订单号 ORD-2024001&amp;quot;这种情况，纯向量检索容易跑偏。&lt;/p&gt;
+&lt;h3 id=&#34;稀疏检索sparse-retrieval--bm25&#34;&gt;稀疏检索（Sparse Retrieval / BM25）
+&lt;/h3&gt;&lt;p&gt;传统搜索引擎的核心算法，基于词频-逆文档频率（TF-IDF）：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;BM25(q, d) = Σ IDF(qi) × TF(qi, d) × (k1 + 1) / (TF(qi, d) + k1 × ...)
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;优点：精确关键词匹配，专有名词、编码、数字等场景表现好。&lt;/p&gt;
+&lt;p&gt;缺点：不懂语义。搜索&amp;quot;怎么连接到数据库&amp;quot;匹配不到&amp;quot;如何建立数据库连接&amp;quot;。&lt;/p&gt;
+&lt;h3 id=&#34;混合检索hybrid-search&#34;&gt;混合检索（Hybrid Search）
+&lt;/h3&gt;&lt;p&gt;密集 + 稀疏 = 互补融合，这是目前工业界的主流方案：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# 伪代码&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;dense_results&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;vector_db&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;search&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;query_vec&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;top_k&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;20&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;   &lt;span class=&#34;c1&#34;&gt;# 语义检索&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;sparse_results&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;bm25_index&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;search&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;query_text&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;top_k&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;20&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;c1&#34;&gt;# 关键词检索&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;final_results&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;fusion&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;dense_results&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;sparse_results&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;    &lt;span class=&#34;c1&#34;&gt;# 融合排序&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;strong&gt;融合策略&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;RRF（Reciprocal Rank Fusion）&lt;/strong&gt;：&lt;code&gt;score(d) = Σ 1/(k + rank_i(d))&lt;/code&gt;，简单有效，无需调权&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;加权求和&lt;/strong&gt;：&lt;code&gt;score(d) = α × dense_score + β × sparse_score&lt;/code&gt;，需要调超参数&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;学习融合&lt;/strong&gt;：用一个小模型学习 dense 和 sparse 的融合权重&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;RRF 因其无需调参、效果稳定，是目前混合检索最常用的融合策略。&lt;/p&gt;
+&lt;h2 id=&#34;召回优化&#34;&gt;召回优化
+&lt;/h2&gt;&lt;h3 id=&#34;查询改写query-rewriting&#34;&gt;查询改写（Query Rewriting）
+&lt;/h3&gt;&lt;p&gt;用户自然的提问方式，和文档的书写风格，往往存在巨大差异。&lt;/p&gt;
+&lt;p&gt;用户问：&amp;ldquo;上次那个登录报错的 bug 修好了吗？&amp;rdquo;&lt;/p&gt;
+&lt;p&gt;但知识库里的文档写的是：&amp;ldquo;2026-04-15 修复 auth 模块 session 过期导致 401 的问题&amp;rdquo;。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;直接用原问题检索，大概率召回不到&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;解决方案——用 LLM 改写查询：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;原始查询 → LLM 改写 → 多个标准化查询 → 检索 → 合并去重
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Prompt:
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&amp;#34;请将用户的问题改写为多个适合知识库检索的关键词查询。提取关键实体、技术术语和可能的同义表达。
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;用户问题：上次那个登录报错的 bug 修好了吗？
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;输出：
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;1. 登录 报错 bug 修复
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;2. auth 认证 错误 修复记录
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;3. session 过期 401 错误 fix
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;4. 登录失败 问题修复 changelog&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;查询改写的常见模式：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;模式&lt;/th&gt;
+          &lt;th&gt;做法&lt;/th&gt;
+          &lt;th&gt;适用&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;关键词提取&lt;/td&gt;
+          &lt;td&gt;LLM 提取关键实体和术语&lt;/td&gt;
+          &lt;td&gt;用户问题口语化&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;多角度生成&lt;/td&gt;
+          &lt;td&gt;从不同角度生成多个查询&lt;/td&gt;
+          &lt;td&gt;问题模糊、维度多&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;假设文档&lt;/td&gt;
+          &lt;td&gt;让 LLM 先生成假想答案，用答案当 query 检索&lt;/td&gt;
+          &lt;td&gt;问题复杂需要推理&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;逐步细化&lt;/td&gt;
+          &lt;td&gt;根据检索结果迭代改写 query&lt;/td&gt;
+          &lt;td&gt;初检不理想时&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id=&#34;多路召回multi-channel-recall&#34;&gt;多路召回（Multi-Channel Recall）
+&lt;/h3&gt;&lt;p&gt;一条检索路径容易漏，多条路径交叉覆盖：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;8
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;query
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  ├── 路径1：原始 query → 密集检索 → Top-20
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  ├── 路径2：改写 query → 密集检索 → Top-20
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  ├── 路径3：原始 query → BM25 稀疏检索 → Top-20
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  ├── 路径4：提取实体 → 精确过滤检索 → Top-10
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  └── 路径5：query 向量 → 跨模态检索 → Top-10
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;            ↓
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;         RRF 融合 → 最终 Top-10
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;这个架构是目前生产级 RAG 的标配。多路召回的本质是&lt;strong&gt;用冗余换覆盖&lt;/strong&gt;，用融合算法保证最终结果的质量。&lt;/p&gt;
+&lt;h3 id=&#34;重排序re-ranking&#34;&gt;重排序（Re-ranking）
+&lt;/h3&gt;&lt;p&gt;初检的 Top-K 只是&amp;quot;粗排&amp;quot;——向量相似度高不代表真正语义相关。重排序用小模型对初检结果做精排。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;初检 Top-50 → Re-ranker → 精排 Top-5 → 送 LLM 生成
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;strong&gt;常用 Re-ranker&lt;/strong&gt;：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;模型&lt;/th&gt;
+          &lt;th&gt;特点&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Cohere Rerank v3&lt;/td&gt;
+          &lt;td&gt;云服务，效果优秀&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;BGE-Reranker-v2-m3&lt;/td&gt;
+          &lt;td&gt;开源，支持多语言&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Cross-Encoder (SBERT)&lt;/td&gt;
+          &lt;td&gt;经典方案，准确但较慢&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;LLM as Reranker&lt;/td&gt;
+          &lt;td&gt;用 LLM 直接打分排序&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;Re-ranker 本质是 Cross-Encoder 架构：将 query 和 document 拼接后送入模型，输出一个 0~1 的相关性分数。比向量余弦相似度更准确，但计算开销大，所以只对初检 Top-K 使用。&lt;/p&gt;
+&lt;p&gt;重排序的关键权衡：K 越大，精排效果越好，但延迟和成本也越高。经验值 20~50 是一个不错的起点。&lt;/p&gt;
+&lt;h3 id=&#34;分段检索与上下文扩展&#34;&gt;分段检索与上下文扩展
+&lt;/h3&gt;&lt;p&gt;检索时只返回匹配的 chunk，但 chunk 前后可能有重要上下文。需要在检索后做上下文扩展：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;窗口扩展&lt;/strong&gt;：返回匹配 chunk + 前后各 N 个 chunk&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;检索命中 chunk 5 → 实际返回 chunk 3, 4, 5, 6, 7
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;strong&gt;句子滑动窗口&lt;/strong&gt;：以匹配句子为中心，前后各取 M 个句子&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;父文档检索&lt;/strong&gt;：检索小 chunk，返回其所属的父文档&lt;/p&gt;
+&lt;p&gt;这就是 &lt;strong&gt;Small-to-Big&lt;/strong&gt; 策略：用小粒度做检索（避免噪声），用大粒度喂 LLM（保留上下文）。&lt;/p&gt;
+&lt;h2 id=&#34;索引优化&#34;&gt;索引优化
+&lt;/h2&gt;&lt;h3 id=&#34;分块策略对检索的影响&#34;&gt;分块策略对检索的影响
+&lt;/h3&gt;&lt;p&gt;分块是 RAG 的&amp;quot;基础工程&amp;quot;，分块方式直接决定检索质量：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;策略&lt;/th&gt;
+          &lt;th&gt;做法&lt;/th&gt;
+          &lt;th&gt;检索影响&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;固定 Token 分块&lt;/td&gt;
+          &lt;td&gt;每 512/1024 token 切一块&lt;/td&gt;
+          &lt;td&gt;简单但容易割裂语义&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;递归字符分割&lt;/td&gt;
+          &lt;td&gt;按段落→句子→词的优先级切&lt;/td&gt;
+          &lt;td&gt;尽量保留自然边界&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;语义分块&lt;/td&gt;
+          &lt;td&gt;LLM 判断分块边界&lt;/td&gt;
+          &lt;td&gt;效果最好但成本高&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;层级分块&lt;/td&gt;
+          &lt;td&gt;父子文档多层索引&lt;/td&gt;
+          &lt;td&gt;支持多粒度检索&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;经验分块参数&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;文档问答：256~512 token&lt;/li&gt;
+&lt;li&gt;技术文档：512~1024 token&lt;/li&gt;
+&lt;li&gt;长文总结：1024~2048 token&lt;/li&gt;
+&lt;li&gt;chunk 重叠度：10%~20%&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;元数据过滤&#34;&gt;元数据过滤
+&lt;/h3&gt;&lt;p&gt;纯向量检索是在全库中搜索。加上元数据过滤，可以先缩小搜索范围：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# 伪代码：带过滤的向量检索&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;results&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;vector_db&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;search&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;query_vec&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;top_k&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;20&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;nb&#34;&gt;filter&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;s2&#34;&gt;&amp;#34;doc_type&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;技术文档&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;    &lt;span class=&#34;c1&#34;&gt;# 只搜技术文档&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;s2&#34;&gt;&amp;#34;date&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;&amp;gt;2026-01-01&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;     &lt;span class=&#34;c1&#34;&gt;# 只看今年&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;s2&#34;&gt;&amp;#34;department&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;后端组&amp;#34;&lt;/span&gt;      &lt;span class=&#34;c1&#34;&gt;# 只看本组&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;元数据设计原则：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;记录时间戳（时效性过滤）&lt;/li&gt;
+&lt;li&gt;标注文档类型（分类过滤）&lt;/li&gt;
+&lt;li&gt;保留来源路径（可追溯）&lt;/li&gt;
+&lt;li&gt;添加自定义标签（业务过滤）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;层级索引hierarchical-index&#34;&gt;层级索引（Hierarchical Index）
+&lt;/h3&gt;&lt;p&gt;对于大型知识库，全库平面检索效率低、精度差。层级索引先定位范围再精细检索：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;用户 query
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  │
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  ▼
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;第一层：粗粒度检索（文档/章节级）
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  → 定位到 &amp;#34;后端-数据库-MySQL&amp;#34; 目录下的 5 篇文档
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  │
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  ▼
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;第二层：细粒度检索（段落/chunk级）
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  → 在这 5 篇文档的 chunk 中检索
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  │
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  ▼
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;返回 Top-10
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;适合文档数量 &amp;gt; 10,000 的大规模场景。&lt;/p&gt;
+&lt;h2 id=&#34;高级检索技术&#34;&gt;高级检索技术
+&lt;/h2&gt;&lt;h3 id=&#34;hydehypothetical-document-embeddings&#34;&gt;HyDE（Hypothetical Document Embeddings）
+&lt;/h3&gt;&lt;p&gt;用 LLM 先生成假想答案，再用假想答案的向量去检索：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;用户问题 → LLM 生成假设答案 → 假设答案向量化 → 检索 → 真实文档
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;为什么有效？因为真实文档和&amp;quot;假设答案&amp;quot;往往比和&amp;quot;简短问题&amp;quot;在向量空间中更接近。尤其在问答类场景中效果显著。&lt;/p&gt;
+&lt;p&gt;代价：多一次 LLM 调用，增加延迟和成本。&lt;/p&gt;
+&lt;h3 id=&#34;自查询检索self-query-retrieval&#34;&gt;自查询检索（Self-Query Retrieval）
+&lt;/h3&gt;&lt;p&gt;让 LLM 从用户问题中提取结构化查询条件 + 语义向量：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;用户：&amp;#34;2026 年 3 月之后后端组写的关于 Redis 的文章&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;LLM 提取：
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;{
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &amp;#34;semantic_query&amp;#34;: &amp;#34;Redis 文章&amp;#34;,
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &amp;#34;filter&amp;#34;: {
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &amp;#34;date&amp;#34;: &amp;#34;&amp;gt;2026-03-01&amp;#34;,
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &amp;#34;department&amp;#34;: &amp;#34;后端组&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  }
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id=&#34;多跳检索multi-hop-retrieval&#34;&gt;多跳检索（Multi-hop Retrieval）
+&lt;/h3&gt;&lt;p&gt;复杂问题需要多步检索，每一步的结果指导下一步：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;问题：张三所在部门的数据库负责人是谁？
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Hop 1：检索 &amp;#34;张三&amp;#34; → 得到 &amp;#34;张三，后端开发部&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Hop 2：检索 &amp;#34;后端开发部 数据库负责人&amp;#34; → 得到 &amp;#34;李四&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;需要 Agent 范式配合——Agent 判断是否需要多跳、何时终止。&lt;/p&gt;
+&lt;h3 id=&#34;查询分解query-decomposition&#34;&gt;查询分解（Query Decomposition）
+&lt;/h3&gt;&lt;p&gt;复杂问题拆解为多个子问题分别检索：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;7
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;问题：Redis Cluster 和 Codis 的对比，以及各自的适用场景
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;拆解：
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;1. &amp;#34;Redis Cluster 架构特点优势劣势&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;2. &amp;#34;Codis 架构特点优势劣势&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;3. &amp;#34;Redis Cluster 适用场景&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;4. &amp;#34;Codis 适用场景&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;各子问题检索结果汇总去重后送给 LLM。&lt;/p&gt;
+&lt;h2 id=&#34;检索效果评估&#34;&gt;检索效果评估
+&lt;/h2&gt;&lt;h3 id=&#34;关键指标&#34;&gt;关键指标
+&lt;/h3&gt;&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;指标&lt;/th&gt;
+          &lt;th&gt;含义&lt;/th&gt;
+          &lt;th&gt;目标&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Recall@K&lt;/td&gt;
+          &lt;td&gt;Top-K 中相关文档占全部相关文档的比例&lt;/td&gt;
+          &lt;td&gt;越高越好（&amp;gt;80%）&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Precision@K&lt;/td&gt;
+          &lt;td&gt;Top-K 中相关文档的比例&lt;/td&gt;
+          &lt;td&gt;越高越好&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;MRR&lt;/td&gt;
+          &lt;td&gt;第一个相关文档排名的倒数均值&lt;/td&gt;
+          &lt;td&gt;越高越好&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;NDCG@K&lt;/td&gt;
+          &lt;td&gt;考虑排序位置的归一化指标&lt;/td&gt;
+          &lt;td&gt;越高越好（&amp;gt;0.7）&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;Hit Rate&lt;/td&gt;
+          &lt;td&gt;至少命中一个相关文档的比例&lt;/td&gt;
+          &lt;td&gt;越高越好（&amp;gt;90%）&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id=&#34;构建评估集&#34;&gt;构建评估集
+&lt;/h3&gt;&lt;p&gt;需要一个&amp;quot;黄金测试集&amp;quot;——(问题, 正确答案/相关文档)对：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;从历史问答中收集 100~500 个真实问题&lt;/li&gt;
+&lt;li&gt;人工标注每个问题对应的正确答案和应该召回的文档&lt;/li&gt;
+&lt;li&gt;用评估集测试不同检索策略的效果&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;没有评估集的调优是盲调——你不知道改了参数到底是变好了还是变坏了。&lt;/p&gt;
+&lt;h2 id=&#34;实践检索优化清单&#34;&gt;实践：检索优化清单
+&lt;/h2&gt;&lt;p&gt;按优先级排列的调试清单：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;[必做] 检查嵌入模型&lt;/strong&gt;：模型和语料语言是否匹配？中文用 BGE-M3 通常比 OpenAI 好&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;[必做] 检查分块质量&lt;/strong&gt;：切出来的 chunk 语义完整吗？相邻 chunk 之间有信息断层吗？&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;[必做] 上混合检索&lt;/strong&gt;：密集 + BM25，用 RRF 融合，这个改动通常能带来 10%~20% 的召回提升&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;[推荐] 加上重排序&lt;/strong&gt;：初检 Top-50 + BGE-Reranker 精排 Top-5，对最终答案质量提升显著&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;[推荐] 查询改写&lt;/strong&gt;：如果用户提问偏口语化，加一层 LLM 改写&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;[进阶] 多路召回&lt;/strong&gt;：在混合检索基础上增加改写查询、实体匹配等召回通道&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;[进阶] Small-to-Big&lt;/strong&gt;：小粒度检索 + 父文档上下文扩展&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;[高阶] HyDE&lt;/strong&gt;：问答类场景效果明显，但需评估额外延迟&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id=&#34;小结&#34;&gt;小结
+&lt;/h2&gt;&lt;p&gt;RAG 的检索优化本质是做减法：从海量文档中筛出最相关的那几条，同时尽可能不遗漏。&lt;/p&gt;
+&lt;p&gt;核心链路：&lt;strong&gt;好的嵌入模型 → 合理的分块 → 混合检索（密集+稀疏）→ 重排序 → 上下文扩展 → 喂给 LLM&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;在这个链路上，每一个环节都有优化空间，但混合检索 + 重排序是高性价比的组合——一个保证覆盖，一个保证精度。在这套基本功之上，再按实际场景评估是否需要查询改写、多路召回、HyDE 等高级策略。&lt;/p&gt;
 </description>
         </item>
         <item>
