@@ -1,0 +1,411 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>记忆系统 on 你怂你mua</title>
+        <link>https://liusir521.github.io/tags/%E8%AE%B0%E5%BF%86%E7%B3%BB%E7%BB%9F/</link>
+        <description>Recent content in 记忆系统 on 你怂你mua</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>zh-cn</language>
+        <copyright>Example Person</copyright>
+        <lastBuildDate>Sat, 11 Apr 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://liusir521.github.io/tags/%E8%AE%B0%E5%BF%86%E7%B3%BB%E7%BB%9F/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>AI Agent 记忆机制详解：从会话上下文到持久化记忆系统</title>
+        <link>https://liusir521.github.io/p/ai-agent-%E8%AE%B0%E5%BF%86%E6%9C%BA%E5%88%B6%E8%AF%A6%E8%A7%A3%E4%BB%8E%E4%BC%9A%E8%AF%9D%E4%B8%8A%E4%B8%8B%E6%96%87%E5%88%B0%E6%8C%81%E4%B9%85%E5%8C%96%E8%AE%B0%E5%BF%86%E7%B3%BB%E7%BB%9F/</link>
+        <pubDate>Sat, 11 Apr 2026 00:00:00 +0000</pubDate>
+        
+        <guid>https://liusir521.github.io/p/ai-agent-%E8%AE%B0%E5%BF%86%E6%9C%BA%E5%88%B6%E8%AF%A6%E8%A7%A3%E4%BB%8E%E4%BC%9A%E8%AF%9D%E4%B8%8A%E4%B8%8B%E6%96%87%E5%88%B0%E6%8C%81%E4%B9%85%E5%8C%96%E8%AE%B0%E5%BF%86%E7%B3%BB%E7%BB%9F/</guid>
+        <description>&lt;img src="https://liusir521.github.io/p/ai-agent-%E8%AE%B0%E5%BF%86%E6%9C%BA%E5%88%B6%E8%AF%A6%E8%A7%A3%E4%BB%8E%E4%BC%9A%E8%AF%9D%E4%B8%8A%E4%B8%8B%E6%96%87%E5%88%B0%E6%8C%81%E4%B9%85%E5%8C%96%E8%AE%B0%E5%BF%86%E7%B3%BB%E7%BB%9F/agent.png" alt="Featured image of post AI Agent 记忆机制详解：从会话上下文到持久化记忆系统" /&gt;&lt;h2 id=&#34;从金鱼记忆到持久化认知&#34;&gt;从&amp;quot;金鱼记忆&amp;quot;到持久化认知
+&lt;/h2&gt;&lt;p&gt;没有记忆的 LLM 每次对话都是独立事件。它不记得你上次说了什么、不知道你的偏好、也不了解项目的历史。每轮对话都从零开始——开发者常常因此感到沮丧：&amp;ldquo;我刚说过的事情，你怎么又忘了？&amp;rdquo;&lt;/p&gt;
+&lt;p&gt;Agent 的记忆系统正是为了解决这个痛点。它让 Agent 从&amp;quot;金鱼记忆&amp;quot;的 chatbot 进化为能跨会话保持认知的智能助手。&lt;/p&gt;
+&lt;h2 id=&#34;记忆不是记录是组织&#34;&gt;记忆不是记录，是组织
+&lt;/h2&gt;&lt;p&gt;记忆系统的本质不是&amp;quot;把所有说过的话存起来&amp;quot;，而是&lt;strong&gt;在正确的时机，把正确的信息送入上下文窗口&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;它与 Context Engineering 的关系是：记忆是&amp;quot;存什么&amp;quot;，上下文是&amp;quot;用什么&amp;quot;。记忆是供给侧，上下文是消费侧。一个好的记忆系统需要在存储成本、检索精度、时效性三者之间做权衡。&lt;/p&gt;
+&lt;h2 id=&#34;三层记忆架构&#34;&gt;三层记忆架构
+&lt;/h2&gt;&lt;p&gt;业界共识的三层记忆模型，灵感来源于人脑记忆机制：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;┌──────────────────────────────────────┐
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;│           工作记忆                    │  ← 当前任务上下文
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;│           Working Memory             │     毫秒级 ~ 秒级
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;│           容量：LLM 上下文窗口         │
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;├──────────────────────────────────────┤
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;│           短期记忆                    │  ← 当前会话历史
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;│           Short-term Memory          │     分钟级 ~ 小时级
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;│           容量：会话内操作记录         │
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;├──────────────────────────────────────┤
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;│           长期记忆                    │  ← 跨会话持久化
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;│           Long-term Memory           │     天级 ~ 永久
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;│           容量：向量库 / 文件系统      │
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;└──────────────────────────────────────┘
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id=&#34;工作记忆&#34;&gt;工作记忆
+&lt;/h3&gt;&lt;p&gt;工作记忆是 LLM 上下文窗口中的一切内容：当前用户输入、系统提示、工具调用与结果、正在进行中的推理链。&lt;/p&gt;
+&lt;p&gt;它是唯一 LLM 能&amp;quot;直接看到&amp;quot;的信息层。所有其他记忆最终都要通过被注入工作记忆来发挥作用。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;工作记忆的挑战不在于存储，而在于编排&lt;/strong&gt;。窗口内的信息如何排列、各占多少 token 预算、新旧信息如何交替，这些决策直接决定推理质量。你可以把工作记忆类比为一个人当下的&amp;quot;注意力焦点&amp;quot;——焦点在哪，能力就在哪。&lt;/p&gt;
+&lt;p&gt;典型的工作记忆构成：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;┌──────────────────────────┐
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;│  系统指令     （固定，~10%） │
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;├──────────────────────────┤
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;│  工具定义     （固定，~15%） │
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;├──────────────────────────┤
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;│  当前任务     （核心，~25%） │
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;├──────────────────────────┤
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;│  近期对话     （滚动，~30%） │
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;├──────────────────────────┤
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;│  检索到的记忆  （动态，~15%）│
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;├──────────────────────────┤
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;│  缓冲空间     （预留，~5%）  │
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;└──────────────────────────┘
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;这张&amp;quot;预算表&amp;quot;的比例因任务而异，但核心原则不变：&lt;strong&gt;为当前决策最相关的内容分配最多 token&lt;/strong&gt;。&lt;/p&gt;
+&lt;h3 id=&#34;短期记忆&#34;&gt;短期记忆
+&lt;/h3&gt;&lt;p&gt;短期记忆记录当前会话中已发生的操作、中间结果和阶段性结论。它的生命周期等于会话时长。&lt;/p&gt;
+&lt;p&gt;短期记忆承担几个关键职能：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;防止重复工作&lt;/strong&gt;：Agent 搜索过一个目录后，记住结果，不再重复搜索。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;维持决策连贯性&lt;/strong&gt;：执行步骤 3 时，知道步骤 1 和 2 做了什么、为什么这么做。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;支持回溯&lt;/strong&gt;：用户说&amp;quot;回到刚才的版本&amp;quot;，Agent 需要知道&amp;quot;刚才&amp;quot;是什么。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;实现要点&lt;/strong&gt;——短期记忆采用滑动窗口管理，超出窗口的旧记录压缩为摘要而非直接丢弃：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;会话时间线 →
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;[操作1] [操作2] [操作3] ... [操作N-3] [操作N-2] [操作N-1] [操作N]
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  ←── 已压缩为摘要 ──│                ←── 完整保留 ──│
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;压缩质量直接影响后续推理。一个差的摘要会让 Agent &amp;ldquo;失忆&amp;rdquo;——还记得做过什么，但忘了为什么这么做。好的摘要保留决策逻辑，而不只是操作结果。&lt;/p&gt;
+&lt;h3 id=&#34;长期记忆&#34;&gt;长期记忆
+&lt;/h3&gt;&lt;p&gt;长期记忆是跨会话持久化的信息，是 Agent 最核心的认知资产。它让 Agent 不再每次从零开始。&lt;/p&gt;
+&lt;p&gt;长期记忆的信息类型：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;类型&lt;/th&gt;
+          &lt;th&gt;内容&lt;/th&gt;
+          &lt;th&gt;生命周期&lt;/th&gt;
+          &lt;th&gt;更新频率&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;用户偏好&lt;/td&gt;
+          &lt;td&gt;编码风格、常用栈、操作习惯&lt;/td&gt;
+          &lt;td&gt;永久&lt;/td&gt;
+          &lt;td&gt;低频&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;项目知识&lt;/td&gt;
+          &lt;td&gt;架构约定、目录结构、关键模块&lt;/td&gt;
+          &lt;td&gt;项目周期&lt;/td&gt;
+          &lt;td&gt;随项目演进&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;经验教训&lt;/td&gt;
+          &lt;td&gt;踩过的坑、有效的方案、失败记录&lt;/td&gt;
+          &lt;td&gt;长期&lt;/td&gt;
+          &lt;td&gt;随实践积累&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;决策历史&lt;/td&gt;
+          &lt;td&gt;过往重要决策及理由&lt;/td&gt;
+          &lt;td&gt;长期&lt;/td&gt;
+          &lt;td&gt;随项目演进&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;上下文线索&lt;/td&gt;
+          &lt;td&gt;特定话题的讨论历史、未完成事项&lt;/td&gt;
+          &lt;td&gt;中期&lt;/td&gt;
+          &lt;td&gt;频繁&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h2 id=&#34;长期记忆的存储与检索&#34;&gt;长期记忆的存储与检索
+&lt;/h2&gt;&lt;h3 id=&#34;存储流程&#34;&gt;存储流程
+&lt;/h3&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;原始信息 → 提取关键事实 → 生成记忆条目 → Embedding 向量化 → 写入向量库
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                                                      │
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                                              ┌───────┴───────┐
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                                              │   同时写入      │
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                                              │   元数据索引    │
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                                              └───────────────┘
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;strong&gt;存储前的关键处理&lt;/strong&gt;——不该存的事先过滤：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;一次性操作记录不存（&amp;ldquo;执行了 npm install&amp;rdquo;——知道了又怎样？）&lt;/li&gt;
+&lt;li&gt;过时的纠正信息不存（&amp;ldquo;用户之前用的是 Vue 2，现在用 Vue 3 了&amp;rdquo;——只保留最新状态）&lt;/li&gt;
+&lt;li&gt;无复用价值的临时讨论不存（&amp;ldquo;用户问今天是周几&amp;rdquo;）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;粒度的学问&lt;/strong&gt;——一条记忆一个事实：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;8
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;## 好：原子化
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&amp;#34;项目使用 Go 1.22，模块路径为 github.com/acme/payments&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&amp;#34;auth 中间件位于 internal/middleware/auth.go&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&amp;#34;数据库迁移使用 golang-migrate，迁移文件在 db/migrations/&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;## 差：一大坨
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&amp;#34;这是一个 Go 1.22 项目叫 payments，auth 中间件在 internal/middleware/auth.go，
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;数据库用 golang-migrate，迁移文件在 db/migrations/，API 监听 8080 端口...&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;原子化的好处：检索时能精确命中相关条目，而不是每次都拉回一大段不相关的内容。&lt;/p&gt;
+&lt;h3 id=&#34;检索流程&#34;&gt;检索流程
+&lt;/h3&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;当前任务 → Embedding 向量化 → 相似度搜索 → Top-K 候选
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                                    │
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                              ┌─────┴─────┐
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                              │  元数据过滤  │  按时间、类型、关联度
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                              └─────┬─────┘
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                                    │
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                              ┌─────┴─────┐
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                              │  相关性重排  │  交叉编码器打分
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                              └─────┬─────┘
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                                    │
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                              注入工作记忆
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;检索不只是向量匹配——需要叠加多种过滤条件：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;时效性过滤&lt;/strong&gt;：旧记忆降低权重。一条两年前的&amp;quot;用户用 Jest&amp;quot;不如三个月前的&amp;quot;用户已迁移到 Vitest&amp;quot;准确。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;关联度过滤&lt;/strong&gt;：当前任务在 &lt;code&gt;api/&lt;/code&gt; 目录下时，关于前端组件的记忆权重应降低。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;频次加权&lt;/strong&gt;：被频繁检索的记忆获得加成。如果某条记忆被多次命中，说明它很重要。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;记忆检索的关键问题&#34;&gt;记忆检索的关键问题
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;语义漂移&lt;/strong&gt;：用户说&amp;quot;帮我看看上次那个 bug&amp;quot;，但记忆中存的是&amp;quot;修复 auth token 过期问题&amp;quot;——&amp;ldquo;bug&amp;quot;和&amp;quot;修复 auth token 过期问题&amp;quot;在语义空间中距离很远，检索不到。解决方案：存储时生成多条语义等价描述；检索时做查询扩展。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;记忆失活&lt;/strong&gt;：去年存的&amp;quot;项目跑在 Node 14&amp;quot;在 Node 22 时代不仅无用，还产生误导。需要设置记忆的&amp;quot;保鲜期&amp;rdquo;，超期自动降低权重或标记待审核。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;检索噪声&lt;/strong&gt;：向量相似度 top-5 里可能混入一条&amp;quot;用户喜欢吃寿司&amp;quot;，对当前代码任务毫无帮助。需要在检索后加一层相关性过滤——不是语义相似就相关，还要判断&amp;quot;对这个任务有没有用&amp;quot;。&lt;/p&gt;
+&lt;h2 id=&#34;记忆更新与遗忘&#34;&gt;记忆更新与遗忘
+&lt;/h2&gt;&lt;p&gt;记忆不是越多越好。记忆系统的长期健康取决于&lt;strong&gt;更新机制&lt;/strong&gt;和&lt;strong&gt;遗忘机制&lt;/strong&gt;。&lt;/p&gt;
+&lt;h3 id=&#34;更新策略&#34;&gt;更新策略
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;以新代旧&lt;/strong&gt;——检测到新记忆与旧记忆冲突时，用新代旧而非追加：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;旧记忆：&amp;#34;用户偏好使用 pnpm&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;新信息：&amp;#34;我现在用 bun 了&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;操作：删除旧记忆，存储新记忆&amp;#34;用户使用 bun 作为包管理器&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;而不是：保留两条，交给 LLM 判断（增加 token 消耗和判断负担）
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;strong&gt;增量合并&lt;/strong&gt;——非冲突信息采用合并策略：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;已有：&amp;#34;项目渲染层使用 React 18&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;新增：&amp;#34;最近已升级到 React 19，同时引入了 React Compiler&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;合并后：&amp;#34;项目使用 React 19，已启用 React Compiler&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id=&#34;遗忘机制&#34;&gt;遗忘机制
+&lt;/h3&gt;&lt;p&gt;受限于存储成本和检索精度，记忆系统必须有遗忘能力：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;衰减遗忘&lt;/strong&gt;：每条记忆记录最后命中时间。长期未被检索的记忆权重逐步降低，降到阈值以下时归档或删除。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;容量淘汰&lt;/strong&gt;：当记忆总量超过设定上限，淘汰优先级 = 最低（重要性 × 时效性 × 命中频次）的条目。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;主动清理&lt;/strong&gt;：用户说&amp;quot;忘了这件事&amp;quot;时，系统需要能够精确删除或更新相关记忆。这不是简单的字符串匹配——用户说&amp;quot;忘了登录相关的事&amp;quot;，系统需要找出语义上与&amp;quot;登录&amp;quot;相关的所有记忆条目。&lt;/p&gt;
+&lt;h2 id=&#34;文件系统-vs-向量库两种记忆存储范式&#34;&gt;文件系统 vs 向量库：两种记忆存储范式
+&lt;/h2&gt;&lt;p&gt;实际工程中，长期记忆有两种主流存储方式，各有优劣：&lt;/p&gt;
+&lt;h3 id=&#34;文件系统存储&#34;&gt;文件系统存储
+&lt;/h3&gt;&lt;p&gt;Claude Code 采用的方案。记忆以 Markdown 文件组织在 &lt;code&gt;.claude/projects/&amp;lt;project&amp;gt;/memory/&lt;/code&gt; 下：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;memory/
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;├── MEMORY.md              # 索引文件
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;├── user_preferences.md    # &amp;#34;用户是 Go 开发者&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;├── project_conventions.md # &amp;#34;测试放在 __tests__/&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;└── work_history.md        # &amp;#34;上次完成了数据库迁移&amp;#34;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;优点：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;人类可读，便于手动检查和编辑&lt;/li&gt;
+&lt;li&gt;无需外部依赖&lt;/li&gt;
+&lt;li&gt;索引文件天然充当检索入口&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;缺点：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;不支持语义搜索（依赖文件名的组织）&lt;/li&gt;
+&lt;li&gt;记忆量大时查找效率低&lt;/li&gt;
+&lt;li&gt;没有自动权重的向量相似度&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;向量库存储&#34;&gt;向量库存储
+&lt;/h3&gt;&lt;p&gt;多数 Agent 框架采用的方式（如 LangChain、LlamaIndex）：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;记忆 → Embedding → 向量库（Chroma / Milvus / Pinecone）
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                                  │
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;检索：query → Embedding → 相似度搜索 → Top-K 记忆
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;优点：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;语义检索精度高&lt;/li&gt;
+&lt;li&gt;支持大规模记忆量&lt;/li&gt;
+&lt;li&gt;可叠加多维过滤&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;缺点：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;外部依赖多&lt;/li&gt;
+&lt;li&gt;人工检查和干预困难&lt;/li&gt;
+&lt;li&gt;需要维护 embedding 一致性&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;混合方案&#34;&gt;混合方案
+&lt;/h3&gt;&lt;p&gt;最优实践往往是两者结合：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;关键事实 → 文件系统（手动可编辑、版本控制）
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;频繁检索 → 向量库（快速语义搜索）
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;重大经验 → 两者各存一份（双重保障）
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;文件系统做&amp;quot;事实源&amp;quot;，向量库做&amp;quot;检索加速层&amp;quot;。&lt;/p&gt;
+&lt;h2 id=&#34;实践设计记忆系统的关键决策&#34;&gt;实践：设计记忆系统的关键决策
+&lt;/h2&gt;&lt;h3 id=&#34;什么时候该记住&#34;&gt;什么时候该记住
+&lt;/h3&gt;&lt;p&gt;不是每件事都值得进入长期记忆。判断标准：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;重复利用率高&lt;/strong&gt;：下次任务大概率还用得到（用户偏好、项目约定）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;获取成本高&lt;/strong&gt;：用户专门告诉你的、你自己花了很多推理才得到的（调试经验、配置细节）&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;纠正了错误&lt;/strong&gt;：用户纠正过你的行为（&amp;ldquo;不要用 X，用 Y&amp;rdquo;）——这种必须记住，否则会重复犯错&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;什么时候该取出&#34;&gt;什么时候该取出
+&lt;/h3&gt;&lt;p&gt;检索触发时机同样重要：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;任务开始时&lt;/strong&gt;：根据当前任务关键词拉取相关记忆&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;遇到困惑时&lt;/strong&gt;：当前推理结果不确定，回溯相关经验&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;即将犯错时&lt;/strong&gt;：记忆中有&amp;quot;上次这样改导致测试失败&amp;quot;的教训&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;记忆的层级组织&#34;&gt;记忆的层级组织
+&lt;/h3&gt;&lt;p&gt;单层平面记忆在大规模时检索效率急剧下降。需要层级化：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;层级1：类目（用户偏好 / 项目知识 / 经验教训）
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;层级2：主题（代码风格 / 测试 / 部署 / 依赖管理）
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;层级3：具体记忆条目
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;检索时先定位主题，再在主题内搜索——将搜索空间从 O(N) 降到 O(log N)。&lt;/p&gt;
+&lt;h2 id=&#34;小结&#34;&gt;小结
+&lt;/h2&gt;&lt;p&gt;记忆系统是 Agent 从&amp;quot;一次性工具&amp;quot;到&amp;quot;长期伙伴&amp;quot;的分水岭：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;工作记忆&lt;/strong&gt;是注意力的舞台——编排比存储更重要&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;短期记忆&lt;/strong&gt;保持决策连贯——滑动窗口 + 压缩摘要&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;长期记忆&lt;/strong&gt;积累认知资产——存储筛选、语义检索、更新遗忘缺一不可&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;三个原则贯穿始终：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;原子的存储&lt;/strong&gt;：一条记忆一个事实&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;精准的检索&lt;/strong&gt;：在正确时机取出最相关的&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;健康的遗忘&lt;/strong&gt;：旧的不去，新的不来&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;没有好的记忆系统，Agent 永远在零基础上运行。把记忆做好，Agent 才能越用越聪明。&lt;/p&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>
