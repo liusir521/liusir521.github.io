@@ -13,7 +13,7 @@
         <pubDate>Thu, 07 May 2026 00:00:00 +0000</pubDate>
         
         <guid>https://liusir521.github.io/p/%E5%A4%9A-agent-%E5%8D%8F%E4%BD%9C%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E5%88%86%E5%B7%A5%E8%BE%A9%E8%AE%BA%E5%B1%82%E7%BA%A7%E4%B8%8E%E9%80%9A%E4%BF%A1%E6%9C%BA%E5%88%B6/</guid>
-        <description>&lt;img src="https://liusir521.github.io/multi-agent.png" alt="Featured image of post 多 Agent 协作原理详解：分工、辩论、层级与通信机制" /&gt;&lt;h2 id=&#34;引言单-agent-的局限&#34;&gt;引言：单 Agent 的局限
+        <description>&lt;img src="https://liusir521.github.io/p/%E5%A4%9A-agent-%E5%8D%8F%E4%BD%9C%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E5%88%86%E5%B7%A5%E8%BE%A9%E8%AE%BA%E5%B1%82%E7%BA%A7%E4%B8%8E%E9%80%9A%E4%BF%A1%E6%9C%BA%E5%88%B6/agent.png" alt="Featured image of post 多 Agent 协作原理详解：分工、辩论、层级与通信机制" /&gt;&lt;h2 id=&#34;引言单-agent-的局限&#34;&gt;引言：单 Agent 的局限
 &lt;/h2&gt;&lt;p&gt;单 Agent 系统在能力上已经令人印象深刻，但在面对复杂任务时，存在三个难以绕过的硬限制：&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;上下文窗口有限。&lt;/strong&gt; 一个代码库可能有几十万行，一份安全审计需要同时关注上百个检查点，一篇长文档的跨章节一致性需要全局视野。单 Agent 的上下文窗口再大也是有上限的，塞入越多信息，注意力越被稀释，关键细节越容易被忽略。&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;单一视角陷阱。&lt;/strong&gt; 一个模型在同一时刻只能持有一种思维框架。让 GPT-4 审计代码安全时，它很难同时切换为&amp;quot;攻击者视角&amp;quot;和&amp;quot;防御者视角&amp;quot;去审视同一段逻辑。而现实中复杂问题恰恰需要多视角交叉验证。&lt;/p&gt;
