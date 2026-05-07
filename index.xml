@@ -7,7 +7,224 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>zh-cn</language>
         <copyright>Example Person</copyright>
-        <lastBuildDate>Sat, 02 May 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://liusir521.github.io/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Thu, 07 May 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://liusir521.github.io/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>多 Agent 协作原理详解：分工、辩论、层级与通信机制</title>
+        <link>https://liusir521.github.io/p/%E5%A4%9A-agent-%E5%8D%8F%E4%BD%9C%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E5%88%86%E5%B7%A5%E8%BE%A9%E8%AE%BA%E5%B1%82%E7%BA%A7%E4%B8%8E%E9%80%9A%E4%BF%A1%E6%9C%BA%E5%88%B6/</link>
+        <pubDate>Thu, 07 May 2026 00:00:00 +0000</pubDate>
+        
+        <guid>https://liusir521.github.io/p/%E5%A4%9A-agent-%E5%8D%8F%E4%BD%9C%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E5%88%86%E5%B7%A5%E8%BE%A9%E8%AE%BA%E5%B1%82%E7%BA%A7%E4%B8%8E%E9%80%9A%E4%BF%A1%E6%9C%BA%E5%88%B6/</guid>
+        <description>&lt;img src="https://liusir521.github.io/multi-agent.png" alt="Featured image of post 多 Agent 协作原理详解：分工、辩论、层级与通信机制" /&gt;&lt;h2 id=&#34;引言单-agent-的局限&#34;&gt;引言：单 Agent 的局限
+&lt;/h2&gt;&lt;p&gt;单 Agent 系统在能力上已经令人印象深刻，但在面对复杂任务时，存在三个难以绕过的硬限制：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;上下文窗口有限。&lt;/strong&gt; 一个代码库可能有几十万行，一份安全审计需要同时关注上百个检查点，一篇长文档的跨章节一致性需要全局视野。单 Agent 的上下文窗口再大也是有上限的，塞入越多信息，注意力越被稀释，关键细节越容易被忽略。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;单一视角陷阱。&lt;/strong&gt; 一个模型在同一时刻只能持有一种思维框架。让 GPT-4 审计代码安全时，它很难同时切换为&amp;quot;攻击者视角&amp;quot;和&amp;quot;防御者视角&amp;quot;去审视同一段逻辑。而现实中复杂问题恰恰需要多视角交叉验证。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;能力边界。&lt;/strong&gt; 不同模型在预训练阶段各有所侧重。有的擅长代码生成，有的擅长逻辑推理，有的擅长长文本理解。单 Agent 很难在所有子任务上都做到最优。&lt;/p&gt;
+&lt;p&gt;多 Agent 系统的核心价值正在于此：&lt;strong&gt;分工解决复杂度，多视角提升质量，并行提升效率&lt;/strong&gt;。本文从协作模式的视角拆解多 Agent 系统的设计原理——分工、辩论、层级三种范式如何将多个智能体组织成一个超越个体的整体。&lt;/p&gt;
+&lt;h2 id=&#34;协作模式总览&#34;&gt;协作模式总览
+&lt;/h2&gt;&lt;p&gt;多 Agent 协作有三种核心范式，对应三种组织逻辑：&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;模式&lt;/th&gt;
+          &lt;th&gt;类比&lt;/th&gt;
+          &lt;th&gt;核心思想&lt;/th&gt;
+          &lt;th&gt;适用场景&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;分工模式&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;流水线/组装线&lt;/td&gt;
+          &lt;td&gt;任务拆成子任务，各 Agent 独立负责一个环节&lt;/td&gt;
+          &lt;td&gt;有清晰阶段边界、可并行分解&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;辩论模式&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;红蓝对抗/同行评审&lt;/td&gt;
+          &lt;td&gt;多个 Agent 对同一问题独立作答，交叉审查&lt;/td&gt;
+          &lt;td&gt;需要高质量决策、风险敏感&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;层级模式&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;经理-员工/军队&lt;/td&gt;
+          &lt;td&gt;上层 Agent 规划调度，下层 Agent 执行&lt;/td&gt;
+          &lt;td&gt;复杂动态任务、需要全局协调&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;一条关键原则：&lt;strong&gt;选对协作模式比选对基座模型更重要&lt;/strong&gt;。三种模式不是互斥的，实际系统经常混合使用——顶层用层级做调度，中间层用分工拆解，关键路径用辩论把关。&lt;/p&gt;
+&lt;p&gt;同一个任务&amp;quot;设计一个高并发消息队列&amp;quot;，三种模式的做法截然不同：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;分工&lt;/strong&gt;：架构设计 Agent 拆出存储层、通信层、高可用三个模块 → 分别交给三个专业 Agent 并行设计 → 汇总整合&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;辩论&lt;/strong&gt;：三个 Agent 各自独立出方案 → 交叉评审对方的吞吐量估算和一致性设计 → 综合最优方案&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;层级&lt;/strong&gt;：架构师 Agent 将目标拆解为子任务序列 → 分派给模块 Agent → 根据返回结果动态调整后续分工 → 审核合并&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;下面逐一深入三种模式。&lt;/p&gt;
+&lt;h2 id=&#34;分工模式&#34;&gt;分工模式
+&lt;/h2&gt;&lt;p&gt;最直观的协作范式。核心问题：&lt;strong&gt;怎么拆任务、怎么拼结果？&lt;/strong&gt;&lt;/p&gt;
+&lt;h3 id=&#34;角色定义&#34;&gt;角色定义
+&lt;/h3&gt;&lt;p&gt;分工的第一步是明确&amp;quot;谁来干什么&amp;quot;。三种方式，从简单到复杂：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;预定义角色。&lt;/strong&gt; 提前为每个 Agent 设置明确的人设和能力边界——&amp;ldquo;你是数据库专家，只回答存储相关问题&amp;rdquo;。实现简单、行为可预测，但缺乏弹性——一旦任务超出预定义范围，Agent 就无法处理。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;动态角色分配。&lt;/strong&gt; 引入一个调度 Agent，根据任务特征动态指派执行者。灵活性大幅提升，但调度 Agent 本身成为新的瓶颈——如果它分错了任务，后续所有环节都会受影响。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;自组织。&lt;/strong&gt; Agent 之间协商分工，没有中央调度者。最灵活也最难控制——Agent 需要具备&amp;quot;知道自己不知道什么&amp;quot;的元认知能力，否则可能出现所有人抢同一个子任务或无人认领的局面。目前自组织多停留在研究阶段，工程落地较少。&lt;/p&gt;
+&lt;h3 id=&#34;流水线-vs-map-reduce&#34;&gt;流水线 vs Map-Reduce
+&lt;/h3&gt;&lt;p&gt;分工模式的两种经典结构：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;流水线（Pipeline）&lt;/strong&gt;：任务线性传递，上游输出即下游输入。典型的软件开发流水线——需求分析 → 方案设计 → 代码生成 → 代码审查。&lt;/p&gt;
+&lt;p&gt;优势是结构简单，每一步有单一职责，质量追溯清晰——代码有问题？去审查环节找。劣势也很明显：信息在传递中衰减，上游的微妙设计意图可能在下游被忽略；一旦某一步出错，后续步骤沿错误方向一路狂奔。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Map-Reduce&lt;/strong&gt;：先将主任务拆成 N 个独立子任务并行处理（Map），再聚合所有结果（Reduce）。翻译一本书是最直观的例子——Map 每人翻一章，Reduce 做术语统一和风格对齐。&lt;/p&gt;
+&lt;p&gt;Map-Reduce 的并行度天然高于流水线，单点子任务失败不影响整体。但 Reduce 阶段是瓶颈——聚合质量直接决定最终输出。拆分粒度的好坏也同样关键：拆太粗等于没分工，拆太细协调开销反而压过收益。&lt;/p&gt;
+&lt;h3 id=&#34;关键工程问题&#34;&gt;关键工程问题
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;Schema 约束。&lt;/strong&gt; 上游 Agent 的输出必须能被下游 Agent 无歧义地解析。通常的做法是要求 Agent 输出结构化格式——JSON Schema 约束字段类型，或利用模型的 function call / tool use 能力将输出限制在预定义结构内。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;错误传播。&lt;/strong&gt; 流水线中间某步出错怎么处理？两种策略：方案 A，回退到上一步重试（适合确定性错误，如格式不符）；方案 B，旁路到专门的错误处理 Agent（适合语义性错误，如逻辑矛盾）。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;粒度决策。&lt;/strong&gt; 拆多细？太粗等于没分工——一个 Agent 扛下 80% 的工作，其他 Agent 围观。太细则协调开销超过收益——管理 20 个 Agent 各干一行代码还不如一个人写完。粒度决策没有普适公式，但有一条经验法则：每个子任务的描述 + 输入 + 输出能被一个 Agent 在单轮对话中高质量完成，且整体子任务数不超过基座模型的&amp;quot;有效注意力&amp;quot;范围（通常 5~15 个）。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;上下文传递策略。&lt;/strong&gt; 分工模式中，下游 Agent 需要多少上游信息？全量传递浪费上下文，精简传递可能丢失关键细节。实践中常用&amp;quot;摘要传递&amp;quot;——让上游 Agent 在输出中附带一段结构化的执行摘要，供下游快速理解上下文。&lt;/p&gt;
+&lt;h2 id=&#34;辩论模式&#34;&gt;辩论模式
+&lt;/h2&gt;&lt;p&gt;核心思想简洁有力：&lt;strong&gt;真理越辩越明&lt;/strong&gt;。用多个独立视角提高决策质量。&lt;/p&gt;
+&lt;h3 id=&#34;为什么有效&#34;&gt;为什么有效
+&lt;/h3&gt;&lt;p&gt;单模型存在确认偏误——一旦生成某个方向的内容，后续 token 倾向于自我强化这个方向。多个独立 Agent 从不同起点出发，各自形成判断后再交叉审视，能显著降低这种&amp;quot;一条道走到黑&amp;quot;的概率。&lt;/p&gt;
+&lt;h3 id=&#34;辩论结构&#34;&gt;辩论结构
+&lt;/h3&gt;&lt;p&gt;一轮完整辩论包含三个阶段：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;生成阶段——制造多样性。&lt;/strong&gt; 各 Agent 独立产生输出。多样性的来源有三种：&lt;strong&gt;模型异构&lt;/strong&gt;（GPT + Claude + Gemini，不同模型的预训练分布和内化知识不同）、&lt;strong&gt;提示异构&lt;/strong&gt;（同一模型套不同角色设定，如&amp;quot;你是乐观分析者&amp;quot;vs&amp;quot;你是悲观分析者&amp;quot;）、&lt;strong&gt;视角异构&lt;/strong&gt;（攻击方/防御方，技术视角/产品视角/安全视角）。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;审查阶段——交叉检验。&lt;/strong&gt; Agent A 的输出交给 Agent B 审查，B 指出问题并给出理由，A 回应或修正。这一过程可以循环 1-3 轮。审查的质量取决于审查者的&amp;quot;挑刺能力&amp;quot;——一个只会说&amp;quot;看起来没问题&amp;quot;的审查者有和没有一样。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;决策阶段——如何收敛。&lt;/strong&gt; 三种收敛方式：投票（多数决，最简单但可能刷掉真正的优秀方案）、外部裁判（一个专门的判断 Agent 阅读完整的辩论记录后做裁决，比投票更准确但多一次推理开销）、结构化提取（不选赢家，而是让一个 Agent 综合各方观点融合输出最终方案，保留少数派的合理洞见）。&lt;/p&gt;
+&lt;h3 id=&#34;经典应用场景&#34;&gt;经典应用场景
+&lt;/h3&gt;&lt;p&gt;辩论模式在需要高可靠性的场景下最为有效：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;代码审查。&lt;/strong&gt; 作者 Agent + 审查 Agent + 安全 Agent，三个独立视角交叉。审查 Agent 关注逻辑和风格，安全 Agent 专盯注入漏洞和权限问题——每个 Agent 只负责自己擅长的维度。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;写作润色。&lt;/strong&gt; 初稿 Agent → 批评 Agent（挑逻辑漏洞和表达问题）→ 编辑 Agent（基于批评意见修改）。一轮辩论通常就能显著提升质量。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;风险评估。&lt;/strong&gt; 乐观分析 Agent + 悲观分析 Agent，分别列出最好的和最坏的情况。两者的交集是确定性结论，差异区间是需要关注的灰色地带。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;多模型路由争议。&lt;/strong&gt; 当同一个问题发给两个不同模型得到不同答案时，启动辩论流程确认最终输出，比随机选一个靠谱得多。&lt;/p&gt;
+&lt;h3 id=&#34;辩论深度的权衡&#34;&gt;辩论深度的权衡
+&lt;/h3&gt;&lt;p&gt;辩论轮次不是越多越好。一轮辩论（生成→审查→决策）对绝大多数场景已经足够。多轮辩论容易陷入两个问题：死循环（双方各执一词无法收敛）、过度拟合评审意见（作者为了通过审查而牺牲原创性）。边际收益在一轮之后急剧递减。&lt;/p&gt;
+&lt;h2 id=&#34;层级模式&#34;&gt;层级模式
+&lt;/h2&gt;&lt;p&gt;最灵活也最复杂的范式。核心思想：&lt;strong&gt;引入&amp;quot;管理者&amp;quot;Agent 负责规划、调度和协调&lt;/strong&gt;。&lt;/p&gt;
+&lt;h3 id=&#34;为什么需要层级&#34;&gt;为什么需要层级
+&lt;/h3&gt;&lt;p&gt;分工和辩论都假设任务结构已知或至少可预判。但很多复杂任务开始时只有模糊目标，具体步骤需要边走边看。层级模式的核心价值就在于&lt;strong&gt;在信息不完备时仍能组织执行&lt;/strong&gt;。&lt;/p&gt;
+&lt;h3 id=&#34;结构与角色&#34;&gt;结构与角色
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;管理者（Orchestrator）&lt;/strong&gt; 承担三个职责：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;任务分解：将目标拆解为子任务序列&lt;/li&gt;
+&lt;li&gt;任务分配：为每个子任务选择最合适的执行者&lt;/li&gt;
+&lt;li&gt;进度监控：观察执行结果，必要时调整后续计划&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;strong&gt;执行者（Worker）&lt;/strong&gt; 接收明确的任务指令，完成并汇报。执行者之间通常不直接通信，所有信息经由管理者中转。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;信息流是单向的&lt;/strong&gt;：管理者→执行者发指令，执行者→管理者汇报结果。这保证了信息有序可控，但也使管理者成为通信瓶颈。&lt;/p&gt;
+&lt;h3 id=&#34;关键机制动态任务分解&#34;&gt;关键机制：动态任务分解
+&lt;/h3&gt;&lt;p&gt;管理者拿到&amp;quot;为开源项目写一份安全审计报告&amp;quot;这样的目标时：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;理解目标 → 拆解为：依赖分析 / 代码扫描 / 配置审查 / 漏洞评估
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;→ 分配四个子任务给对应 Worker
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;→ [观察返回] 依赖分析发现 3 个高危 CVE
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;→ 动态调整：新增&amp;#34;供应链风险&amp;#34;专项子任务
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;→ 汇总所有 Worker 结果 → 生成综合报告
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;关键在第三步——管理者根据中间结果&lt;strong&gt;动态调整后续计划&lt;/strong&gt;，而不是一开始就把所有步骤固定死。&lt;/p&gt;
+&lt;p&gt;每一步管理者实际做三个决策：&lt;strong&gt;分解&lt;/strong&gt;（基于当前信息，我应该创建哪些子任务？）、&lt;strong&gt;分配&lt;/strong&gt;（每个子任务最适合交给谁？）、&lt;strong&gt;整合&lt;/strong&gt;（结果返回后，我需要做进一步的追问还是可以总结？）。&lt;/p&gt;
+&lt;h3 id=&#34;常见问题&#34;&gt;常见问题
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;单点瓶颈。&lt;/strong&gt; 管理者出错，整个任务失败。缓解手段：给管理者配备&amp;quot;计划审查 Agent&amp;quot;做二次确认，或者对关键决策引入投票机制。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;调度开销。&lt;/strong&gt; 管理者自身推理消耗 token，复杂任务中管理成本可能超过实际执行成本。假设一个任务拆成 8 个子任务，每个 Worker 回答 500 token，但管理者花了 3000 token 做规划和协调——调度开销占比接近 50%。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;信息截断。&lt;/strong&gt; 管理者需要压缩 Worker 返回的信息来避免上下文溢出。压缩意味着信息丢失。常见的缓解策略是让 Worker 在输出中附带结构化摘要，管理者优先读摘要，按需深入细节。&lt;/p&gt;
+&lt;h3 id=&#34;混合策略协作的终极形态&#34;&gt;混合策略：协作的终极形态
+&lt;/h3&gt;&lt;p&gt;实际生产系统极少只用一种模式。一个完善的架构审查系统可能是这样的：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;层级层（顶层）：架构师 Agent 接收审查请求 → 规划审查步骤 → 动态调度
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;分工层（中间层）：代码分析、依赖检查、配置审查、安全扫描 四个 Agent 并行执行
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;辩论层（关键点）：安全扫描发现疑似漏洞 → 启动辩论（攻击视角 + 防御视角 + 第三方裁判）
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;顶层用层级调度保证全局一致性，中间用分工并行提升效率，关键决策点用辩论把关——三种模式各取所长。&lt;/p&gt;
+&lt;h2 id=&#34;通信机制与拓扑结构&#34;&gt;通信机制与拓扑结构
+&lt;/h2&gt;&lt;p&gt;三种协作模式依赖一套共同的通信基础设施。这一节从底层视角回答：Agent 之间怎么&amp;quot;说话&amp;quot;？系统怎么&amp;quot;布线&amp;quot;？&lt;/p&gt;
+&lt;h3 id=&#34;通信方式&#34;&gt;通信方式
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;消息传递。&lt;/strong&gt; 最基础的方式——Agent 之间发送结构化消息。三种传递模式：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;直接调用：Agent A → Agent B，请求-响应，最简单&lt;/li&gt;
+&lt;li&gt;广播：一个 Agent 发出消息，所有 Agent 接收，适合全局通知&lt;/li&gt;
+&lt;li&gt;发布-订阅：Agent 声明自己感兴趣的主题，消息按主题投递，比广播更精准&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;黑板系统。&lt;/strong&gt; 不直接发消息，而是写到一个共享的公共区域，其他 Agent 按需读取。你可以把它理解为 Agent 系统的 Redis——生产者写入，消费者自主读取，双方互不知晓。&lt;/p&gt;
+&lt;p&gt;黑板系统的核心优势是解耦：新增 Agent 不需要修改现有 Agent 的代码，只需读写黑板。代价是缺乏信息过滤——黑板上内容多了之后，Agent 需要自己判断什么与自己相关，注意力被无关信息消耗。此外还有并发写入的版本冲突问题。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;结构化通信（Agent-as-Tool）。&lt;/strong&gt; 更进一步——Agent 不仅输出自然语言，而是输出结构化动作指令。这意味着每个 Agent 可以将自己注册为一个&amp;quot;函数&amp;quot;，调用方通过 function call 协议调用它。Agent 之间不再&amp;quot;对话&amp;quot;，而是像调用 API 一样互操作。这种模式下，多 Agent 系统的行为更接近微服务架构——每个 Agent 是独立服务，通信走结构化协议。&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;方式&lt;/th&gt;
+          &lt;th&gt;耦合度&lt;/th&gt;
+          &lt;th&gt;灵活性&lt;/th&gt;
+          &lt;th&gt;适用场景&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;消息传递&lt;/td&gt;
+          &lt;td&gt;高&lt;/td&gt;
+          &lt;td&gt;低&lt;/td&gt;
+          &lt;td&gt;流水线、层级&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;黑板系统&lt;/td&gt;
+          &lt;td&gt;低&lt;/td&gt;
+          &lt;td&gt;高&lt;/td&gt;
+          &lt;td&gt;辩论、自组织&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;结构化通信&lt;/td&gt;
+          &lt;td&gt;中&lt;/td&gt;
+          &lt;td&gt;中&lt;/td&gt;
+          &lt;td&gt;Agent 工具化、微服务式&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id=&#34;拓扑结构&#34;&gt;拓扑结构
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;星型。&lt;/strong&gt; 一个中心 Agent，其他星状环绕，所有通信经过中心。对应层级模式。实现最简单，路由清晰，但中心是单点和瓶颈。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;网状。&lt;/strong&gt; 任意两个 Agent 都可直接通信。对应辩论模式。最灵活，但 N 个 Agent 有 N² 条潜在通道——4 个 Agent 有 12 条，10 个就有 90 条。消息复杂度随规模平方增长，需要额外的流控和去重机制。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;流水线。&lt;/strong&gt; Agent 线性排列，消息单向流动。对应分工模式。最可控——每一步的输入输出边界清晰，调试和监控友好。代价是没有反馈回路，后面的发现无法纠正前面的决策。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;树形 / DAG。&lt;/strong&gt; 混合拓扑，实践中使用最多。上层是星型做调度，中间是流水线做加工，叶子层是网状做交叉审查。没有一种结构能通吃，合在一起才完整。&lt;/p&gt;
+&lt;h2 id=&#34;选型指南与总结&#34;&gt;选型指南与总结
+&lt;/h2&gt;&lt;p&gt;选择协作模式不是纯技术问题，要看任务特征：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;什么时候用分工？&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;任务可以清晰地拆解为独立子任务&lt;/li&gt;
+&lt;li&gt;子任务之间没有强依赖&lt;/li&gt;
+&lt;li&gt;每个环节的输入输出有明确的 Schema 可定义&lt;/li&gt;
+&lt;li&gt;举例：翻译、文档生成、数据流水线&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;什么时候用辩论？&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;决策质量 &amp;gt; 响应速度&lt;/li&gt;
+&lt;li&gt;存在多个合理的视角&lt;/li&gt;
+&lt;li&gt;错误的代价很高&lt;/li&gt;
+&lt;li&gt;举例：代码审查、安全审计、风险评估&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;什么时候用层级？&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;任务边界模糊，需要边做边拆&lt;/li&gt;
+&lt;li&gt;子任务分配需要动态调整&lt;/li&gt;
+&lt;li&gt;全局一致性要求高&lt;/li&gt;
+&lt;li&gt;举例：复杂工程任务、开放研究项目&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;什么时候用混合？&lt;/strong&gt;
+——几乎所有非玩具场景。&lt;/p&gt;
+&lt;hr&gt;
+&lt;p&gt;多 Agent 系统的本质可以用一句话概括：&lt;strong&gt;把&amp;quot;一个聪明的模型&amp;quot;变成&amp;quot;一群能协作的模型&amp;quot;&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;单 Agent 的上限是单体模型的推理能力，多 Agent 的上限则是协作结构的组织效率。分工、辩论、层级是三种最基本的组织逻辑；通信机制和拓扑结构是支撑这些逻辑运转的基础设施。理解了这些，你就不只是在&amp;quot;用&amp;quot; Agent，而是在设计 Agent 系统。&lt;/p&gt;
+&lt;p&gt;这个领域还在快速演化。从 AutoGen 到 CrewAI 到 LangGraph，从 MetaGPT 的软件公司模拟到 Claude Code 的 subagent 体系——每个框架都在用自己的方式回答同一个问题：怎么让一群 Agent 高效协作。掌握了本文讨论的原理，再去审视这些框架，你会发现它们不过是用不同的工程选型在回答同样的设计问题。&lt;/p&gt;
+</description>
+        </item>
+        <item>
         <title>大语言模型原理详解：从 Transformer 到 Scaling Law</title>
         <link>https://liusir521.github.io/p/%E5%A4%A7%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E4%BB%8E-transformer-%E5%88%B0-scaling-law/</link>
         <pubDate>Sat, 02 May 2026 00:00:00 +0000</pubDate>
