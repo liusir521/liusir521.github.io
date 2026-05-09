@@ -1,25 +1,22 @@
 <!DOCTYPE html>
 <html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="深入拆解多 Agent 系统的核心设计原理：三种协作范式（分工、辩论、层级）与底层通信机制，理解如何将多个智能体组织成一个高效整体">
-<title>多 Agent 协作原理详解：分工、辩论、层级与通信机制</title>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="欢迎来到我的网站,主要分享个人学习记录,后端开发人员。">
+<title>协议</title>
 
-<link rel='canonical' href='https://liusir521.github.io/p/%E5%A4%9A-agent-%E5%8D%8F%E4%BD%9C%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E5%88%86%E5%B7%A5%E8%BE%A9%E8%AE%BA%E5%B1%82%E7%BA%A7%E4%B8%8E%E9%80%9A%E4%BF%A1%E6%9C%BA%E5%88%B6/'>
+<link rel='canonical' href='https://liusir521.github.io/tags/%E5%8D%8F%E8%AE%AE/'>
 
-<link rel="stylesheet" href="/scss/style.min.ae56834d8e6c736a3fd56f971794f8c0705364d4411c7000fbf5dc668862af2f.css"><meta property='og:title' content="多 Agent 协作原理详解：分工、辩论、层级与通信机制">
-<meta property='og:description' content="深入拆解多 Agent 系统的核心设计原理：三种协作范式（分工、辩论、层级）与底层通信机制，理解如何将多个智能体组织成一个高效整体">
-<meta property='og:url' content='https://liusir521.github.io/p/%E5%A4%9A-agent-%E5%8D%8F%E4%BD%9C%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E5%88%86%E5%B7%A5%E8%BE%A9%E8%AE%BA%E5%B1%82%E7%BA%A7%E4%B8%8E%E9%80%9A%E4%BF%A1%E6%9C%BA%E5%88%B6/'>
+<link rel="stylesheet" href="/scss/style.min.ae56834d8e6c736a3fd56f971794f8c0705364d4411c7000fbf5dc668862af2f.css"><meta property='og:title' content="协议">
+<meta property='og:description' content="欢迎来到我的网站,主要分享个人学习记录,后端开发人员。">
+<meta property='og:url' content='https://liusir521.github.io/tags/%E5%8D%8F%E8%AE%AE/'>
 <meta property='og:site_name' content='你怂你mua'>
-<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Agent' /><meta property='article:tag' content='Multi-Agent' /><meta property='article:tag' content='AI' /><meta property='article:tag' content='LLM' /><meta property='article:tag' content='多智能体' /><meta property='article:published_time' content='2026-05-07T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2026-05-07T00:00:00&#43;00:00'/><meta property='og:image' content='https://liusir521.github.io/p/%E5%A4%9A-agent-%E5%8D%8F%E4%BD%9C%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E5%88%86%E5%B7%A5%E8%BE%A9%E8%AE%BA%E5%B1%82%E7%BA%A7%E4%B8%8E%E9%80%9A%E4%BF%A1%E6%9C%BA%E5%88%B6/agent.png' />
-<meta name="twitter:title" content="多 Agent 协作原理详解：分工、辩论、层级与通信机制">
-<meta name="twitter:description" content="深入拆解多 Agent 系统的核心设计原理：三种协作范式（分工、辩论、层级）与底层通信机制，理解如何将多个智能体组织成一个高效整体"><meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content='https://liusir521.github.io/p/%E5%A4%9A-agent-%E5%8D%8F%E4%BD%9C%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E5%88%86%E5%B7%A5%E8%BE%A9%E8%AE%BA%E5%B1%82%E7%BA%A7%E4%B8%8E%E9%80%9A%E4%BF%A1%E6%9C%BA%E5%88%B6/agent.png' />
+<meta property='og:type' content='website'><meta property='og:updated_time' content=' 2026-05-09T00:00:00&#43;00:00 '/>
+<meta name="twitter:title" content="协议">
+<meta name="twitter:description" content="欢迎来到我的网站,主要分享个人学习记录,后端开发人员。"><link rel="alternate" type="application/rss&#43;xml" href="https://liusir521.github.io/tags/%E5%8D%8F%E8%AE%AE/index.xml">
     <link rel="shortcut icon" href="/favicon.png" />
 
     </head>
-    <body class="
-    article-page
-    ">
+    <body class="">
     <script>
         (function() {
             const colorSchemeKey = 'StackColorScheme';
@@ -279,10 +276,68 @@
     <aside class="sidebar right-sidebar sticky">
         
             
-                
-    <section class="widget archives">
+                <form action="/search/" class="search-form widget" >
+        <p>
+            <label>搜索</label>
+            <input name="keyword" required placeholder="输入关键词..." />
+        
+            <button title="搜索">
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+            </button>
+        </p>
+    </form>
+            
+        
+            
+                <section class="widget archives">
         <div class="widget-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-infinity" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M9.828 9.172a4 4 0 1 0 0 5.656 a10 10 0 0 0 2.172 -2.828a10 10 0 0 1 2.172 -2.828 a4 4 0 1 1 0 5.656a10 10 0 0 1 -2.172 -2.828a10 10 0 0 0 -2.172 -2.828" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">归档</h2>
+
+        
+        
+        
+        
+        <div class="widget-archive--list">
+            <div class="archives-year">
+                    <a href="/archives/#2026">
+                        
+                            <span class="year">2026</span>
+                            <span class="count">19</span>
+                        
+                    </a> 
+                </div>
+            <div class="archives-year">
+                    <a href="/archives/#2025">
+                        
+                            <span class="year">2025</span>
+                            <span class="count">11</span>
+                        
+                    </a> 
+                </div>
+            
+        </div>
+    </section>
+            
+        
+            
+                <section class="widget tagCloud">
+    <div class="widget-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
   <path stroke="none" d="M0 0h24v24H0z"/>
   <line x1="5" y1="9" x2="19" y2="9" />
   <line x1="5" y1="15" x2="19" y2="15" />
@@ -292,49 +347,114 @@
 
 
 
-        </div>
-        <h2 class="widget-title section-title">目录</h2>
+    </div>
+    <h2 class="widget-title section-title">分类</h2>
+
+    <div class="tagCloud-tags">
         
-        <div class="widget--toc">
-            <nav id="TableOfContents">
-  <ol>
-    <li><a href="#引言单-agent-的局限">引言：单 Agent 的局限</a></li>
-    <li><a href="#协作模式总览">协作模式总览</a></li>
-    <li><a href="#分工模式">分工模式</a>
-      <ol>
-        <li><a href="#角色定义">角色定义</a></li>
-        <li><a href="#流水线-vs-map-reduce">流水线 vs Map-Reduce</a></li>
-        <li><a href="#关键工程问题">关键工程问题</a></li>
-      </ol>
-    </li>
-    <li><a href="#辩论模式">辩论模式</a>
-      <ol>
-        <li><a href="#为什么有效">为什么有效</a></li>
-        <li><a href="#辩论结构">辩论结构</a></li>
-        <li><a href="#经典应用场景">经典应用场景</a></li>
-        <li><a href="#辩论深度的权衡">辩论深度的权衡</a></li>
-      </ol>
-    </li>
-    <li><a href="#层级模式">层级模式</a>
-      <ol>
-        <li><a href="#为什么需要层级">为什么需要层级</a></li>
-        <li><a href="#结构与角色">结构与角色</a></li>
-        <li><a href="#关键机制动态任务分解">关键机制：动态任务分解</a></li>
-        <li><a href="#常见问题">常见问题</a></li>
-        <li><a href="#混合策略协作的终极形态">混合策略：协作的终极形态</a></li>
-      </ol>
-    </li>
-    <li><a href="#通信机制与拓扑结构">通信机制与拓扑结构</a>
-      <ol>
-        <li><a href="#通信方式">通信方式</a></li>
-        <li><a href="#拓扑结构">拓扑结构</a></li>
-      </ol>
-    </li>
-    <li><a href="#选型指南与总结">选型指南与总结</a></li>
-  </ol>
-</nav>
-        </div>
-    </section>
+            <a href="/categories/ai/" class="font_size_13">
+                AI
+            </a>
+        
+            <a href="/categories/%E6%BA%90%E7%A0%81/" class="font_size_11">
+                源码
+            </a>
+        
+            <a href="/categories/go%E8%AF%AD%E8%A8%80/" class="font_size_7">
+                Go语言
+            </a>
+        
+            <a href="/categories/agent/" class="font_size_6">
+                Agent
+            </a>
+        
+            <a href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F/" class="font_size_5">
+                分布式
+            </a>
+        
+            <a href="/categories/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" class="font_size_5">
+                学习笔记
+            </a>
+        
+            <a href="/categories/mit/" class="font_size_4">
+                Mit
+            </a>
+        
+            <a href="/categories/redis/" class="font_size_4">
+                Redis
+            </a>
+        
+            <a href="/categories/%E5%B7%A5%E5%85%B7/" class="font_size_4">
+                工具
+            </a>
+        
+            <a href="/categories/%E5%A4%A7%E6%A8%A1%E5%9E%8B/" class="font_size_2">
+                大模型
+            </a>
+        
+    </div>
+</section>
+
+            
+        
+            
+                <section class="widget tagCloud">
+    <div class="widget-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-tag" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11 3L20 12a1.5 1.5 0 0 1 0 2L14 20a1.5 1.5 0 0 1 -2 0L3 11v-4a4 4 0 0 1 4 -4h4" />
+  <circle cx="9" cy="9" r="2" />
+</svg>
+
+
+
+    </div>
+    <h2 class="widget-title section-title">标签云</h2>
+
+    <div class="tagCloud-tags">
+        
+            <a href="/tags/%E6%BA%90%E7%A0%81/">
+                源码
+            </a>
+        
+            <a href="/tags/ai/">
+                AI
+            </a>
+        
+            <a href="/tags/llm/">
+                LLM
+            </a>
+        
+            <a href="/tags/go%E8%AF%AD%E8%A8%80/">
+                Go语言
+            </a>
+        
+            <a href="/tags/agent/">
+                Agent
+            </a>
+        
+            <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/">
+                分布式
+            </a>
+        
+            <a href="/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">
+                学习笔记
+            </a>
+        
+            <a href="/tags/%E7%BC%93%E5%AD%98/">
+                缓存
+            </a>
+        
+            <a href="/tags/ai%E7%BC%96%E7%A8%8B/">
+                AI编程
+            </a>
+        
+            <a href="/tags/claude-code/">
+                Claude Code
+            </a>
+        
+    </div>
+</section>
 
             
         
@@ -342,528 +462,46 @@
 
 
             <main class="main full-width">
-    <article class="has-image main-article">
-    <header class="article-header">
-        <div class="article-image">
-            <a href="/p/%E5%A4%9A-agent-%E5%8D%8F%E4%BD%9C%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E5%88%86%E5%B7%A5%E8%BE%A9%E8%AE%BA%E5%B1%82%E7%BA%A7%E4%B8%8E%E9%80%9A%E4%BF%A1%E6%9C%BA%E5%88%B6/">
-                <img src="/p/%E5%A4%9A-agent-%E5%8D%8F%E4%BD%9C%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E5%88%86%E5%B7%A5%E8%BE%A9%E8%AE%BA%E5%B1%82%E7%BA%A7%E4%B8%8E%E9%80%9A%E4%BF%A1%E6%9C%BA%E5%88%B6/agent_hu_b35b85d51dfd1aea.png"
-                        srcset="/p/%E5%A4%9A-agent-%E5%8D%8F%E4%BD%9C%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E5%88%86%E5%B7%A5%E8%BE%A9%E8%AE%BA%E5%B1%82%E7%BA%A7%E4%B8%8E%E9%80%9A%E4%BF%A1%E6%9C%BA%E5%88%B6/agent_hu_b35b85d51dfd1aea.png 800w, /p/%E5%A4%9A-agent-%E5%8D%8F%E4%BD%9C%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E5%88%86%E5%B7%A5%E8%BE%A9%E8%AE%BA%E5%B1%82%E7%BA%A7%E4%B8%8E%E9%80%9A%E4%BF%A1%E6%9C%BA%E5%88%B6/agent_hu_6e2b77297debb6de.png 1600w"
-                        width="800" 
-                        height="533" 
-                        loading="lazy"
-                        alt="Featured image of post 多 Agent 协作原理详解：分工、辩论、层级与通信机制" />
-                
-            </a>
-        </div>
-    
+    <header>
+        <h3 class="section-title">
+            
+                Tags
+            
+        </h3>
 
-    <div class="article-details">
-    
-    <header class="article-category">
-        
-            
-            
-            
-            <a href="/categories/ai/" style="background-color: hsl(167, 60%, 84%); color: hsl(167, 60%, 15%);">
-                AI
-            </a>
-        
-            
-            
-            
-            <a href="/categories/agent/" style="background-color: hsl(350, 60%, 84%); color: hsl(350, 60%, 15%);">
-                Agent
-            </a>
-        
+        <div class="section-card">
+            <div class="section-details">
+                <h3 class="section-count">1 个页面</h3>
+                <h1 class="section-term">协议</h1>
+                
+            </div>
+        </div>
     </header>
     
-
-    <div class="article-title-wrapper">
-        <h2 class="article-title">
-            <a href="/p/%E5%A4%9A-agent-%E5%8D%8F%E4%BD%9C%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E5%88%86%E5%B7%A5%E8%BE%A9%E8%AE%BA%E5%B1%82%E7%BA%A7%E4%B8%8E%E9%80%9A%E4%BF%A1%E6%9C%BA%E5%88%B6/">多 Agent 协作原理详解：分工、辩论、层级与通信机制</a>
-        </h2>
     
-        
-        <h3 class="article-subtitle">
-            深入拆解多 Agent 系统的核心设计原理：三种协作范式（分工、辩论、层级）与底层通信机制，理解如何将多个智能体组织成一个高效整体
-        </h3>
-        
-    </div>
-
-    
-    
-    
-    
-    <footer class="article-time">
-        
-            <div>
-                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
-  <circle cx="18" cy="18" r="4" />
-  <path d="M15 3v4" />
-  <path d="M7 3v4" />
-  <path d="M3 11h16" />
-  <path d="M18 16.496v1.504l1 1" />
-</svg>
-                <time class="article-time--published" datetime='2026-05-07T00:00:00Z'>May 07, 2026</time>
-            </div>
-        
-
-        
-            <div>
-                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <circle cx="12" cy="12" r="9" />
-  <polyline points="12 7 12 12 15 15" />
-</svg>
-
-
-
-                <time class="article-time--reading">
-                    阅读时长: 3 分钟
-                </time>
-            </div>
-        
-    </footer>
-    
-
-    
-</div>
-
-</header>
-
-    <section class="article-content">
-    
-    
-    <h2 id="引言单-agent-的局限">引言：单 Agent 的局限
-</h2><p>单 Agent 系统在能力上已经令人印象深刻，但在面对复杂任务时，存在三个难以绕过的硬限制：</p>
-<p><strong>上下文窗口有限。</strong> 一个代码库可能有几十万行，一份安全审计需要同时关注上百个检查点，一篇长文档的跨章节一致性需要全局视野。单 Agent 的上下文窗口再大也是有上限的，塞入越多信息，注意力越被稀释，关键细节越容易被忽略。</p>
-<p><strong>单一视角陷阱。</strong> 一个模型在同一时刻只能持有一种思维框架。让 GPT-4 审计代码安全时，它很难同时切换为&quot;攻击者视角&quot;和&quot;防御者视角&quot;去审视同一段逻辑。而现实中复杂问题恰恰需要多视角交叉验证。</p>
-<p><strong>能力边界。</strong> 不同模型在预训练阶段各有所侧重。有的擅长代码生成，有的擅长逻辑推理，有的擅长长文本理解。单 Agent 很难在所有子任务上都做到最优。</p>
-<p>多 Agent 系统的核心价值正在于此：<strong>分工解决复杂度，多视角提升质量，并行提升效率</strong>。本文从协作模式的视角拆解多 Agent 系统的设计原理——分工、辩论、层级三种范式如何将多个智能体组织成一个超越个体的整体。</p>
-<h2 id="协作模式总览">协作模式总览
-</h2><p>多 Agent 协作有三种核心范式，对应三种组织逻辑：</p>
-<div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>模式</th>
-          <th>类比</th>
-          <th>核心思想</th>
-          <th>适用场景</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td><strong>分工模式</strong></td>
-          <td>流水线/组装线</td>
-          <td>任务拆成子任务，各 Agent 独立负责一个环节</td>
-          <td>有清晰阶段边界、可并行分解</td>
-      </tr>
-      <tr>
-          <td><strong>辩论模式</strong></td>
-          <td>红蓝对抗/同行评审</td>
-          <td>多个 Agent 对同一问题独立作答，交叉审查</td>
-          <td>需要高质量决策、风险敏感</td>
-      </tr>
-      <tr>
-          <td><strong>层级模式</strong></td>
-          <td>经理-员工/军队</td>
-          <td>上层 Agent 规划调度，下层 Agent 执行</td>
-          <td>复杂动态任务、需要全局协调</td>
-      </tr>
-  </tbody>
-</table></div>
-<p>一条关键原则：<strong>选对协作模式比选对基座模型更重要</strong>。三种模式不是互斥的，实际系统经常混合使用——顶层用层级做调度，中间层用分工拆解，关键路径用辩论把关。</p>
-<p>同一个任务&quot;设计一个高并发消息队列&quot;，三种模式的做法截然不同：</p>
-<ul>
-<li><strong>分工</strong>：架构设计 Agent 拆出存储层、通信层、高可用三个模块 → 分别交给三个专业 Agent 并行设计 → 汇总整合</li>
-<li><strong>辩论</strong>：三个 Agent 各自独立出方案 → 交叉评审对方的吞吐量估算和一致性设计 → 综合最优方案</li>
-<li><strong>层级</strong>：架构师 Agent 将目标拆解为子任务序列 → 分派给模块 Agent → 根据返回结果动态调整后续分工 → 审核合并</li>
-</ul>
-<p>下面逐一深入三种模式。</p>
-<h2 id="分工模式">分工模式
-</h2><p>最直观的协作范式。核心问题：<strong>怎么拆任务、怎么拼结果？</strong></p>
-<h3 id="角色定义">角色定义
-</h3><p>分工的第一步是明确&quot;谁来干什么&quot;。三种方式，从简单到复杂：</p>
-<p><strong>预定义角色。</strong> 提前为每个 Agent 设置明确的人设和能力边界——&ldquo;你是数据库专家，只回答存储相关问题&rdquo;。实现简单、行为可预测，但缺乏弹性——一旦任务超出预定义范围，Agent 就无法处理。</p>
-<p><strong>动态角色分配。</strong> 引入一个调度 Agent，根据任务特征动态指派执行者。灵活性大幅提升，但调度 Agent 本身成为新的瓶颈——如果它分错了任务，后续所有环节都会受影响。</p>
-<p><strong>自组织。</strong> Agent 之间协商分工，没有中央调度者。最灵活也最难控制——Agent 需要具备&quot;知道自己不知道什么&quot;的元认知能力，否则可能出现所有人抢同一个子任务或无人认领的局面。目前自组织多停留在研究阶段，工程落地较少。</p>
-<h3 id="流水线-vs-map-reduce">流水线 vs Map-Reduce
-</h3><p>分工模式的两种经典结构：</p>
-<p><strong>流水线（Pipeline）</strong>：任务线性传递，上游输出即下游输入。典型的软件开发流水线——需求分析 → 方案设计 → 代码生成 → 代码审查。</p>
-<p>优势是结构简单，每一步有单一职责，质量追溯清晰——代码有问题？去审查环节找。劣势也很明显：信息在传递中衰减，上游的微妙设计意图可能在下游被忽略；一旦某一步出错，后续步骤沿错误方向一路狂奔。</p>
-<p><strong>Map-Reduce</strong>：先将主任务拆成 N 个独立子任务并行处理（Map），再聚合所有结果（Reduce）。翻译一本书是最直观的例子——Map 每人翻一章，Reduce 做术语统一和风格对齐。</p>
-<p>Map-Reduce 的并行度天然高于流水线，单点子任务失败不影响整体。但 Reduce 阶段是瓶颈——聚合质量直接决定最终输出。拆分粒度的好坏也同样关键：拆太粗等于没分工，拆太细协调开销反而压过收益。</p>
-<h3 id="关键工程问题">关键工程问题
-</h3><p><strong>Schema 约束。</strong> 上游 Agent 的输出必须能被下游 Agent 无歧义地解析。通常的做法是要求 Agent 输出结构化格式——JSON Schema 约束字段类型，或利用模型的 function call / tool use 能力将输出限制在预定义结构内。</p>
-<p><strong>错误传播。</strong> 流水线中间某步出错怎么处理？两种策略：方案 A，回退到上一步重试（适合确定性错误，如格式不符）；方案 B，旁路到专门的错误处理 Agent（适合语义性错误，如逻辑矛盾）。</p>
-<p><strong>粒度决策。</strong> 拆多细？太粗等于没分工——一个 Agent 扛下 80% 的工作，其他 Agent 围观。太细则协调开销超过收益——管理 20 个 Agent 各干一行代码还不如一个人写完。粒度决策没有普适公式，但有一条经验法则：每个子任务的描述 + 输入 + 输出能被一个 Agent 在单轮对话中高质量完成，且整体子任务数不超过基座模型的&quot;有效注意力&quot;范围（通常 5~15 个）。</p>
-<p><strong>上下文传递策略。</strong> 分工模式中，下游 Agent 需要多少上游信息？全量传递浪费上下文，精简传递可能丢失关键细节。实践中常用&quot;摘要传递&quot;——让上游 Agent 在输出中附带一段结构化的执行摘要，供下游快速理解上下文。</p>
-<h2 id="辩论模式">辩论模式
-</h2><p>核心思想简洁有力：<strong>真理越辩越明</strong>。用多个独立视角提高决策质量。</p>
-<h3 id="为什么有效">为什么有效
-</h3><p>单模型存在确认偏误——一旦生成某个方向的内容，后续 token 倾向于自我强化这个方向。多个独立 Agent 从不同起点出发，各自形成判断后再交叉审视，能显著降低这种&quot;一条道走到黑&quot;的概率。</p>
-<h3 id="辩论结构">辩论结构
-</h3><p>一轮完整辩论包含三个阶段：</p>
-<p><strong>生成阶段——制造多样性。</strong> 各 Agent 独立产生输出。多样性的来源有三种：<strong>模型异构</strong>（GPT + Claude + Gemini，不同模型的预训练分布和内化知识不同）、<strong>提示异构</strong>（同一模型套不同角色设定，如&quot;你是乐观分析者&quot;vs&quot;你是悲观分析者&quot;）、<strong>视角异构</strong>（攻击方/防御方，技术视角/产品视角/安全视角）。</p>
-<p><strong>审查阶段——交叉检验。</strong> Agent A 的输出交给 Agent B 审查，B 指出问题并给出理由，A 回应或修正。这一过程可以循环 1-3 轮。审查的质量取决于审查者的&quot;挑刺能力&quot;——一个只会说&quot;看起来没问题&quot;的审查者有和没有一样。</p>
-<p><strong>决策阶段——如何收敛。</strong> 三种收敛方式：投票（多数决，最简单但可能刷掉真正的优秀方案）、外部裁判（一个专门的判断 Agent 阅读完整的辩论记录后做裁决，比投票更准确但多一次推理开销）、结构化提取（不选赢家，而是让一个 Agent 综合各方观点融合输出最终方案，保留少数派的合理洞见）。</p>
-<h3 id="经典应用场景">经典应用场景
-</h3><p>辩论模式在需要高可靠性的场景下最为有效：</p>
-<p><strong>代码审查。</strong> 作者 Agent + 审查 Agent + 安全 Agent，三个独立视角交叉。审查 Agent 关注逻辑和风格，安全 Agent 专盯注入漏洞和权限问题——每个 Agent 只负责自己擅长的维度。</p>
-<p><strong>写作润色。</strong> 初稿 Agent → 批评 Agent（挑逻辑漏洞和表达问题）→ 编辑 Agent（基于批评意见修改）。一轮辩论通常就能显著提升质量。</p>
-<p><strong>风险评估。</strong> 乐观分析 Agent + 悲观分析 Agent，分别列出最好的和最坏的情况。两者的交集是确定性结论，差异区间是需要关注的灰色地带。</p>
-<p><strong>多模型路由争议。</strong> 当同一个问题发给两个不同模型得到不同答案时，启动辩论流程确认最终输出，比随机选一个靠谱得多。</p>
-<h3 id="辩论深度的权衡">辩论深度的权衡
-</h3><p>辩论轮次不是越多越好。一轮辩论（生成→审查→决策）对绝大多数场景已经足够。多轮辩论容易陷入两个问题：死循环（双方各执一词无法收敛）、过度拟合评审意见（作者为了通过审查而牺牲原创性）。边际收益在一轮之后急剧递减。</p>
-<h2 id="层级模式">层级模式
-</h2><p>最灵活也最复杂的范式。核心思想：<strong>引入&quot;管理者&quot;Agent 负责规划、调度和协调</strong>。</p>
-<h3 id="为什么需要层级">为什么需要层级
-</h3><p>分工和辩论都假设任务结构已知或至少可预判。但很多复杂任务开始时只有模糊目标，具体步骤需要边走边看。层级模式的核心价值就在于<strong>在信息不完备时仍能组织执行</strong>。</p>
-<h3 id="结构与角色">结构与角色
-</h3><p><strong>管理者（Orchestrator）</strong> 承担三个职责：</p>
-<ol>
-<li>任务分解：将目标拆解为子任务序列</li>
-<li>任务分配：为每个子任务选择最合适的执行者</li>
-<li>进度监控：观察执行结果，必要时调整后续计划</li>
-</ol>
-<p><strong>执行者（Worker）</strong> 接收明确的任务指令，完成并汇报。执行者之间通常不直接通信，所有信息经由管理者中转。</p>
-<p><strong>信息流是单向的</strong>：管理者→执行者发指令，执行者→管理者汇报结果。这保证了信息有序可控，但也使管理者成为通信瓶颈。</p>
-<h3 id="关键机制动态任务分解">关键机制：动态任务分解
-</h3><p>管理者拿到&quot;为开源项目写一份安全审计报告&quot;这样的目标时：</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">理解目标 → 拆解为：依赖分析 / 代码扫描 / 配置审查 / 漏洞评估
-</span></span><span class="line"><span class="cl">→ 分配四个子任务给对应 Worker
-</span></span><span class="line"><span class="cl">→ [观察返回] 依赖分析发现 3 个高危 CVE
-</span></span><span class="line"><span class="cl">→ 动态调整：新增&#34;供应链风险&#34;专项子任务
-</span></span><span class="line"><span class="cl">→ 汇总所有 Worker 结果 → 生成综合报告
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>关键在第三步——管理者根据中间结果<strong>动态调整后续计划</strong>，而不是一开始就把所有步骤固定死。</p>
-<p>每一步管理者实际做三个决策：<strong>分解</strong>（基于当前信息，我应该创建哪些子任务？）、<strong>分配</strong>（每个子任务最适合交给谁？）、<strong>整合</strong>（结果返回后，我需要做进一步的追问还是可以总结？）。</p>
-<h3 id="常见问题">常见问题
-</h3><p><strong>单点瓶颈。</strong> 管理者出错，整个任务失败。缓解手段：给管理者配备&quot;计划审查 Agent&quot;做二次确认，或者对关键决策引入投票机制。</p>
-<p><strong>调度开销。</strong> 管理者自身推理消耗 token，复杂任务中管理成本可能超过实际执行成本。假设一个任务拆成 8 个子任务，每个 Worker 回答 500 token，但管理者花了 3000 token 做规划和协调——调度开销占比接近 50%。</p>
-<p><strong>信息截断。</strong> 管理者需要压缩 Worker 返回的信息来避免上下文溢出。压缩意味着信息丢失。常见的缓解策略是让 Worker 在输出中附带结构化摘要，管理者优先读摘要，按需深入细节。</p>
-<h3 id="混合策略协作的终极形态">混合策略：协作的终极形态
-</h3><p>实际生产系统极少只用一种模式。一个完善的架构审查系统可能是这样的：</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">层级层（顶层）：架构师 Agent 接收审查请求 → 规划审查步骤 → 动态调度
-</span></span><span class="line"><span class="cl">分工层（中间层）：代码分析、依赖检查、配置审查、安全扫描 四个 Agent 并行执行
-</span></span><span class="line"><span class="cl">辩论层（关键点）：安全扫描发现疑似漏洞 → 启动辩论（攻击视角 + 防御视角 + 第三方裁判）
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>顶层用层级调度保证全局一致性，中间用分工并行提升效率，关键决策点用辩论把关——三种模式各取所长。</p>
-<h2 id="通信机制与拓扑结构">通信机制与拓扑结构
-</h2><p>三种协作模式依赖一套共同的通信基础设施。这一节从底层视角回答：Agent 之间怎么&quot;说话&quot;？系统怎么&quot;布线&quot;？</p>
-<h3 id="通信方式">通信方式
-</h3><p><strong>消息传递。</strong> 最基础的方式——Agent 之间发送结构化消息。三种传递模式：</p>
-<ul>
-<li>直接调用：Agent A → Agent B，请求-响应，最简单</li>
-<li>广播：一个 Agent 发出消息，所有 Agent 接收，适合全局通知</li>
-<li>发布-订阅：Agent 声明自己感兴趣的主题，消息按主题投递，比广播更精准</li>
-</ul>
-<p><strong>黑板系统。</strong> 不直接发消息，而是写到一个共享的公共区域，其他 Agent 按需读取。你可以把它理解为 Agent 系统的 Redis——生产者写入，消费者自主读取，双方互不知晓。</p>
-<p>黑板系统的核心优势是解耦：新增 Agent 不需要修改现有 Agent 的代码，只需读写黑板。代价是缺乏信息过滤——黑板上内容多了之后，Agent 需要自己判断什么与自己相关，注意力被无关信息消耗。此外还有并发写入的版本冲突问题。</p>
-<p><strong>结构化通信（Agent-as-Tool）。</strong> 更进一步——Agent 不仅输出自然语言，而是输出结构化动作指令。这意味着每个 Agent 可以将自己注册为一个&quot;函数&quot;，调用方通过 function call 协议调用它。Agent 之间不再&quot;对话&quot;，而是像调用 API 一样互操作。这种模式下，多 Agent 系统的行为更接近微服务架构——每个 Agent 是独立服务，通信走结构化协议。</p>
-<div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>方式</th>
-          <th>耦合度</th>
-          <th>灵活性</th>
-          <th>适用场景</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>消息传递</td>
-          <td>高</td>
-          <td>低</td>
-          <td>流水线、层级</td>
-      </tr>
-      <tr>
-          <td>黑板系统</td>
-          <td>低</td>
-          <td>高</td>
-          <td>辩论、自组织</td>
-      </tr>
-      <tr>
-          <td>结构化通信</td>
-          <td>中</td>
-          <td>中</td>
-          <td>Agent 工具化、微服务式</td>
-      </tr>
-  </tbody>
-</table></div>
-<h3 id="拓扑结构">拓扑结构
-</h3><p><strong>星型。</strong> 一个中心 Agent，其他星状环绕，所有通信经过中心。对应层级模式。实现最简单，路由清晰，但中心是单点和瓶颈。</p>
-<p><strong>网状。</strong> 任意两个 Agent 都可直接通信。对应辩论模式。最灵活，但 N 个 Agent 有 N² 条潜在通道——4 个 Agent 有 12 条，10 个就有 90 条。消息复杂度随规模平方增长，需要额外的流控和去重机制。</p>
-<p><strong>流水线。</strong> Agent 线性排列，消息单向流动。对应分工模式。最可控——每一步的输入输出边界清晰，调试和监控友好。代价是没有反馈回路，后面的发现无法纠正前面的决策。</p>
-<p><strong>树形 / DAG。</strong> 混合拓扑，实践中使用最多。上层是星型做调度，中间是流水线做加工，叶子层是网状做交叉审查。没有一种结构能通吃，合在一起才完整。</p>
-<h2 id="选型指南与总结">选型指南与总结
-</h2><p>选择协作模式不是纯技术问题，要看任务特征：</p>
-<p><strong>什么时候用分工？</strong></p>
-<ul>
-<li>任务可以清晰地拆解为独立子任务</li>
-<li>子任务之间没有强依赖</li>
-<li>每个环节的输入输出有明确的 Schema 可定义</li>
-<li>举例：翻译、文档生成、数据流水线</li>
-</ul>
-<p><strong>什么时候用辩论？</strong></p>
-<ul>
-<li>决策质量 &gt; 响应速度</li>
-<li>存在多个合理的视角</li>
-<li>错误的代价很高</li>
-<li>举例：代码审查、安全审计、风险评估</li>
-</ul>
-<p><strong>什么时候用层级？</strong></p>
-<ul>
-<li>任务边界模糊，需要边做边拆</li>
-<li>子任务分配需要动态调整</li>
-<li>全局一致性要求高</li>
-<li>举例：复杂工程任务、开放研究项目</li>
-</ul>
-<p><strong>什么时候用混合？</strong>
-——几乎所有非玩具场景。</p>
-<hr>
-<p>多 Agent 系统的本质可以用一句话概括：<strong>把&quot;一个聪明的模型&quot;变成&quot;一群能协作的模型&quot;</strong>。</p>
-<p>单 Agent 的上限是单体模型的推理能力，多 Agent 的上限则是协作结构的组织效率。分工、辩论、层级是三种最基本的组织逻辑；通信机制和拓扑结构是支撑这些逻辑运转的基础设施。理解了这些，你就不只是在&quot;用&quot; Agent，而是在设计 Agent 系统。</p>
-<p>这个领域还在快速演化。从 AutoGen 到 CrewAI 到 LangGraph，从 MetaGPT 的软件公司模拟到 Claude Code 的 subagent 体系——每个框架都在用自己的方式回答同一个问题：怎么让一群 Agent 高效协作。掌握了本文讨论的原理，再去审视这些框架，你会发现它们不过是用不同的工程选型在回答同样的设计问题。</p>
-
-</section>
-
-
-    <footer class="article-footer">
-    
-    <section class="article-tags">
-        
-            <a href="/tags/agent/">Agent</a>
-        
-            <a href="/tags/multi-agent/">Multi-Agent</a>
-        
-            <a href="/tags/ai/">AI</a>
-        
-            <a href="/tags/llm/">LLM</a>
-        
-            <a href="/tags/%E5%A4%9A%E6%99%BA%E8%83%BD%E4%BD%93/">多智能体</a>
-        
-    </section>
-
-
-    
-    <section class="article-copyright">
-        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <circle cx="12" cy="12" r="9" />
-  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
-</svg>
-
-
-
-        <span>Licensed under CC BY-NC-SA 4.0</span>
-    </section>
-    </footer>
-
-
-    
-</article>
-
-    
-
-    
-
-<aside class="related-content--wrapper">
-    <h2 class="section-title">相关文章</h2>
-    <div class="related-content">
-        <div class="flex article-list--tile">
+        <section class="article-list--compact">
             
-                
-<article class="has-image">
-    <a href="/p/ai-agent-%E8%AF%84%E4%BC%B0%E4%BD%93%E7%B3%BB%E8%AF%A6%E8%A7%A3%E4%BB%8E%E5%87%86%E7%A1%AE%E7%8E%87%E5%88%B0%E7%AB%AF%E5%88%B0%E7%AB%AF%E4%BB%BB%E5%8A%A1%E6%88%90%E5%8A%9F%E7%8E%87/">
-        
-        
+                <article>
+    <a href="/p/mcp-%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E5%8D%8F%E8%AE%AE%E5%B7%A5%E5%85%B7%E8%B5%84%E6%BA%90%E4%B8%8E%E5%AE%89%E5%85%A8%E8%BE%B9%E7%95%8C/">
+        <div class="article-details">
+            <h2 class="article-title">MCP 原理详解：协议、工具、资源与安全边界</h2>
+            <footer class="article-time">
+                <time datetime='2026-05-09T00:00:00Z'>May 09, 2026</time>
+            </footer>
+        </div>
             <div class="article-image">
-                <img src="/p/ai-agent-%E8%AF%84%E4%BC%B0%E4%BD%93%E7%B3%BB%E8%AF%A6%E8%A7%A3%E4%BB%8E%E5%87%86%E7%A1%AE%E7%8E%87%E5%88%B0%E7%AB%AF%E5%88%B0%E7%AB%AF%E4%BB%BB%E5%8A%A1%E6%88%90%E5%8A%9F%E7%8E%87/agent.eeda6d8a8b2dcc1f636fc8f0b922c53d_hu_7ae131697522e39f.png" 
-                        width="250" 
-                        height="150" 
-                        loading="lazy"
-                        alt="Featured image of post AI Agent 评估体系详解：从准确率到端到端任务成功率"
-                        
-                        data-hash="md5-7tptiostzB9jb8jwuSLFPQ==">
+                <img src="/p/mcp-%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E5%8D%8F%E8%AE%AE%E5%B7%A5%E5%85%B7%E8%B5%84%E6%BA%90%E4%B8%8E%E5%AE%89%E5%85%A8%E8%BE%B9%E7%95%8C/claude-code_hu_1b7ea0743cb228fe.png" 
+                        width="120"
+                        height="120" 
+                        alt="MCP 原理详解：协议、工具、资源与安全边界"
+                        loading="lazy">
                 
             </div>
         
-
-        <div class="article-details">
-            <h2 class="article-title">AI Agent 评估体系详解：从准确率到端到端任务成功率</h2>
-        </div>
     </a>
 </article>
-
             
-                
-<article class="has-image">
-    <a href="/p/ai-agent-%E5%B7%A5%E7%A8%8B%E4%BD%93%E7%B3%BB%E8%AF%A6%E8%A7%A3%E6%8F%90%E7%A4%BA%E5%B7%A5%E7%A8%8B%E4%B8%8A%E4%B8%8B%E6%96%87%E5%B7%A5%E7%A8%8B%E4%B8%8E%E7%BC%96%E6%8E%92%E5%B7%A5%E7%A8%8B/">
-        
-        
-            <div class="article-image">
-                <img src="/p/ai-agent-%E5%B7%A5%E7%A8%8B%E4%BD%93%E7%B3%BB%E8%AF%A6%E8%A7%A3%E6%8F%90%E7%A4%BA%E5%B7%A5%E7%A8%8B%E4%B8%8A%E4%B8%8B%E6%96%87%E5%B7%A5%E7%A8%8B%E4%B8%8E%E7%BC%96%E6%8E%92%E5%B7%A5%E7%A8%8B/agent.eeda6d8a8b2dcc1f636fc8f0b922c53d_hu_7ae131697522e39f.png" 
-                        width="250" 
-                        height="150" 
-                        loading="lazy"
-                        alt="Featured image of post AI Agent 工程体系详解：提示工程、上下文工程与编排工程"
-                        
-                        data-hash="md5-7tptiostzB9jb8jwuSLFPQ==">
-                
-            </div>
-        
-
-        <div class="article-details">
-            <h2 class="article-title">AI Agent 工程体系详解：提示工程、上下文工程与编排工程</h2>
-        </div>
-    </a>
-</article>
-
-            
-                
-<article class="has-image">
-    <a href="/p/ai-agent-%E8%AE%B0%E5%BF%86%E6%9C%BA%E5%88%B6%E8%AF%A6%E8%A7%A3%E4%BB%8E%E4%BC%9A%E8%AF%9D%E4%B8%8A%E4%B8%8B%E6%96%87%E5%88%B0%E6%8C%81%E4%B9%85%E5%8C%96%E8%AE%B0%E5%BF%86%E7%B3%BB%E7%BB%9F/">
-        
-        
-            <div class="article-image">
-                <img src="/p/ai-agent-%E8%AE%B0%E5%BF%86%E6%9C%BA%E5%88%B6%E8%AF%A6%E8%A7%A3%E4%BB%8E%E4%BC%9A%E8%AF%9D%E4%B8%8A%E4%B8%8B%E6%96%87%E5%88%B0%E6%8C%81%E4%B9%85%E5%8C%96%E8%AE%B0%E5%BF%86%E7%B3%BB%E7%BB%9F/agent.eeda6d8a8b2dcc1f636fc8f0b922c53d_hu_7ae131697522e39f.png" 
-                        width="250" 
-                        height="150" 
-                        loading="lazy"
-                        alt="Featured image of post AI Agent 记忆机制详解：从会话上下文到持久化记忆系统"
-                        
-                        data-hash="md5-7tptiostzB9jb8jwuSLFPQ==">
-                
-            </div>
-        
-
-        <div class="article-details">
-            <h2 class="article-title">AI Agent 记忆机制详解：从会话上下文到持久化记忆系统</h2>
-        </div>
-    </a>
-</article>
-
-            
-                
-<article class="has-image">
-    <a href="/p/ai-agent-%E6%9E%B6%E6%9E%84%E8%AF%A6%E8%A7%A3%E8%8C%83%E5%BC%8F%E8%AE%B0%E5%BF%86%E8%A7%84%E5%88%92%E4%B8%8E%E5%B7%A5%E5%85%B7%E7%B3%BB%E7%BB%9F/">
-        
-        
-            <div class="article-image">
-                <img src="/p/ai-agent-%E6%9E%B6%E6%9E%84%E8%AF%A6%E8%A7%A3%E8%8C%83%E5%BC%8F%E8%AE%B0%E5%BF%86%E8%A7%84%E5%88%92%E4%B8%8E%E5%B7%A5%E5%85%B7%E7%B3%BB%E7%BB%9F/agent.eeda6d8a8b2dcc1f636fc8f0b922c53d_hu_7ae131697522e39f.png" 
-                        width="250" 
-                        height="150" 
-                        loading="lazy"
-                        alt="Featured image of post AI Agent 架构详解：范式、记忆、规划与工具系统"
-                        
-                        data-hash="md5-7tptiostzB9jb8jwuSLFPQ==">
-                
-            </div>
-        
-
-        <div class="article-details">
-            <h2 class="article-title">AI Agent 架构详解：范式、记忆、规划与工具系统</h2>
-        </div>
-    </a>
-</article>
-
-            
-                
-<article class="has-image">
-    <a href="/p/%E5%A4%A7%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E4%BB%8E-transformer-%E5%88%B0-scaling-law/">
-        
-        
-            <div class="article-image">
-                <img src="/p/%E5%A4%A7%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E4%BB%8E-transformer-%E5%88%B0-scaling-law/llm.ed2d6de360a5d3cecf4a03b16ff64337_hu_65eec11f36ce1691.png" 
-                        width="250" 
-                        height="150" 
-                        loading="lazy"
-                        alt="Featured image of post 大语言模型原理详解：从 Transformer 到 Scaling Law"
-                        
-                        data-hash="md5-7S1t42Cl087PSgOxb/ZDNw==">
-                
-            </div>
-        
-
-        <div class="article-details">
-            <h2 class="article-title">大语言模型原理详解：从 Transformer 到 Scaling Law</h2>
-        </div>
-    </a>
-</article>
-
-            
-        </div>
-    </div>
-</aside>
-
-     
-    
-        
-    <div class="disqus-container">
-    <div id="disqus_thread"></div>
-<script>
-    window.disqus_config = function () {
-    
-    
-    
-    };
-    (function() {
-        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
-            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
-            return;
-        }
-        var d = document, s = d.createElement('script'); s.async = true;
-        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
-        s.setAttribute('data-timestamp', +new Date());
-        (d.head || d.body).appendChild(s);
-    })();
-</script>
-<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
-</div>
-
-<style>
-    .disqus-container {
-        background-color: var(--card-background);
-        border-radius: var(--card-border-radius);
-        box-shadow: var(--shadow-l1);
-        padding: var(--card-padding);
-    }
-</style>
-
-<script>
-    window.addEventListener('onColorSchemeChange', (e) => {
-        if (typeof DISQUS == 'object') {
-            DISQUS.reset({
-                reload: true
-            });
-        }
-    })
-</script>
-
-    
-
+        </section>
     <footer class="site-footer">
     <section class="copyright">
         &copy; 
@@ -879,85 +517,6 @@
     </section>
 </footer>
 
-
-    
-<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
-
-    
-    <div class="pswp__bg"></div>
-
-    
-    <div class="pswp__scroll-wrap">
-
-        
-        <div class="pswp__container">
-            <div class="pswp__item"></div>
-            <div class="pswp__item"></div>
-            <div class="pswp__item"></div>
-        </div>
-
-        
-        <div class="pswp__ui pswp__ui--hidden">
-
-            <div class="pswp__top-bar">
-
-                
-
-                <div class="pswp__counter"></div>
-
-                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
-
-                <button class="pswp__button pswp__button--share" title="Share"></button>
-
-                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
-
-                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
-
-                
-                
-                <div class="pswp__preloader">
-                    <div class="pswp__preloader__icn">
-                        <div class="pswp__preloader__cut">
-                            <div class="pswp__preloader__donut"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
-                <div class="pswp__share-tooltip"></div>
-            </div>
-
-            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
-            </button>
-
-            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
-            </button>
-
-            <div class="pswp__caption">
-                <div class="pswp__caption__center"></div>
-            </div>
-
-        </div>
-
-    </div>
-
-</div><script 
-                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
-                defer
-                >
-            </script><script 
-                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
-                defer
-                >
-            </script><link 
-                rel="stylesheet" 
-                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
-            ><link 
-                rel="stylesheet" 
-                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
-            >
-    
 
             </main>
         </div>
