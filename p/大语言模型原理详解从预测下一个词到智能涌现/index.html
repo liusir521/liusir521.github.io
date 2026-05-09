@@ -1,19 +1,19 @@
 <!DOCTYPE html>
 <html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="深入浅出介绍大语言模型的核心原理，包括 Transformer 架构、注意力机制、训练流程、Scaling Law 和涌现能力">
-<title>大语言模型原理详解：从 Transformer 到 Scaling Law</title>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="用清晰易懂的方式解释大语言模型的核心原理：Token、Embedding、Transformer、注意力机制、训练、对齐、推理参数、上下文窗口与常见局限">
+<title>大语言模型原理详解：从预测下一个词到智能涌现</title>
 
-<link rel='canonical' href='https://liusir521.github.io/p/%E5%A4%A7%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E4%BB%8E-transformer-%E5%88%B0-scaling-law/'>
+<link rel='canonical' href='https://liusir521.github.io/p/%E5%A4%A7%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E4%BB%8E%E9%A2%84%E6%B5%8B%E4%B8%8B%E4%B8%80%E4%B8%AA%E8%AF%8D%E5%88%B0%E6%99%BA%E8%83%BD%E6%B6%8C%E7%8E%B0/'>
 
-<link rel="stylesheet" href="/scss/style.min.ae56834d8e6c736a3fd56f971794f8c0705364d4411c7000fbf5dc668862af2f.css"><meta property='og:title' content="大语言模型原理详解：从 Transformer 到 Scaling Law">
-<meta property='og:description' content="深入浅出介绍大语言模型的核心原理，包括 Transformer 架构、注意力机制、训练流程、Scaling Law 和涌现能力">
-<meta property='og:url' content='https://liusir521.github.io/p/%E5%A4%A7%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E4%BB%8E-transformer-%E5%88%B0-scaling-law/'>
+<link rel="stylesheet" href="/scss/style.min.ae56834d8e6c736a3fd56f971794f8c0705364d4411c7000fbf5dc668862af2f.css"><meta property='og:title' content="大语言模型原理详解：从预测下一个词到智能涌现">
+<meta property='og:description' content="用清晰易懂的方式解释大语言模型的核心原理：Token、Embedding、Transformer、注意力机制、训练、对齐、推理参数、上下文窗口与常见局限">
+<meta property='og:url' content='https://liusir521.github.io/p/%E5%A4%A7%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E4%BB%8E%E9%A2%84%E6%B5%8B%E4%B8%8B%E4%B8%80%E4%B8%AA%E8%AF%8D%E5%88%B0%E6%99%BA%E8%83%BD%E6%B6%8C%E7%8E%B0/'>
 <meta property='og:site_name' content='你怂你mua'>
-<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='LLM' /><meta property='article:tag' content='Transformer' /><meta property='article:tag' content='大模型' /><meta property='article:tag' content='AI' /><meta property='article:tag' content='深度学习' /><meta property='article:published_time' content='2026-05-02T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2026-05-02T00:00:00&#43;00:00'/><meta property='og:image' content='https://liusir521.github.io/p/%E5%A4%A7%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E4%BB%8E-transformer-%E5%88%B0-scaling-law/llm.png' />
-<meta name="twitter:title" content="大语言模型原理详解：从 Transformer 到 Scaling Law">
-<meta name="twitter:description" content="深入浅出介绍大语言模型的核心原理，包括 Transformer 架构、注意力机制、训练流程、Scaling Law 和涌现能力"><meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content='https://liusir521.github.io/p/%E5%A4%A7%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E4%BB%8E-transformer-%E5%88%B0-scaling-law/llm.png' />
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='LLM' /><meta property='article:tag' content='Transformer' /><meta property='article:tag' content='大模型' /><meta property='article:tag' content='AI' /><meta property='article:tag' content='深度学习' /><meta property='article:published_time' content='2026-05-02T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2026-05-02T00:00:00&#43;00:00'/><meta property='og:image' content='https://liusir521.github.io/p/%E5%A4%A7%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E4%BB%8E%E9%A2%84%E6%B5%8B%E4%B8%8B%E4%B8%80%E4%B8%AA%E8%AF%8D%E5%88%B0%E6%99%BA%E8%83%BD%E6%B6%8C%E7%8E%B0/llm.png' />
+<meta name="twitter:title" content="大语言模型原理详解：从预测下一个词到智能涌现">
+<meta name="twitter:description" content="用清晰易懂的方式解释大语言模型的核心原理：Token、Embedding、Transformer、注意力机制、训练、对齐、推理参数、上下文窗口与常见局限"><meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content='https://liusir521.github.io/p/%E5%A4%A7%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E4%BB%8E%E9%A2%84%E6%B5%8B%E4%B8%8B%E4%B8%80%E4%B8%AA%E8%AF%8D%E5%88%B0%E6%99%BA%E8%83%BD%E6%B6%8C%E7%8E%B0/llm.png' />
     <link rel="shortcut icon" href="/favicon.png" />
 
     </head>
@@ -299,49 +299,52 @@
             <nav id="TableOfContents">
   <ol>
     <li><a href="#引言">引言</a></li>
-    <li><a href="#语言模型的前世今生">语言模型的前世今生</a>
+    <li><a href="#一句话理解-llm">一句话理解 LLM</a></li>
+    <li><a href="#token模型眼中的文字">Token：模型眼中的文字</a>
       <ol>
-        <li><a href="#统计语言模型时代">统计语言模型时代</a></li>
-        <li><a href="#神经网络语言模型">神经网络语言模型</a></li>
-        <li><a href="#rnnlstm-时代">RNN/LSTM 时代</a></li>
-        <li><a href="#transformer-革命">Transformer 革命</a></li>
+        <li><a href="#为什么不用字或词">为什么不用字或词</a></li>
+        <li><a href="#token-影响成本和上下文">Token 影响成本和上下文</a></li>
       </ol>
     </li>
-    <li><a href="#transformer-架构全景">Transformer 架构全景</a></li>
-    <li><a href="#核心一self-attention-自注意力机制">核心一：Self-Attention 自注意力机制</a>
+    <li><a href="#embedding把-token-变成向量">Embedding：把 token 变成向量</a></li>
+    <li><a href="#transformerllm-的主干架构">Transformer：LLM 的主干架构</a></li>
+    <li><a href="#attention让-token-互相看见">Attention：让 token 互相看见</a>
       <ol>
-        <li><a href="#为什么需要注意力">为什么需要注意力</a></li>
-        <li><a href="#query-key-value">Query, Key, Value</a></li>
-        <li><a href="#一步一步拆解">一步一步拆解</a></li>
-        <li><a href="#multi-head-attention">Multi-Head Attention</a></li>
+        <li><a href="#querykeyvalue">Query、Key、Value</a></li>
+        <li><a href="#self-attention">Self-Attention</a></li>
+        <li><a href="#causal-mask">Causal Mask</a></li>
       </ol>
     </li>
-    <li><a href="#核心二feed-forward-network-前馈网络">核心二：Feed-Forward Network 前馈网络</a></li>
-    <li><a href="#核心三位置编码">核心三：位置编码</a></li>
-    <li><a href="#核心四add--norm">核心四：Add &amp; Norm</a></li>
-    <li><a href="#tokenization模型如何读文本">Tokenization：模型如何&quot;读&quot;文本</a>
+    <li><a href="#multi-head-attention从多个角度看上下文">Multi-Head Attention：从多个角度看上下文</a></li>
+    <li><a href="#feed-forward对信息做加工">Feed Forward：对信息做加工</a></li>
+    <li><a href="#位置编码让模型知道顺序">位置编码：让模型知道顺序</a></li>
+    <li><a href="#残差连接与归一化让深层网络稳定训练">残差连接与归一化：让深层网络稳定训练</a>
       <ol>
-        <li><a href="#bpe-训练过程">BPE 训练过程</a></li>
-        <li><a href="#tokenization-的影响">Tokenization 的影响</a></li>
+        <li><a href="#残差连接">残差连接</a></li>
+        <li><a href="#layernorm">LayerNorm</a></li>
       </ol>
     </li>
-    <li><a href="#训练流程从原始文本到智能对话">训练流程：从原始文本到智能对话</a>
+    <li><a href="#训练从海量文本中学习规律">训练：从海量文本中学习规律</a>
       <ol>
-        <li><a href="#第一阶段预训练pre-training">第一阶段：预训练（Pre-training）</a></li>
-        <li><a href="#第二阶段监督微调supervised-fine-tuning-sft">第二阶段：监督微调（Supervised Fine-Tuning, SFT）</a></li>
-        <li><a href="#第三阶段rlhf基于人类反馈的强化学习">第三阶段：RLHF（基于人类反馈的强化学习）</a></li>
-        <li><a href="#rlhf-的替代方案">RLHF 的替代方案</a></li>
+        <li><a href="#预训练学到什么">预训练学到什么</a></li>
       </ol>
     </li>
-    <li><a href="#scaling-law大就是好">Scaling Law：大就是好</a>
+    <li><a href="#指令微调从续写器到助手">指令微调：从续写器到助手</a></li>
+    <li><a href="#对齐让模型更符合人类偏好">对齐：让模型更符合人类偏好</a></li>
+    <li><a href="#推理模型如何生成回答">推理：模型如何生成回答</a>
       <ol>
-        <li><a href="#chinchilla-定律">Chinchilla 定律</a></li>
+        <li><a href="#temperature">Temperature</a></li>
+        <li><a href="#top-k">Top-K</a></li>
+        <li><a href="#top-p">Top-P</a></li>
       </ol>
     </li>
-    <li><a href="#涌现能力从量变到质变">涌现能力：从量变到质变</a></li>
-    <li><a href="#推理阶段温度top-k-与-top-p">推理阶段：温度、Top-K 与 Top-P</a></li>
-    <li><a href="#从原理到趋势">从原理到趋势</a></li>
-    <li><a href="#总结">总结</a></li>
+    <li><a href="#上下文窗口模型的工作记忆">上下文窗口：模型的工作记忆</a></li>
+    <li><a href="#参数量数据和算力">参数量、数据和算力</a></li>
+    <li><a href="#涌现能力规模带来的质变">涌现能力：规模带来的质变</a></li>
+    <li><a href="#为什么会幻觉">为什么会幻觉</a></li>
+    <li><a href="#为什么数学和逻辑会出错">为什么数学和逻辑会出错</a></li>
+    <li><a href="#llm-与-agent-的关系">LLM 与 Agent 的关系</a></li>
+    <li><a href="#小结">小结</a></li>
   </ol>
 </nav>
         </div>
@@ -356,13 +359,13 @@
     <article class="has-image main-article">
     <header class="article-header">
         <div class="article-image">
-            <a href="/p/%E5%A4%A7%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E4%BB%8E-transformer-%E5%88%B0-scaling-law/">
-                <img src="/p/%E5%A4%A7%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E4%BB%8E-transformer-%E5%88%B0-scaling-law/llm_hu_360d753c1cc4c568.png"
-                        srcset="/p/%E5%A4%A7%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E4%BB%8E-transformer-%E5%88%B0-scaling-law/llm_hu_360d753c1cc4c568.png 800w, /p/%E5%A4%A7%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E4%BB%8E-transformer-%E5%88%B0-scaling-law/llm_hu_79a81bc581f945a8.png 1600w"
+            <a href="/p/%E5%A4%A7%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E4%BB%8E%E9%A2%84%E6%B5%8B%E4%B8%8B%E4%B8%80%E4%B8%AA%E8%AF%8D%E5%88%B0%E6%99%BA%E8%83%BD%E6%B6%8C%E7%8E%B0/">
+                <img src="/p/%E5%A4%A7%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E4%BB%8E%E9%A2%84%E6%B5%8B%E4%B8%8B%E4%B8%80%E4%B8%AA%E8%AF%8D%E5%88%B0%E6%99%BA%E8%83%BD%E6%B6%8C%E7%8E%B0/llm_hu_360d753c1cc4c568.png"
+                        srcset="/p/%E5%A4%A7%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E4%BB%8E%E9%A2%84%E6%B5%8B%E4%B8%8B%E4%B8%80%E4%B8%AA%E8%AF%8D%E5%88%B0%E6%99%BA%E8%83%BD%E6%B6%8C%E7%8E%B0/llm_hu_360d753c1cc4c568.png 800w, /p/%E5%A4%A7%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E4%BB%8E%E9%A2%84%E6%B5%8B%E4%B8%8B%E4%B8%80%E4%B8%AA%E8%AF%8D%E5%88%B0%E6%99%BA%E8%83%BD%E6%B6%8C%E7%8E%B0/llm_hu_79a81bc581f945a8.png 1600w"
                         width="800" 
                         height="533" 
                         loading="lazy"
-                        alt="Featured image of post 大语言模型原理详解：从 Transformer 到 Scaling Law" />
+                        alt="Featured image of post 大语言模型原理详解：从预测下一个词到智能涌现" />
                 
             </a>
         </div>
@@ -391,12 +394,12 @@
 
     <div class="article-title-wrapper">
         <h2 class="article-title">
-            <a href="/p/%E5%A4%A7%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E4%BB%8E-transformer-%E5%88%B0-scaling-law/">大语言模型原理详解：从 Transformer 到 Scaling Law</a>
+            <a href="/p/%E5%A4%A7%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E4%BB%8E%E9%A2%84%E6%B5%8B%E4%B8%8B%E4%B8%80%E4%B8%AA%E8%AF%8D%E5%88%B0%E6%99%BA%E8%83%BD%E6%B6%8C%E7%8E%B0/">大语言模型原理详解：从预测下一个词到智能涌现</a>
         </h2>
     
         
         <h3 class="article-subtitle">
-            深入浅出介绍大语言模型的核心原理，包括 Transformer 架构、注意力机制、训练流程、Scaling Law 和涌现能力
+            用清晰易懂的方式解释大语言模型的核心原理：Token、Embedding、Transformer、注意力机制、训练、对齐、推理参数、上下文窗口与常见局限
         </h3>
         
     </div>
@@ -432,7 +435,7 @@
 
 
                 <time class="article-time--reading">
-                    阅读时长: 5 分钟
+                    阅读时长: 4 分钟
                 </time>
             </div>
         
@@ -448,160 +451,48 @@
     
     
     <h2 id="引言">引言
-</h2><p>2022年11月，ChatGPT 横空出世，两个月内月活破亿。此后，GPT-4、Claude、Gemini、Llama、DeepSeek 等大语言模型（Large Language Model, LLM）层出不穷，深刻改变了人机交互范式。</p>
-<p>这些模型的背后是一套精妙的理论体系：从 Transformer 架构到注意力机制，从预训练到对齐，从 Scaling Law 到涌现能力。本文尝试从头梳理这些核心原理，帮助读者建立对 LLM 的系统性认知。</p>
-<p>读完本文你会理解：</p>
+</h2><p>大语言模型看起来很神奇：能聊天、写代码、总结文章、翻译文本、分析日志，甚至能像助手一样完成复杂任务。</p>
+<p>但如果把外壳拆开，它最核心的目标其实非常朴素：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">根据前面的内容，预测下一个 token。
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>例如给模型一句话：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">今天天气很
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>模型要做的是预测后面最可能接什么：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">好、热、冷、差、舒服……
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>当这个能力被放大到海量数据、巨大参数、强大的 Transformer 架构和精心设计的训练流程上，就出现了我们今天看到的大语言模型。</p>
+<p>这篇文章不追求堆公式，而是用尽量直观的方式讲清楚：</p>
 <ul>
-<li>Transformer 为什么能取代 RNN/LSTM</li>
-<li>Self-Attention 到底在&quot;注意&quot;什么</li>
-<li>一个 token 是如何一步步生成的</li>
-<li>为什么模型越大能力越强</li>
-<li>RLHF 如何让模型&quot;听话&quot;</li>
+<li>模型如何“读”文字</li>
+<li>Transformer 为什么有效</li>
+<li>注意力机制到底在注意什么</li>
+<li>模型是怎么训练出来的</li>
+<li>对齐为什么能让模型更像助手</li>
+<li>推理参数如何影响回答</li>
+<li>大模型为什么会幻觉、受上下文限制</li>
 </ul>
-<h2 id="语言模型的前世今生">语言模型的前世今生
-</h2><h3 id="统计语言模型时代">统计语言模型时代
-</h3><p>语言模型的核心问题很简单：<strong>给定前文，预测下一个词的概率</strong>。</p>
-$$
-P(w_t \mid w_1, w_2, \dots, w_{t-1})
-$$<p>最朴素的做法是 N-gram 模型——假设当前词只与前 N-1 个词相关。N=2（Bigram）时，&ldquo;我/爱/吃&rdquo; 后面接 &ldquo;苹果&rdquo; 的概率就是 count(&ldquo;吃苹果&rdquo;) / count(&ldquo;吃&rdquo;) 的统计频率。</p>
-<p>N-gram 的问题很明显：<strong>稀疏性</strong>。自然语言中大部分词组从未在训练集中出现，概率为 0；增大 N 虽然能捕捉更长依赖，但参数呈指数爆炸。</p>
-<h3 id="神经网络语言模型">神经网络语言模型
-</h3><p>2003年 Bengio 提出用神经网络做语言建模，将每个词映射为稠密向量（词嵌入），再用全连接网络预测下一个词。这解决了稀疏性问题，但依赖固定窗口，仍然看不了长距离。</p>
-<h3 id="rnnlstm-时代">RNN/LSTM 时代
-</h3><p>循环神经网络（RNN）天然适合序列建模，每步输出状态传递给下一步，理论上可以捕捉任意长度的依赖。LSTM 引入门控机制缓解了梯度消失。</p>
-<p>问题是：<strong>无法并行计算</strong>——第 t 步依赖第 t-1 步的状态，训练慢得令人绝望。长序列的梯度传播仍然不稳定。</p>
-<h3 id="transformer-革命">Transformer 革命
-</h3><p>2017年 Google 发表《Attention Is All You Need》，提出纯 Attention 架构取代循环结构。核心洞见是：<strong>序列中任意两个位置的交互距离是 O(1)</strong>，而且可以完全并行计算。Transformer 成为 LLM 时代所有主流模型的基础架构。</p>
-<h2 id="transformer-架构全景">Transformer 架构全景
-</h2><p>Transformer 原始设计是 Encoder-Decoder 结构，但 LLM 大多只使用 Decoder（GPT 系）或 Encoder（BERT 系）。下面以 GPT 式 Decoder-Only 架构展开。</p>
-<p>从宏观看，模型就是一个巨大的函数：</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">输入 tokens → [Embedding] → [N 层 Transformer Block] → [LM Head] → 概率分布
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>每个 Transformer Block 包含两个核心子层：</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">x → [Multi-Head Self-Attention] → [Add &amp; Norm] → [FFN] → [Add &amp; Norm] → 输出
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>训练好的模型权重里，参数分布在四个矩阵族中：</p>
-<ul>
-<li><strong>Q/K/V/O 矩阵</strong>（Attention 部分）：控制&quot;从哪读信息&quot;</li>
-<li><strong>FFN 矩阵</strong>（前馈部分）：存储&quot;知识&quot;</li>
-<li><strong>Embedding 矩阵</strong>：将 token 映射为向量</li>
-<li><strong>LM Head 矩阵</strong>：将向量映射回词表概率</li>
-</ul>
-<h2 id="核心一self-attention-自注意力机制">核心一：Self-Attention 自注意力机制
-</h2><h3 id="为什么需要注意力">为什么需要注意力
-</h3><p>读这句话：<strong>&ldquo;小明把苹果给了小红，因为她很__&rdquo;</strong>。</p>
-<p>空白处该填什么？理解 &ldquo;她&rdquo; 指代 &ldquo;小红&rdquo; 而非 &ldquo;小明&rdquo;、理解 &ldquo;给苹果&rdquo; 这个动作的后续，都需要综合多个位置的信息。卷积和 RNN 处理这种依赖能力有限。</p>
-<p>Self-Attention 的基本思想是：<strong>让序列中每个位置都去&quot;看&quot;序列中的所有位置，并根据相关性加权聚合信息</strong>。</p>
-<h3 id="query-key-value">Query, Key, Value
-</h3><p>这可能是注意力机制中最令人困惑的设计。一个直觉类比——<strong>数据库查询</strong>：</p>
-<div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>概念</th>
-          <th>数据库</th>
-          <th>Self-Attention</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>Query</td>
-          <td>你的 SQL 查询</td>
-          <td>当前 token 的&quot;需求&quot;向量</td>
-      </tr>
-      <tr>
-          <td>Key</td>
-          <td>索引列</td>
-          <td>所有 token 的&quot;标签&quot;向量</td>
-      </tr>
-      <tr>
-          <td>Value</td>
-          <td>数据行</td>
-          <td>所有 token 的&quot;内容&quot;向量</td>
-      </tr>
-  </tbody>
-</table></div>
-<p>当你查询 <code>SELECT * WHERE name = '苹果'</code>，数据库用查询条件（Query）去匹配索引（Key），找到匹配行后返回数据（Value）。</p>
-<p>Self-Attention 的计算完全一致：</p>
-<ol>
-<li>当前 token 产出一个 Query 向量（&ldquo;我想要什么信息&rdquo;）</li>
-<li>所有 token 各产出一个 Key 向量（&ldquo;我有什么信息&rdquo;）和一个 Value 向量（&ldquo;我的实际内容&rdquo;）</li>
-<li>Query 与所有 Key 做点积求相似度 → 得到注意力权重</li>
-<li>用权重对所有 Value 加权求和 → 得到当前 token 的上下文表示</li>
-</ol>
-<p>写成公式：</p>
-$$
-\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right) V
-$$<h3 id="一步一步拆解">一步一步拆解
-</h3><p>假设序列长度 n=4，每个向量维度 d=512：</p>
-<p><strong>Step 1 — 线性投影</strong></p>
-<p>输入 X 的 shape 是 <code>[4, 512]</code>（4 个 token，每个 512 维）。用三个权重矩阵投影：</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Q = X @ W_Q    # [4, 512] × [512, 64] = [4, 64]
-</span></span><span class="line"><span class="cl">K = X @ W_K    # [4, 512] × [512, 64] = [4, 64]
-</span></span><span class="line"><span class="cl">V = X @ W_V    # [4, 512] × [512, 64] = [4, 64]
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p><strong>Step 2 — 计算注意力分数</strong></p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">scores = Q @ K^T / sqrt(64)    # [4, 64] × [64, 4] = [4, 4]
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>得到 <code>[4, 4]</code> 的注意力矩阵，<code>scores[i][j]</code> 表示第 i 个 token 对第 j 个 token 的&quot;关注程度&quot;。</p>
-<p>除以 sqrt(d_k) 是为了防止点积值过大，导致 softmax 梯度消失。为什么是 sqrt(d_k)？因为随机初始化时 Q 和 K 的每个维度期望为 0、方差为 1，点积的期望就是 0、方差就是 d_k。</p>
-<p><strong>Step 3 — Softmax 归一化 + Causal Mask</strong></p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">weights = softmax(scores, dim=-1)    # [4, 4]，每行和为 1
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>Decoder 模型还需要 <strong>Causal Mask（因果掩码）</strong> ——将 scores 矩阵的上三角置为 -inf，确保第 i 个 token 只能看到位置 0~i，不能偷看未来。放到 softmax 之前做：</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">scores[i][j] = -inf   (for j &gt; i)   # 每个 token 只能看到自己及之前的 token
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>所以 Causal Mask 也常被称为 <strong>下三角掩码</strong>，因为它最终保留的是一个下三角矩阵——每个位置只能看到它前面（含自己）的内容。</p>
-<p><strong>Step 4 — 加权聚合</strong></p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">output = weights @ V    # [4, 4] × [4, 64] = [4, 64]
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>每个 token 的输出来自对所有（可见）token 的 Value 按注意力权重加权求和。</p>
-<h3 id="multi-head-attention">Multi-Head Attention
-</h3><p>单头注意力只能捕捉一种关系模式。比如在 &ldquo;小明把苹果给了小红，因为她很__&rdquo; 中，需要同时关注<strong>指代关系</strong>（她→小红）和<strong>语义搭配</strong>（吃/喜欢+苹果）等不同维度。</p>
-<p>多头注意力就是并行做多组独立的 Q/K/V 投影，每组叫做一个&quot;头&quot;（head）：</p>
+<h2 id="一句话理解-llm">一句话理解 LLM
+</h2><p>大语言模型可以理解成一个巨大的概率预测器。</p>
+<p>它接收一串 token，输出下一个 token 的概率分布：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -613,154 +504,679 @@ $$<h3 id="一步一步拆解">一步一步拆解
 </span><span class="lnt">7
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">对每个 head_i:
-</span></span><span class="line"><span class="cl">    Q_i = X @ W_Q_i
-</span></span><span class="line"><span class="cl">    K_i = X @ W_K_i
-</span></span><span class="line"><span class="cl">    V_i = X @ W_V_i
-</span></span><span class="line"><span class="cl">    head_i = Attention(Q_i, K_i, V_i)
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">MultiHead = Concat(head_1, head_2, ..., head_h) @ W_O
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">输入：我 喜欢 吃
+</span></span><span class="line"><span class="cl">输出：
+</span></span><span class="line"><span class="cl">  苹果：0.31
+</span></span><span class="line"><span class="cl">  米饭：0.18
+</span></span><span class="line"><span class="cl">  火锅：0.12
+</span></span><span class="line"><span class="cl">  代码：0.01
+</span></span><span class="line"><span class="cl">  ...
 </span></span></code></pre></td></tr></table>
 </div>
-</div><p>每个头可以学到不同的注意力模式：有的头关注相邻词做语法建模，有的头关注远距离指代，有的头关注标点边界。实际的注意力模式远比&quot;相邻&quot;和&quot;远距离&quot;复杂，不同层、不同头的分工至今仍是可解释性研究的前沿课题。</p>
-<p>以 Llama 3 70B 为例：d_model=8192，num_heads=64，每个头的 d_k=128。64 个不同的&quot;视角&quot;并行工作。</p>
-<h2 id="核心二feed-forward-network-前馈网络">核心二：Feed-Forward Network 前馈网络
-</h2><p>每个 Transformer Block 的 FFN 是一个两层的全连接网络：</p>
-$$
-\text{FFN}(x) = \text{GeLU}(xW_1 + b_1)W_2 + b_2
-$$<p>通常 hidden_dim 是 d_model 的 4 倍。比如 d_model=4096 的模型，FFN 中间层有 16384 维。</p>
-<p>FFN 承担了<strong>知识存储</strong>的角色。研究表明，Transformer 中的事实性知识主要存储在 FFN 的参数中——可以把 FFN 理解为一种<strong>键值记忆</strong>：第一层做模式匹配（匹配输入模式），第二层输出对应的知识。</p>
-<p>一个有意思的结论来自 <em>Transformer Feed-Forward Layers Are Key-Value Memories</em>（2020）这篇论文：FFN 的第一层（W1）的每一行可以看作一个 &ldquo;Key&rdquo;，负责检测某种输入模式；第二层（W2）的对应列则是这个 Key 对应的输出。这意味着 FFN 的参数本身就是一种可学习的关联存储。</p>
-<p>一个对 GPT-2 的可解释性实验也印证了这一观点：如果用一个分类器去检测 &ldquo;巴黎&rdquo; &ldquo;法国&rdquo; &ldquo;首都&rdquo; 这几个概念在模型各层的激活情况，会发现 FFN 层的激活模式远比 Attention 层更集中——知识确实 &ldquo;住&rdquo; 在 FFN 里。</p>
-<h2 id="核心三位置编码">核心三：位置编码
-</h2><p>Self-Attention 本身是<strong>置换不变的</strong>——打乱输入顺序，输出也跟着打乱但值不变。&ldquo;我爱吃苹果&quot;和&quot;苹果爱吃我&quot;对 Attention 来说，只是矩阵行排列的顺序不同。</p>
-<p>因此需要显式注入位置信息。原始 Transformer 使用正弦位置编码：</p>
-$$
-PE_{(pos, 2i)} = \sin\left(\frac{pos}{10000^{2i/d_{model}}}\right)
-$$<p>
-</p>
-$$
-PE_{(pos, 2i+1)} = \cos\left(\frac{pos}{10000^{2i/d_{model}}}\right)
-$$<p>不同频率的正弦波让模型能够学习相对位置关系（因为 sin(a+b) 可以展开为 sin(a)cos(b) + cos(a)sin(b)），且有良好的外推性——训练时见过 512 长度的序列，推理时遇到 1024 也勉强能处理。</p>
-<p>现代 LLM 更多使用 <strong>RoPE（旋转位置编码）</strong> ，通过旋转矩阵将位置信息编码到 Q/K 向量中。RoPE 的优势是相对位置关系天然内嵌在向量内积中：两个位置 token 的注意力分数仅取决于它们的相对距离，不依赖绝对位置。Llama 系列、Gemma、Qwen 等主流模型均使用 RoPE。</p>
-<h2 id="核心四add--norm">核心四：Add &amp; Norm
-</h2><p>Transformer Block 中每一子层后都有残差连接 + 层归一化：</p>
+</div><p>然后系统从这个概率分布里选一个 token，接到原文后面，再继续预测下一个。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">我喜欢吃 → 苹果
+</span></span><span class="line"><span class="cl">我喜欢吃苹果 → 。
+</span></span><span class="line"><span class="cl">我喜欢吃苹果。 → 今天
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>一句话、一段代码、一篇文章，都是这样一个 token 一个 token 生成出来的。</p>
+<p>这听起来像“文字接龙”，但关键在于：为了准确预测下一个 token，模型必须学会大量隐含能力。</p>
+<p>它要知道：</p>
+<ul>
+<li>语法结构</li>
+<li>词义关系</li>
+<li>世界知识</li>
+<li>常识推理</li>
+<li>代码模式</li>
+<li>对话格式</li>
+<li>上下文约束</li>
+</ul>
+<p>预测下一个 token 是训练目标，理解和推理是这个目标逼出来的能力。</p>
+<h2 id="token模型眼中的文字">Token：模型眼中的文字
+</h2><p>模型不能直接读“文字”。它看到的是 token。</p>
+<p>Token 可以是一个字、一个词、一个词的一部分，甚至是标点或空格。</p>
+<p>例如：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">原文：ChatGPT 很强
+</span></span><span class="line"><span class="cl">可能被切成：[&#34;Chat&#34;, &#34;GPT&#34;, &#34; 很&#34;, &#34;强&#34;]
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>不同模型的分词器不一样，所以同一句话在不同模型里可能切成不同 token。</p>
+<h3 id="为什么不用字或词">为什么不用字或词
+</h3><p>如果按字切，英文会很碎：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">output = LayerNorm(x + Sublayer(x))
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">transformer → t r a n s f o r m e r
 </span></span></code></pre></td></tr></table>
 </div>
-</div><p>残差连接确保梯度可以无损地从顶层传导到底层，这是训练深网络的必要条件——100 层 Transformer 能训练，全靠残差提供的梯度&quot;高速公路&rdquo;。而 LayerNorm 稳定每一层的数值分布，防止数值发散。</p>
-<h2 id="tokenization模型如何读文本">Tokenization：模型如何&quot;读&quot;文本
-</h2><p>模型不能直接理解原始文本，需要先分词（Tokenization）。现代 LLM 普遍使用 <strong>BPE（Byte Pair Encoding）</strong> 子词分词算法。</p>
-<p>BPE 的核心思想是：从字符级别开始，迭代地将最高频的相邻符号对合并为一个新符号。</p>
-<p>比如词表有限时，&ldquo;apple&rdquo; &ldquo;apples&rdquo; &ldquo;application&rdquo; 可能被拆成 &ldquo;app&rdquo; + &ldquo;le&rdquo; / &ldquo;app&rdquo; + &ldquo;les&rdquo; / &ldquo;app&rdquo; + &ldquo;lication&rdquo;。共用词根 &ldquo;app&rdquo; 大大压缩词表大小。</p>
-<h3 id="bpe-训练过程">BPE 训练过程
-</h3><ol>
-<li>初始化词表为所有单字符（256 个字节级别的基础符号）</li>
-<li>统计训练语料中所有相邻符号对的频率</li>
-<li>将最高频的符号对合并为一个新符号，加入词表</li>
-<li>重复步骤 2-3，直到词表达目标大小（如 GPT-4 的 100K tokens）</li>
-</ol>
-<h3 id="tokenization-的影响">Tokenization 的影响
-</h3><p>分词方案直接决定模型的&quot;世界观&quot;。它带来几个关键约束：</p>
-<p><strong>尾部词问题。</strong> BPE 对高频词完整保留（如 &ldquo;the&rdquo;），对低频词拆得很碎（如 &ldquo;sesquipedalian&rdquo; → [&ldquo;ses&rdquo;, &ldquo;qui&rdquo;, &ldquo;ped&rdquo;, &ldquo;alian&rdquo;]）。低频词占用更多 token，消耗更多算力。</p>
-<p><strong>多语言不平等。</strong> 同一句话，&ldquo;Hello world&rdquo; 占 2 tokens，&ldquo;你好世界&rdquo; 却可能占 6-8 tokens。非英语内容效率低下且成本更高——因为训练语料以英文为主，中文短语合并机会少得多。</p>
-<p><strong>&ldquo;反转诅咒&rdquo;。</strong> 模型知道&quot;A 是 B&quot;（A is B），但不会自动推出&quot;B 是 A&quot;（B is A）。这与训练数据的方向性有关——语料中很少同时出现两种表述。</p>
-<h2 id="训练流程从原始文本到智能对话">训练流程：从原始文本到智能对话
-</h2><p>LLM 的训练分为三个阶段。</p>
-<h3 id="第一阶段预训练pre-training">第一阶段：预训练（Pre-training）
-</h3><p><strong>目标</strong>：让模型学会语言的统计规律和世界知识。</p>
-<p><strong>数据</strong>：数万亿 token 的文本——网页、书籍、代码、论文等。Common Crawl、The Pile、RefinedWeb 等是常用的预训练数据集。</p>
-<p><strong>任务</strong>：自回归语言建模——给定前面的 token，预测下一个 token。这个任务不需要标注数据，文本本身就是标签。</p>
-<p><strong>损失函数</strong>：交叉熵损失。对每个位置 t，模型输出词表大小的概率分布，损失就是真实 token 的负对数概率。</p>
-$$
-\mathcal{L} = -\sum_{t=1}^{T} \log P(w_t \mid w_1, \dots, w_{t-1})
-$$<p>预训练占整个训练成本的 99% 以上。GPT-3 训练成本约 460 万美元（2020 年价格），GPT-4 据说花了约 1 亿美元。</p>
-<p>这个阶段产出的模型叫 <strong>Base Model</strong>，它能做文本补全但不会聊天——你问它&quot;1+1=?&quot;，它会回答&quot;2+2=?&quot;，因为它见过太多数学题序列，只是在续写。</p>
-<h3 id="第二阶段监督微调supervised-fine-tuning-sft">第二阶段：监督微调（Supervised Fine-Tuning, SFT）
-</h3><p><strong>目标</strong>：让模型学会&quot;对话格式&quot;。</p>
-<p><strong>数据</strong>：人工标注的高质量对话——几千到几万条。格式为 <code>{&quot;prompt&quot;: &quot;用户问题&quot;, &quot;response&quot;: &quot;理想回答&quot;}</code>。</p>
-<p>SFT 本质上还是相同的语言建模任务，只是训练数据从&quot;下一步续写&quot;变成了&quot;给定指令，生成回答&quot;。数据量虽小但质量极高，通常几千到几万条即可让 Base Model 掌握对话能力。</p>
-<p>SFT 之后模型就变成了我们熟悉的 <strong>Chat 模型</strong>。</p>
-<h3 id="第三阶段rlhf基于人类反馈的强化学习">第三阶段：RLHF（基于人类反馈的强化学习）
-</h3><p>SFT 的局限在于：人类标注的&quot;理想回答&quot;只是人类偏好的一个点。模型需要理解的是——当有多种合理回答时，人类更偏好哪一种？长回答还是短回答？客观还是主观？详细还是简洁？</p>
-<p><strong>RLHF（Reinforcement Learning from Human Feedback）</strong> 解决的就是这个问题，分为三步：</p>
-<p><strong>Step 1 — 训练奖励模型（Reward Model, RM）。</strong> 让 SFT 模型对同一个 prompt 生成多个回答，人类标注员对这些回答进行排序（A &gt; B &gt; C &gt; D）。用排序数据训练一个&quot;打分器&quot;——输入是 (prompt, response)，输出是一个标量分数（这个回答有多好）。</p>
-<p><strong>Step 2 — 用强化学习优化生成模型。</strong> 使用 PPO（Proximal Policy Optimization）算法：SFT 模型作为初始策略，对 prompt 生成回答，RM 给回答打分，奖励信号回传更新模型参数。关键技巧是加入 KL 散度惩罚项——防止模型为了刷分而偏离太远，生成莫名其妙的内容。</p>
-<p><strong>Step 3 — 迭代。</strong> 用更新后的模型生成新回答，收集新的人类偏好数据，重新训练 RM，再次 PPO。重复多次。</p>
-<p>RLHF 让模型学到了人类难以用规则描述的偏好——什么是一个&quot;好回答&quot;。OpenAI 内部实验显示，1.3B 参数的 InstructGPT 在人类评估中胜过了 175B 的 GPT-3 Base Model——<strong>对齐比规模更能赢得人类认可</strong>。</p>
-<h3 id="rlhf-的替代方案">RLHF 的替代方案
-</h3><p>近两年业界也在探索 RLHF 的替代品：</p>
-<p><strong>DPO（Direct Preference Optimization）</strong> 直接从偏好数据优化模型，不需要显式训练奖励模型，数学上等价于 RLHF 但实现简单得多。Llama 3、Qwen 2 等模型都有使用 DPO 进行对齐。</p>
-<p><strong>RLAIF（RL from AI Feedback）</strong> 用更强的 AI（如 GPT-4）代替人类做偏好标注，降低人工成本。Anthropic 的 Constitutional AI 就是这一路线的代表——让 AI 根据一套&quot;宪法&quot;原则自我评估和改进。</p>
-<h2 id="scaling-law大就是好">Scaling Law：大就是好
-</h2><p>2020年 OpenAI 发表论文提出 <strong>Scaling Law</strong>：模型的性能（以交叉熵损失衡量）与<strong>参数量 N</strong>、<strong>训练数据量 D</strong> 和<strong>计算量 C</strong> 三个因素之间遵循幂律关系。</p>
-<p>通俗来说就是：算力每增加 10 倍，模型损失稳定下降一个可预测的量级，而且在相当大的范围内不存在平台期。</p>
-<h3 id="chinchilla-定律">Chinchilla 定律
-</h3><p>2022年 DeepMind 提出的 Chinchilla 定律给出了最优配比：<strong>每增加一个参数，应该增加约 20 个训练 token</strong>。</p>
-<p>以 Llama 3 70B 为例，按 Chinchilla 定律需要约 1.4T 的训练 token。Meta 实际喂了约 15T——远超 Chinchilla 最优，属于&quot;过度训练&quot;（overtraining）策略，这是为了在推理成本（小模型更便宜）和训练成本之间做取舍。</p>
-<p>但 Chinchilla 定律有重要的前置条件：它在给定 FLOPs 预算下寻找最优配比。如果你的约束不是 FLOPs 而是推理成本（如部署到手机），最优策略是用更多数据训练更小的模型——这也解释了 Llama 系列和各大开源模型为什么普遍&quot;过度训练&quot;。</p>
-<p>Scaling Law 也不是万能的。<strong>数据质量</strong>在 2024-2025 年成为新瓶颈——互联网上的高质量文本正在被耗尽（所谓的&quot;数据墙&quot;）。合成数据可能是突破瓶颈的关键：用顶级模型生成训练数据来训练新模型，但这同时带来了模型同质化（model collapse）的风险。Phi-3、Llama 3 等模型在发布时都强调了数据质量的提高（而非仅仅是数据量的增加）带来了显著收益。</p>
-<h2 id="涌现能力从量变到质变">涌现能力：从量变到质变
-</h2><p>LLM 一个令人着迷的现象是 <strong>涌现能力（Emergent Abilities）</strong>：某些能力在小模型中不存在，当参数超过某个阈值后突然出现。</p>
-<p>典型的涌现能力——<strong>思维链（Chain-of-Thought, CoT）</strong>：</p>
-<p>小模型做多步数学题：&ldquo;小明有 5 个苹果，给了小红 2 个，又买了 3 个，现在有几个？&rdquo; → 直接猜答案，错误率高。</p>
-<p>大模型（&gt;100B）：自动分步推理——&ldquo;小明开始有 5 个 → 给了小红 2 个，剩下 3 个 → 又买了 3 个 → 共 6 个&rdquo;，准确率大幅提升。</p>
-<p>无需显式训练，仅是在 prompt 中示例分步推理（Few-shot CoT），甚至只说一句 &ldquo;Let&rsquo;s think step by step&rdquo;（Zero-shot CoT），模型就能展现推理能力。</p>
-<p>涌现的机制至今没有定论。一种主流解释是：复杂任务由多层简单的子任务组合而成，小模型每层&quot;胜任度&quot;不够，到达不了&quot;组合爆发&quot;的临界点。随着参数增长，每层子任务超过阈值，能力就突然出现。但这也只是假说，我们实际上对这种能力跃迁的理解还非常有限。</p>
-<p>已知的涌现能力包括：算术推理、多语言翻译、代码生成、讽刺理解、心智理论等。</p>
-<h2 id="推理阶段温度top-k-与-top-p">推理阶段：温度、Top-K 与 Top-P
-</h2><p>模型输出的是一个概率分布（词表中每个 token 的概率），需要从中选择一个 token 作为输出。不同策略直接影响生成质量：</p>
-<p><strong>贪心解码（Greedy Decoding）</strong> 每次选概率最高的 token。确定性高，但容易陷入重复循环。永远生成相同输出。</p>
-<p><strong>温度采样（Temperature Sampling）</strong> 在 softmax 之前除以温度 T：</p>
+</div><p>如果按词切，又会遇到新词、拼写变体、代码变量名：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">getUserProfileById
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>现代模型通常使用子词分词。它在“太碎”和“太粗”之间折中：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">unbelievable → un + believe + able
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这样既能处理常见词，也能拼出没见过的新词。</p>
+<h3 id="token-影响成本和上下文">Token 影响成本和上下文
+</h3><p>上下文窗口不是按字数算，而是按 token 算。</p>
+<p>如果模型上下文是 128K token，意思是一次最多能看到约 128K 个 token，包括：</p>
 <ul>
-<li>T→0：趋近贪心，趋于确定出最高概率 token</li>
-<li>T=1：原始概率分布</li>
-<li>T&gt;1：概率分布更平滑，低概率 token 被&quot;提权&quot;，输出更多样但也更不可控</li>
+<li>系统提示</li>
+<li>用户输入</li>
+<li>历史对话</li>
+<li>检索文档</li>
+<li>工具结果</li>
+<li>模型输出</li>
 </ul>
-<p><strong>Top-K 采样</strong> 只从概率最高的 K 个 token 中采样，切断长尾噪声。比如 K=50 意味着只考虑 top-50，屏蔽剩下几万个 token。</p>
-<p><strong>Top-P 采样（Nucleus Sampling）</strong> 动态选择最小集合，使其累积概率 ≥ P。比 Top-K 更灵活：概率集中时选得少（精准），概率分散时选得多（多样）。</p>
-<p>实际生产中通常是 Temperature + Top-P 组合使用。API 调用的 <code>temperature</code> 和 <code>top_p</code> 参数就是这么来的。</p>
-<h2 id="从原理到趋势">从原理到趋势
-</h2><p>理解了上述原理，再看当下的技术趋势就会觉得顺理成章：</p>
-<p><strong>长上下文</strong> 挑战 Attention 的 O(n²) 复杂度。RoPE 外推 + FlashAttention 等工程优化，将上下文从 4K 推到 1M+ token 级别。FlashAttention 通过分块计算和 IO 优化，将原始 Attention 的内存瓶颈从 HBM 移到 SRAM，实现数倍加速。</p>
-<p><strong>MoE（混合专家）</strong> 将 FFN 层拆成 N 个&quot;专家&quot;，每个 token 只激活其中的 K 个（K&laquo;N）。DeepSeek-V3（671B 总参，37B 激活）、Mixtral 8x7B 都是 MoE 架构。用路由网络（一个轻量分类器）为每个 token 选择最合适的专家，让容量接近稠密大模型，推理成本接近稠密小模型。</p>
-<p><strong>多模态</strong> 将图像、音频也 token 化，用相同的 Transformer 统一处理。GPT-4V/GPT-4o 是闭源代表，LLaVA 是开源路线的典型。</p>
-<p><strong>推理时缩放（Inference-Time Scaling）</strong> 改变了过去仅在训练阶段堆算力的范式——让模型在推理时&quot;思考更久&quot;也能提升性能。典型例子是 OpenAI o1/o3 的推理模型，以及 DeepSeek-R1 所展示的纯强化学习激发推理能力的方法。</p>
-<h2 id="总结">总结
-</h2><p>大语言模型的原理体系可以总结为三个层次：</p>
-<div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>层次</th>
-          <th>核心组件</th>
-          <th>解决什么问题</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>架构层</td>
-          <td>Transformer, Self-Attention, FFN</td>
-          <td>如何高效地建模序列</td>
-      </tr>
-      <tr>
-          <td>训练层</td>
-          <td>Pre-training, SFT, RLHF/DPO</td>
-          <td>如何获得知识和遵循指令</td>
-      </tr>
-      <tr>
-          <td>规模层</td>
-          <td>Scaling Law, Emergence</td>
-          <td>做大能得到什么</td>
-      </tr>
-  </tbody>
-</table></div>
-<p>理解这些不意味着我们能造出 GPT-5，但至少在使用和评估它们时，我们不再是面对一个&quot;魔法黑箱&quot;，而是一个可以分解、可以分析的工程系统。</p>
-<p>大模型的下一幕正在展开。Agent 架构、代码生成与执行、多模态融合、端侧部署——每个方向都在重新定义我们与机器的关系。越是深入原理，就越能在浪潮中找到自己的立足点。</p>
+<p>token 越多，成本越高，推理越慢，上下文管理也越重要。</p>
+<h2 id="embedding把-token-变成向量">Embedding：把 token 变成向量
+</h2><p>模型不能直接对 token 字符串做计算。它会先把每个 token 映射成一个向量。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">&#34;苹果&#34; → [0.12, -0.38, 0.57, ...]
+</span></span><span class="line"><span class="cl">&#34;香蕉&#34; → [0.10, -0.35, 0.61, ...]
+</span></span><span class="line"><span class="cl">&#34;数据库&#34; → [-0.44, 0.72, 0.08, ...]
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这个向量叫 Embedding。</p>
+<p>可以把它理解成 token 在语义空间里的坐标。语义接近的 token，向量距离通常也更接近。</p>
+<p>但在大语言模型里，Embedding 只是第一步。真正强大的地方在于：这个向量会经过很多层 Transformer，不断吸收上下文信息。</p>
+<p>例如“苹果”这个 token，在不同句子里的含义不同：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">我买了一个苹果。
+</span></span><span class="line"><span class="cl">苹果发布了新款芯片。
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>初始 Embedding 可能相同，但经过上下文处理后，模型会逐渐区分它是水果还是公司。</p>
+<h2 id="transformerllm-的主干架构">Transformer：LLM 的主干架构
+</h2><p>现代大语言模型的核心架构基本都来自 Transformer。</p>
+<p>一个简化版流程：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">文本
+</span></span><span class="line"><span class="cl">  ↓
+</span></span><span class="line"><span class="cl">Tokenization
+</span></span><span class="line"><span class="cl">  ↓
+</span></span><span class="line"><span class="cl">Embedding
+</span></span><span class="line"><span class="cl">  ↓
+</span></span><span class="line"><span class="cl">Transformer Block × N
+</span></span><span class="line"><span class="cl">  ↓
+</span></span><span class="line"><span class="cl">输出下一个 token 的概率
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Transformer Block 可以理解成一层“信息加工器”。每一层主要做两件事：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">1. Attention：让每个 token 从其他 token 那里取信息
+</span></span><span class="line"><span class="cl">2. Feed Forward：对每个位置的信息做进一步加工
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>几十层甚至上百层叠起来后，模型就能从简单词义逐步抽象到语法、语义、推理和任务意图。</p>
+<h2 id="attention让-token-互相看见">Attention：让 token 互相看见
+</h2><p>Attention 是 Transformer 最核心的机制。</p>
+<p>一句话理解：</p>
+<p><strong>Attention 让当前位置的 token 判断：我应该重点关注前文里的哪些 token。</strong></p>
+<p>例如：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">小明把书放进书包，因为它太重了。
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这里“它”指的更可能是“书”，不是“书包”。模型要理解这件事，就需要让“它”这个位置去关注前面的相关词。</p>
+<h3 id="querykeyvalue">Query、Key、Value
+</h3><p>Attention 里常见三个词：Query、Key、Value。</p>
+<p>可以用查资料来类比：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">Query：我想找什么？
+</span></span><span class="line"><span class="cl">Key：每份资料的标签是什么？
+</span></span><span class="line"><span class="cl">Value：资料真正的内容是什么？
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>每个 token 都会生成自己的 Query、Key、Value。</p>
+<p>然后当前位置的 Query 会和所有位置的 Key 做匹配，算出注意力分数。分数越高，说明越值得关注。最后再按这些分数加权汇总 Value。</p>
+<p>简化成三步：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">1. 当前 token 发出 Query：我需要什么信息？
+</span></span><span class="line"><span class="cl">2. 其他 token 提供 Key：我能提供什么线索？
+</span></span><span class="line"><span class="cl">3. 根据匹配程度汇总 Value：把有用信息拿过来。
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="self-attention">Self-Attention
+</h3><p>Self-Attention 的意思是：同一句话内部的 token 互相关注。</p>
+<p>例如：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">张三告诉李四，他明天会来。
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>模型需要判断“他”更可能指谁。这就需要结合上下文中的多个 token。</p>
+<p>Self-Attention 的强大之处在于：任意两个位置之间都可以直接建立联系。不像 RNN 那样必须从左到右一步步传递信息。</p>
+<h3 id="causal-mask">Causal Mask
+</h3><p>GPT 这类生成式模型在训练和生成时不能偷看未来。</p>
+<p>预测第 5 个 token 时，只能看前 4 个 token，不能看第 6 个 token。</p>
+<p>这靠 Causal Mask 实现。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">位置 1 只能看 1
+</span></span><span class="line"><span class="cl">位置 2 只能看 1,2
+</span></span><span class="line"><span class="cl">位置 3 只能看 1,2,3
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这样模型学到的才是“根据前文预测后文”，而不是提前看答案。</p>
+<h2 id="multi-head-attention从多个角度看上下文">Multi-Head Attention：从多个角度看上下文
+</h2><p>一个 Attention 头只能从一种角度关注上下文。</p>
+<p>但一句话里有很多关系：</p>
+<ul>
+<li>主谓关系</li>
+<li>指代关系</li>
+<li>时间关系</li>
+<li>因果关系</li>
+<li>代码里的变量引用</li>
+<li>Markdown 里的结构层级</li>
+</ul>
+<p>Multi-Head Attention 就是让模型同时用多个 Attention 头观察文本。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">Head 1：关注语法
+</span></span><span class="line"><span class="cl">Head 2：关注指代
+</span></span><span class="line"><span class="cl">Head 3：关注代码变量
+</span></span><span class="line"><span class="cl">Head 4：关注段落结构
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这些头的结果会被合并，让模型得到更丰富的上下文表示。</p>
+<p>不需要把每个头想得太神秘。它们不一定真的严格分工成“语法头”“指代头”，但多头机制确实给了模型从不同子空间捕捉关系的能力。</p>
+<h2 id="feed-forward对信息做加工">Feed Forward：对信息做加工
+</h2><p>Attention 负责“从哪里拿信息”，Feed Forward 负责“怎么加工信息”。</p>
+<p>在每个 Transformer Block 中，Attention 汇总上下文后，会经过一个前馈网络。</p>
+<p>可以粗略理解为：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">Attention：把相关信息拿到当前 token 身边
+</span></span><span class="line"><span class="cl">Feed Forward：根据这些信息更新当前 token 的表示
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>很多研究认为，模型里的事实知识和模式记忆相当一部分保存在前馈网络参数中。</p>
+<p>例如模型知道：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">巴黎是法国的首都
+</span></span><span class="line"><span class="cl">Redis 的 zset 常用跳表
+</span></span><span class="line"><span class="cl">Go 的 goroutine 由调度器管理
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这些知识并不是以数据库记录的形式存储，而是分散在大量参数里。</p>
+<h2 id="位置编码让模型知道顺序">位置编码：让模型知道顺序
+</h2><p>Attention 本身不天然知道顺序。</p>
+<p>如果只看一堆 token 向量，模型并不知道谁在前谁在后。</p>
+<p>所以模型需要位置编码。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">我 爱 你
+</span></span><span class="line"><span class="cl">你 爱 我
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这两句话 token 一样，但顺序不同，意思不同。</p>
+<p>位置编码就是给每个 token 加上“我在第几个位置”的信息。</p>
+<p>现代模型常用 RoPE 这类相对位置编码。你不必记住复杂数学，只要知道它解决的是：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">模型如何理解 token 之间的距离和顺序。
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="残差连接与归一化让深层网络稳定训练">残差连接与归一化：让深层网络稳定训练
+</h2><p>Transformer 可以堆很多层，但层数越深，训练越难。</p>
+<p>残差连接和归一化是两个稳定训练的关键技巧。</p>
+<h3 id="残差连接">残差连接
+</h3><p>残差连接就是让每层不要完全重写输入，而是在输入基础上做增量修改：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">输出 = 输入 + 本层加工结果
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这样信息可以更顺畅地穿过很多层，训练也更稳定。</p>
+<h3 id="layernorm">LayerNorm
+</h3><p>LayerNorm 用来让每层的数值分布更稳定。</p>
+<p>可以类比成：每一层处理完后，把数据尺度整理一下，避免数值忽大忽小导致训练崩掉。</p>
+<p>这些机制不直接决定模型“懂不懂”，但决定了模型能否被训练得足够深、足够大。</p>
+<h2 id="训练从海量文本中学习规律">训练：从海量文本中学习规律
+</h2><p>预训练阶段的任务很简单：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">给定前文，预测下一个 token。
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>训练数据来自大量文本：</p>
+<ul>
+<li>网页</li>
+<li>书籍</li>
+<li>代码</li>
+<li>论文</li>
+<li>问答</li>
+<li>文档</li>
+<li>论坛</li>
+</ul>
+<p>模型一开始是随机参数，预测很差。每次预测错了，就根据误差微调参数。</p>
+<p>这个过程重复数万亿 token 后，模型逐渐学会语言和世界知识的统计规律。</p>
+<h3 id="预训练学到什么">预训练学到什么
+</h3><p>预训练让模型学会：</p>
+<ul>
+<li>词和词如何搭配</li>
+<li>句子如何组织</li>
+<li>代码如何书写</li>
+<li>常见事实</li>
+<li>推理模式</li>
+<li>不同领域的表达方式</li>
+</ul>
+<p>但预训练模型本质上仍然是“续写器”。</p>
+<p>你问：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">请解释什么是 Redis。
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Base Model 可能会继续补成一段网页、问答、代码注释，未必像助手一样回答你。</p>
+<p>这就是为什么还需要指令微调和对齐。</p>
+<h2 id="指令微调从续写器到助手">指令微调：从续写器到助手
+</h2><p>SFT（Supervised Fine-Tuning，监督微调）会用人工整理的指令数据继续训练模型。</p>
+<p>数据长这样：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;instruction&#34;</span><span class="p">:</span> <span class="s2">&#34;解释什么是 Redis&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">  <span class="nt">&#34;response&#34;</span><span class="p">:</span> <span class="s2">&#34;Redis 是一种基于内存的键值数据库...&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>模型通过这些样本学会：</p>
+<ul>
+<li>用户提问应该回答</li>
+<li>要遵循指令</li>
+<li>要保持对话格式</li>
+<li>要按要求输出结构</li>
+<li>不要无意义续写</li>
+</ul>
+<p>经过 SFT 后，模型才更像我们熟悉的聊天助手。</p>
+<h2 id="对齐让模型更符合人类偏好">对齐：让模型更符合人类偏好
+</h2><p>SFT 解决“会不会听指令”，但不完全解决“回答得好不好”。</p>
+<p>同一个问题可以有很多回答：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">太短：Redis 是数据库。
+</span></span><span class="line"><span class="cl">太长：从网络协议讲到源码实现。
+</span></span><span class="line"><span class="cl">刚好：解释核心概念、使用场景和特点。
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>对齐训练就是让模型更符合人类偏好。</p>
+<p>常见方法包括：</p>
+<ul>
+<li>RLHF：基于人类反馈的强化学习</li>
+<li>DPO：直接偏好优化</li>
+<li>RLAIF：用 AI 反馈辅助偏好数据</li>
+</ul>
+<p>它们的共同目标是让模型更倾向于输出：</p>
+<ul>
+<li>有帮助</li>
+<li>准确</li>
+<li>安全</li>
+<li>不胡乱承诺</li>
+<li>格式清晰</li>
+<li>符合用户意图</li>
+</ul>
+<p>可以把训练流程简化成：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">预训练：学语言和知识
+</span></span><span class="line"><span class="cl">SFT：学会按指令回答
+</span></span><span class="line"><span class="cl">对齐：学会什么回答更好
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="推理模型如何生成回答">推理：模型如何生成回答
+</h2><p>训练完成后，模型参数固定。用户输入问题时，进入推理阶段。</p>
+<p>推理流程：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">用户输入
+</span></span><span class="line"><span class="cl">  ↓
+</span></span><span class="line"><span class="cl">转成 token
+</span></span><span class="line"><span class="cl">  ↓
+</span></span><span class="line"><span class="cl">模型计算下一个 token 概率
+</span></span><span class="line"><span class="cl">  ↓
+</span></span><span class="line"><span class="cl">采样或选择一个 token
+</span></span><span class="line"><span class="cl">  ↓
+</span></span><span class="line"><span class="cl">加入上下文
+</span></span><span class="line"><span class="cl">  ↓
+</span></span><span class="line"><span class="cl">继续预测
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这个循环一直进行，直到模型输出结束符或达到最大长度。</p>
+<h3 id="temperature">Temperature
+</h3><p>Temperature 控制随机性。</p>
+<p>低 temperature：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">更稳定、更保守、更可复现
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>高 temperature：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">更多样、更有创意、也更容易跑偏
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>写代码、做问答通常用较低温度；写故事、头脑风暴可以适当提高。</p>
+<h3 id="top-k">Top-K
+</h3><p>Top-K 表示只从概率最高的 K 个 token 中选择。</p>
+<p>如果 K=5，模型只会在前 5 个候选里采样，低概率 token 会被排除。</p>
+<h3 id="top-p">Top-P
+</h3><p>Top-P 也叫 nucleus sampling。</p>
+<p>它不是固定取前 K 个，而是取累计概率达到 P 的候选集合。</p>
+<p>例如 P=0.9，模型会从累计概率前 90% 的候选里采样。</p>
+<p>Top-P 比 Top-K 更灵活，因为不同位置的候选分布可能差异很大。</p>
+<h2 id="上下文窗口模型的工作记忆">上下文窗口：模型的工作记忆
+</h2><p>模型不会真正“记住”当前对话之外的东西。它每次生成时，只能看到上下文窗口里的内容。</p>
+<p>上下文包括：</p>
+<ul>
+<li>系统提示</li>
+<li>用户消息</li>
+<li>历史对话</li>
+<li>工具结果</li>
+<li>RAG 检索文档</li>
+<li>代码片段</li>
+<li>记忆摘要</li>
+</ul>
+<p>如果信息不在上下文里，模型就无法直接使用。</p>
+<p>这也是为什么 RAG、记忆系统、上下文压缩很重要。它们本质上都在解决一个问题：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">该把什么信息放进模型当前能看到的窗口？
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>上下文窗口变大不代表问题完全解决。信息越多，噪声也越多。真正关键的是上下文质量。</p>
+<h2 id="参数量数据和算力">参数量、数据和算力
+</h2><p>大模型能力提升通常来自三件事：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">更多参数
+</span></span><span class="line"><span class="cl">更多高质量数据
+</span></span><span class="line"><span class="cl">更多训练算力
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>参数可以理解成模型内部可调的“旋钮”。参数越多，模型能表达的模式越复杂。</p>
+<p>但参数不是越大越无脑好。</p>
+<p>模型效果还取决于：</p>
+<ul>
+<li>数据质量</li>
+<li>训练 token 数</li>
+<li>模型架构</li>
+<li>对齐质量</li>
+<li>推理成本</li>
+<li>部署约束</li>
+</ul>
+<p>一个训练得好的小模型，在特定任务上可能比一个泛用大模型更划算。</p>
+<h2 id="涌现能力规模带来的质变">涌现能力：规模带来的质变
+</h2><p>当模型规模、数据量和训练计算达到一定程度后，会出现一些小模型不明显的能力：</p>
+<ul>
+<li>多步推理</li>
+<li>代码生成</li>
+<li>工具调用</li>
+<li>少样本学习</li>
+<li>指令泛化</li>
+<li>跨语言迁移</li>
+</ul>
+<p>这类现象常被称为涌现能力。</p>
+<p>但“涌现”不等于魔法。它更像是大量统计规律、表示能力和训练目标叠加后，在某些任务上表现出突然变强的现象。</p>
+<p>理解这一点很重要：大模型很强，但它不是全知系统。</p>
+<h2 id="为什么会幻觉">为什么会幻觉
+</h2><p>幻觉是大模型最典型的问题之一。</p>
+<p>原因很简单：模型的目标是生成“概率上合理的下一个 token”，不是从数据库里查真相。</p>
+<p>当它不知道答案时，也可能生成一个看起来像答案的回答。</p>
+<p>幻觉常见于：</p>
+<ul>
+<li>问题超出训练知识</li>
+<li>需要最新信息</li>
+<li>上下文缺少证据</li>
+<li>用户要求编造式任务</li>
+<li>检索结果不相关</li>
+<li>模型被错误前提诱导</li>
+</ul>
+<p>降低幻觉的方法：</p>
+<ul>
+<li>RAG 引入外部证据</li>
+<li>工具调用查询真实系统</li>
+<li>要求引用来源</li>
+<li>不确定时允许回答不知道</li>
+<li>对高风险场景做人工审核</li>
+</ul>
+<p>幻觉不能完全消除，只能通过工程手段降低。</p>
+<h2 id="为什么数学和逻辑会出错">为什么数学和逻辑会出错
+</h2><p>LLM 不是传统符号推理引擎。</p>
+<p>它可以学到很多推理模式，但本质上仍然在生成 token。</p>
+<p>所以它可能：</p>
+<ul>
+<li>算术中间步骤出错</li>
+<li>忘记约束条件</li>
+<li>被题目措辞误导</li>
+<li>在长推理链中偏离目标</li>
+<li>给出看似合理但错误的解释</li>
+</ul>
+<p>解决方法通常不是“让模型更努力想”，而是结合工具：</p>
+<ul>
+<li>计算器</li>
+<li>代码执行器</li>
+<li>定理证明器</li>
+<li>SQL 查询</li>
+<li>测试用例</li>
+</ul>
+<p>模型负责理解问题和组织流程，工具负责精确计算和验证。</p>
+<h2 id="llm-与-agent-的关系">LLM 与 Agent 的关系
+</h2><p>LLM 是大脑，但 Agent 是系统。</p>
+<p>一个 Agent 通常包含：</p>
+<ul>
+<li>LLM 推理</li>
+<li>工具调用</li>
+<li>记忆系统</li>
+<li>任务规划</li>
+<li>权限控制</li>
+<li>错误恢复</li>
+<li>评估与日志</li>
+</ul>
+<p>LLM 本身只负责生成下一步内容或动作意图。Agent 工程负责把它放进可执行、可观察、可控制的系统里。</p>
+<p>这就是为什么同一个模型，在不同产品里的表现差异很大。真正决定可用性的，不只有模型，还有上下文、工具、流程和评估。</p>
+<h2 id="小结">小结
+</h2><p>大语言模型的核心可以压缩成一句话：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">在大量文本上训练一个 Transformer，让它根据上下文预测下一个 token。
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>但这句话背后包含一整套机制：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">Tokenization：把文字切成模型能处理的单位
+</span></span><span class="line"><span class="cl">Embedding：把 token 变成向量
+</span></span><span class="line"><span class="cl">Attention：让 token 从上下文中取信息
+</span></span><span class="line"><span class="cl">Feed Forward：加工和存储模式
+</span></span><span class="line"><span class="cl">Position Encoding：让模型知道顺序
+</span></span><span class="line"><span class="cl">Pre-training：学习语言和世界规律
+</span></span><span class="line"><span class="cl">SFT：学会听指令
+</span></span><span class="line"><span class="cl">Alignment：学会更符合人类偏好
+</span></span><span class="line"><span class="cl">Decoding：一个 token 一个 token 生成答案
+</span></span><span class="line"><span class="cl">Context：决定模型当前能看到什么
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>理解 LLM，不需要一开始就陷进公式。先抓住主线：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">它如何读文本 → 如何理解上下文 → 如何训练 → 如何生成 → 为什么会出错
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这条线理清了，再去看 Transformer 细节、RAG、Agent、Tool Calling、模型部署，就会顺很多。</p>
 
 </section>
 

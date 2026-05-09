@@ -5150,166 +5150,54 @@
 </description>
         </item>
         <item>
-        <title>大语言模型原理详解：从 Transformer 到 Scaling Law</title>
-        <link>https://liusir521.github.io/p/%E5%A4%A7%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E4%BB%8E-transformer-%E5%88%B0-scaling-law/</link>
+        <title>大语言模型原理详解：从预测下一个词到智能涌现</title>
+        <link>https://liusir521.github.io/p/%E5%A4%A7%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E4%BB%8E%E9%A2%84%E6%B5%8B%E4%B8%8B%E4%B8%80%E4%B8%AA%E8%AF%8D%E5%88%B0%E6%99%BA%E8%83%BD%E6%B6%8C%E7%8E%B0/</link>
         <pubDate>Sat, 02 May 2026 00:00:00 +0000</pubDate>
         
-        <guid>https://liusir521.github.io/p/%E5%A4%A7%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E4%BB%8E-transformer-%E5%88%B0-scaling-law/</guid>
-        <description>&lt;img src="https://liusir521.github.io/p/%E5%A4%A7%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E4%BB%8E-transformer-%E5%88%B0-scaling-law/llm.png" alt="Featured image of post 大语言模型原理详解：从 Transformer 到 Scaling Law" /&gt;&lt;h2 id=&#34;引言&#34;&gt;引言
-&lt;/h2&gt;&lt;p&gt;2022年11月，ChatGPT 横空出世，两个月内月活破亿。此后，GPT-4、Claude、Gemini、Llama、DeepSeek 等大语言模型（Large Language Model, LLM）层出不穷，深刻改变了人机交互范式。&lt;/p&gt;
-&lt;p&gt;这些模型的背后是一套精妙的理论体系：从 Transformer 架构到注意力机制，从预训练到对齐，从 Scaling Law 到涌现能力。本文尝试从头梳理这些核心原理，帮助读者建立对 LLM 的系统性认知。&lt;/p&gt;
-&lt;p&gt;读完本文你会理解：&lt;/p&gt;
+        <guid>https://liusir521.github.io/p/%E5%A4%A7%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E4%BB%8E%E9%A2%84%E6%B5%8B%E4%B8%8B%E4%B8%80%E4%B8%AA%E8%AF%8D%E5%88%B0%E6%99%BA%E8%83%BD%E6%B6%8C%E7%8E%B0/</guid>
+        <description>&lt;img src="https://liusir521.github.io/p/%E5%A4%A7%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E4%BB%8E%E9%A2%84%E6%B5%8B%E4%B8%8B%E4%B8%80%E4%B8%AA%E8%AF%8D%E5%88%B0%E6%99%BA%E8%83%BD%E6%B6%8C%E7%8E%B0/llm.png" alt="Featured image of post 大语言模型原理详解：从预测下一个词到智能涌现" /&gt;&lt;h2 id=&#34;引言&#34;&gt;引言
+&lt;/h2&gt;&lt;p&gt;大语言模型看起来很神奇：能聊天、写代码、总结文章、翻译文本、分析日志，甚至能像助手一样完成复杂任务。&lt;/p&gt;
+&lt;p&gt;但如果把外壳拆开，它最核心的目标其实非常朴素：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;根据前面的内容，预测下一个 token。
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;例如给模型一句话：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;今天天气很
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;模型要做的是预测后面最可能接什么：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;好、热、冷、差、舒服……
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;当这个能力被放大到海量数据、巨大参数、强大的 Transformer 架构和精心设计的训练流程上，就出现了我们今天看到的大语言模型。&lt;/p&gt;
+&lt;p&gt;这篇文章不追求堆公式，而是用尽量直观的方式讲清楚：&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;Transformer 为什么能取代 RNN/LSTM&lt;/li&gt;
-&lt;li&gt;Self-Attention 到底在&amp;quot;注意&amp;quot;什么&lt;/li&gt;
-&lt;li&gt;一个 token 是如何一步步生成的&lt;/li&gt;
-&lt;li&gt;为什么模型越大能力越强&lt;/li&gt;
-&lt;li&gt;RLHF 如何让模型&amp;quot;听话&amp;quot;&lt;/li&gt;
+&lt;li&gt;模型如何“读”文字&lt;/li&gt;
+&lt;li&gt;Transformer 为什么有效&lt;/li&gt;
+&lt;li&gt;注意力机制到底在注意什么&lt;/li&gt;
+&lt;li&gt;模型是怎么训练出来的&lt;/li&gt;
+&lt;li&gt;对齐为什么能让模型更像助手&lt;/li&gt;
+&lt;li&gt;推理参数如何影响回答&lt;/li&gt;
+&lt;li&gt;大模型为什么会幻觉、受上下文限制&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h2 id=&#34;语言模型的前世今生&#34;&gt;语言模型的前世今生
-&lt;/h2&gt;&lt;h3 id=&#34;统计语言模型时代&#34;&gt;统计语言模型时代
-&lt;/h3&gt;&lt;p&gt;语言模型的核心问题很简单：&lt;strong&gt;给定前文，预测下一个词的概率&lt;/strong&gt;。&lt;/p&gt;
-$$
-P(w_t \mid w_1, w_2, \dots, w_{t-1})
-$$&lt;p&gt;最朴素的做法是 N-gram 模型——假设当前词只与前 N-1 个词相关。N=2（Bigram）时，&amp;ldquo;我/爱/吃&amp;rdquo; 后面接 &amp;ldquo;苹果&amp;rdquo; 的概率就是 count(&amp;ldquo;吃苹果&amp;rdquo;) / count(&amp;ldquo;吃&amp;rdquo;) 的统计频率。&lt;/p&gt;
-&lt;p&gt;N-gram 的问题很明显：&lt;strong&gt;稀疏性&lt;/strong&gt;。自然语言中大部分词组从未在训练集中出现，概率为 0；增大 N 虽然能捕捉更长依赖，但参数呈指数爆炸。&lt;/p&gt;
-&lt;h3 id=&#34;神经网络语言模型&#34;&gt;神经网络语言模型
-&lt;/h3&gt;&lt;p&gt;2003年 Bengio 提出用神经网络做语言建模，将每个词映射为稠密向量（词嵌入），再用全连接网络预测下一个词。这解决了稀疏性问题，但依赖固定窗口，仍然看不了长距离。&lt;/p&gt;
-&lt;h3 id=&#34;rnnlstm-时代&#34;&gt;RNN/LSTM 时代
-&lt;/h3&gt;&lt;p&gt;循环神经网络（RNN）天然适合序列建模，每步输出状态传递给下一步，理论上可以捕捉任意长度的依赖。LSTM 引入门控机制缓解了梯度消失。&lt;/p&gt;
-&lt;p&gt;问题是：&lt;strong&gt;无法并行计算&lt;/strong&gt;——第 t 步依赖第 t-1 步的状态，训练慢得令人绝望。长序列的梯度传播仍然不稳定。&lt;/p&gt;
-&lt;h3 id=&#34;transformer-革命&#34;&gt;Transformer 革命
-&lt;/h3&gt;&lt;p&gt;2017年 Google 发表《Attention Is All You Need》，提出纯 Attention 架构取代循环结构。核心洞见是：&lt;strong&gt;序列中任意两个位置的交互距离是 O(1)&lt;/strong&gt;，而且可以完全并行计算。Transformer 成为 LLM 时代所有主流模型的基础架构。&lt;/p&gt;
-&lt;h2 id=&#34;transformer-架构全景&#34;&gt;Transformer 架构全景
-&lt;/h2&gt;&lt;p&gt;Transformer 原始设计是 Encoder-Decoder 结构，但 LLM 大多只使用 Decoder（GPT 系）或 Encoder（BERT 系）。下面以 GPT 式 Decoder-Only 架构展开。&lt;/p&gt;
-&lt;p&gt;从宏观看，模型就是一个巨大的函数：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
-&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
-&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;输入 tokens → [Embedding] → [N 层 Transformer Block] → [LM Head] → 概率分布
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-&lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;每个 Transformer Block 包含两个核心子层：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
-&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
-&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;x → [Multi-Head Self-Attention] → [Add &amp;amp; Norm] → [FFN] → [Add &amp;amp; Norm] → 输出
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-&lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;训练好的模型权重里，参数分布在四个矩阵族中：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Q/K/V/O 矩阵&lt;/strong&gt;（Attention 部分）：控制&amp;quot;从哪读信息&amp;quot;&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;FFN 矩阵&lt;/strong&gt;（前馈部分）：存储&amp;quot;知识&amp;quot;&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Embedding 矩阵&lt;/strong&gt;：将 token 映射为向量&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;LM Head 矩阵&lt;/strong&gt;：将向量映射回词表概率&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id=&#34;核心一self-attention-自注意力机制&#34;&gt;核心一：Self-Attention 自注意力机制
-&lt;/h2&gt;&lt;h3 id=&#34;为什么需要注意力&#34;&gt;为什么需要注意力
-&lt;/h3&gt;&lt;p&gt;读这句话：&lt;strong&gt;&amp;ldquo;小明把苹果给了小红，因为她很__&amp;rdquo;&lt;/strong&gt;。&lt;/p&gt;
-&lt;p&gt;空白处该填什么？理解 &amp;ldquo;她&amp;rdquo; 指代 &amp;ldquo;小红&amp;rdquo; 而非 &amp;ldquo;小明&amp;rdquo;、理解 &amp;ldquo;给苹果&amp;rdquo; 这个动作的后续，都需要综合多个位置的信息。卷积和 RNN 处理这种依赖能力有限。&lt;/p&gt;
-&lt;p&gt;Self-Attention 的基本思想是：&lt;strong&gt;让序列中每个位置都去&amp;quot;看&amp;quot;序列中的所有位置，并根据相关性加权聚合信息&lt;/strong&gt;。&lt;/p&gt;
-&lt;h3 id=&#34;query-key-value&#34;&gt;Query, Key, Value
-&lt;/h3&gt;&lt;p&gt;这可能是注意力机制中最令人困惑的设计。一个直觉类比——&lt;strong&gt;数据库查询&lt;/strong&gt;：&lt;/p&gt;
-&lt;table&gt;
-  &lt;thead&gt;
-      &lt;tr&gt;
-          &lt;th&gt;概念&lt;/th&gt;
-          &lt;th&gt;数据库&lt;/th&gt;
-          &lt;th&gt;Self-Attention&lt;/th&gt;
-      &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-      &lt;tr&gt;
-          &lt;td&gt;Query&lt;/td&gt;
-          &lt;td&gt;你的 SQL 查询&lt;/td&gt;
-          &lt;td&gt;当前 token 的&amp;quot;需求&amp;quot;向量&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;Key&lt;/td&gt;
-          &lt;td&gt;索引列&lt;/td&gt;
-          &lt;td&gt;所有 token 的&amp;quot;标签&amp;quot;向量&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;Value&lt;/td&gt;
-          &lt;td&gt;数据行&lt;/td&gt;
-          &lt;td&gt;所有 token 的&amp;quot;内容&amp;quot;向量&lt;/td&gt;
-      &lt;/tr&gt;
-  &lt;/tbody&gt;
-&lt;/table&gt;
-&lt;p&gt;当你查询 &lt;code&gt;SELECT * WHERE name = &#39;苹果&#39;&lt;/code&gt;，数据库用查询条件（Query）去匹配索引（Key），找到匹配行后返回数据（Value）。&lt;/p&gt;
-&lt;p&gt;Self-Attention 的计算完全一致：&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;当前 token 产出一个 Query 向量（&amp;ldquo;我想要什么信息&amp;rdquo;）&lt;/li&gt;
-&lt;li&gt;所有 token 各产出一个 Key 向量（&amp;ldquo;我有什么信息&amp;rdquo;）和一个 Value 向量（&amp;ldquo;我的实际内容&amp;rdquo;）&lt;/li&gt;
-&lt;li&gt;Query 与所有 Key 做点积求相似度 → 得到注意力权重&lt;/li&gt;
-&lt;li&gt;用权重对所有 Value 加权求和 → 得到当前 token 的上下文表示&lt;/li&gt;
-&lt;/ol&gt;
-&lt;p&gt;写成公式：&lt;/p&gt;
-$$
-\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right) V
-$$&lt;h3 id=&#34;一步一步拆解&#34;&gt;一步一步拆解
-&lt;/h3&gt;&lt;p&gt;假设序列长度 n=4，每个向量维度 d=512：&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;Step 1 — 线性投影&lt;/strong&gt;&lt;/p&gt;
-&lt;p&gt;输入 X 的 shape 是 &lt;code&gt;[4, 512]&lt;/code&gt;（4 个 token，每个 512 维）。用三个权重矩阵投影：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
-&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
-&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Q = X @ W_Q    # [4, 512] × [512, 64] = [4, 64]
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;K = X @ W_K    # [4, 512] × [512, 64] = [4, 64]
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;V = X @ W_V    # [4, 512] × [512, 64] = [4, 64]
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-&lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;&lt;strong&gt;Step 2 — 计算注意力分数&lt;/strong&gt;&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
-&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
-&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;scores = Q @ K^T / sqrt(64)    # [4, 64] × [64, 4] = [4, 4]
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-&lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;得到 &lt;code&gt;[4, 4]&lt;/code&gt; 的注意力矩阵，&lt;code&gt;scores[i][j]&lt;/code&gt; 表示第 i 个 token 对第 j 个 token 的&amp;quot;关注程度&amp;quot;。&lt;/p&gt;
-&lt;p&gt;除以 sqrt(d_k) 是为了防止点积值过大，导致 softmax 梯度消失。为什么是 sqrt(d_k)？因为随机初始化时 Q 和 K 的每个维度期望为 0、方差为 1，点积的期望就是 0、方差就是 d_k。&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;Step 3 — Softmax 归一化 + Causal Mask&lt;/strong&gt;&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
-&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
-&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;weights = softmax(scores, dim=-1)    # [4, 4]，每行和为 1
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-&lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;Decoder 模型还需要 &lt;strong&gt;Causal Mask（因果掩码）&lt;/strong&gt; ——将 scores 矩阵的上三角置为 -inf，确保第 i 个 token 只能看到位置 0~i，不能偷看未来。放到 softmax 之前做：&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
-&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
-&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;scores[i][j] = -inf   (for j &amp;gt; i)   # 每个 token 只能看到自己及之前的 token
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-&lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;所以 Causal Mask 也常被称为 &lt;strong&gt;下三角掩码&lt;/strong&gt;，因为它最终保留的是一个下三角矩阵——每个位置只能看到它前面（含自己）的内容。&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;Step 4 — 加权聚合&lt;/strong&gt;&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
-&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
-&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;output = weights @ V    # [4, 4] × [4, 64] = [4, 64]
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-&lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;每个 token 的输出来自对所有（可见）token 的 Value 按注意力权重加权求和。&lt;/p&gt;
-&lt;h3 id=&#34;multi-head-attention&#34;&gt;Multi-Head Attention
-&lt;/h3&gt;&lt;p&gt;单头注意力只能捕捉一种关系模式。比如在 &amp;ldquo;小明把苹果给了小红，因为她很__&amp;rdquo; 中，需要同时关注&lt;strong&gt;指代关系&lt;/strong&gt;（她→小红）和&lt;strong&gt;语义搭配&lt;/strong&gt;（吃/喜欢+苹果）等不同维度。&lt;/p&gt;
-&lt;p&gt;多头注意力就是并行做多组独立的 Q/K/V 投影，每组叫做一个&amp;quot;头&amp;quot;（head）：&lt;/p&gt;
+&lt;h2 id=&#34;一句话理解-llm&#34;&gt;一句话理解 LLM
+&lt;/h2&gt;&lt;p&gt;大语言模型可以理解成一个巨大的概率预测器。&lt;/p&gt;
+&lt;p&gt;它接收一串 token，输出下一个 token 的概率分布：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
@@ -5321,154 +5209,679 @@ $$&lt;h3 id=&#34;一步一步拆解&#34;&gt;一步一步拆解
 &lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;7
 &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
 &lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;对每个 head_i:
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    Q_i = X @ W_Q_i
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    K_i = X @ W_K_i
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    V_i = X @ W_V_i
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    head_i = Attention(Q_i, K_i, V_i)
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;MultiHead = Concat(head_1, head_2, ..., head_h) @ W_O
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;输入：我 喜欢 吃
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;输出：
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  苹果：0.31
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  米饭：0.18
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  火锅：0.12
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  代码：0.01
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  ...
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;每个头可以学到不同的注意力模式：有的头关注相邻词做语法建模，有的头关注远距离指代，有的头关注标点边界。实际的注意力模式远比&amp;quot;相邻&amp;quot;和&amp;quot;远距离&amp;quot;复杂，不同层、不同头的分工至今仍是可解释性研究的前沿课题。&lt;/p&gt;
-&lt;p&gt;以 Llama 3 70B 为例：d_model=8192，num_heads=64，每个头的 d_k=128。64 个不同的&amp;quot;视角&amp;quot;并行工作。&lt;/p&gt;
-&lt;h2 id=&#34;核心二feed-forward-network-前馈网络&#34;&gt;核心二：Feed-Forward Network 前馈网络
-&lt;/h2&gt;&lt;p&gt;每个 Transformer Block 的 FFN 是一个两层的全连接网络：&lt;/p&gt;
-$$
-\text{FFN}(x) = \text{GeLU}(xW_1 + b_1)W_2 + b_2
-$$&lt;p&gt;通常 hidden_dim 是 d_model 的 4 倍。比如 d_model=4096 的模型，FFN 中间层有 16384 维。&lt;/p&gt;
-&lt;p&gt;FFN 承担了&lt;strong&gt;知识存储&lt;/strong&gt;的角色。研究表明，Transformer 中的事实性知识主要存储在 FFN 的参数中——可以把 FFN 理解为一种&lt;strong&gt;键值记忆&lt;/strong&gt;：第一层做模式匹配（匹配输入模式），第二层输出对应的知识。&lt;/p&gt;
-&lt;p&gt;一个有意思的结论来自 &lt;em&gt;Transformer Feed-Forward Layers Are Key-Value Memories&lt;/em&gt;（2020）这篇论文：FFN 的第一层（W1）的每一行可以看作一个 &amp;ldquo;Key&amp;rdquo;，负责检测某种输入模式；第二层（W2）的对应列则是这个 Key 对应的输出。这意味着 FFN 的参数本身就是一种可学习的关联存储。&lt;/p&gt;
-&lt;p&gt;一个对 GPT-2 的可解释性实验也印证了这一观点：如果用一个分类器去检测 &amp;ldquo;巴黎&amp;rdquo; &amp;ldquo;法国&amp;rdquo; &amp;ldquo;首都&amp;rdquo; 这几个概念在模型各层的激活情况，会发现 FFN 层的激活模式远比 Attention 层更集中——知识确实 &amp;ldquo;住&amp;rdquo; 在 FFN 里。&lt;/p&gt;
-&lt;h2 id=&#34;核心三位置编码&#34;&gt;核心三：位置编码
-&lt;/h2&gt;&lt;p&gt;Self-Attention 本身是&lt;strong&gt;置换不变的&lt;/strong&gt;——打乱输入顺序，输出也跟着打乱但值不变。&amp;ldquo;我爱吃苹果&amp;quot;和&amp;quot;苹果爱吃我&amp;quot;对 Attention 来说，只是矩阵行排列的顺序不同。&lt;/p&gt;
-&lt;p&gt;因此需要显式注入位置信息。原始 Transformer 使用正弦位置编码：&lt;/p&gt;
-$$
-PE_{(pos, 2i)} = \sin\left(\frac{pos}{10000^{2i/d_{model}}}\right)
-$$&lt;p&gt;
-&lt;/p&gt;
-$$
-PE_{(pos, 2i+1)} = \cos\left(\frac{pos}{10000^{2i/d_{model}}}\right)
-$$&lt;p&gt;不同频率的正弦波让模型能够学习相对位置关系（因为 sin(a+b) 可以展开为 sin(a)cos(b) + cos(a)sin(b)），且有良好的外推性——训练时见过 512 长度的序列，推理时遇到 1024 也勉强能处理。&lt;/p&gt;
-&lt;p&gt;现代 LLM 更多使用 &lt;strong&gt;RoPE（旋转位置编码）&lt;/strong&gt; ，通过旋转矩阵将位置信息编码到 Q/K 向量中。RoPE 的优势是相对位置关系天然内嵌在向量内积中：两个位置 token 的注意力分数仅取决于它们的相对距离，不依赖绝对位置。Llama 系列、Gemma、Qwen 等主流模型均使用 RoPE。&lt;/p&gt;
-&lt;h2 id=&#34;核心四add--norm&#34;&gt;核心四：Add &amp;amp; Norm
-&lt;/h2&gt;&lt;p&gt;Transformer Block 中每一子层后都有残差连接 + 层归一化：&lt;/p&gt;
+&lt;/div&gt;&lt;p&gt;然后系统从这个概率分布里选一个 token，接到原文后面，再继续预测下一个。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;我喜欢吃 → 苹果
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;我喜欢吃苹果 → 。
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;我喜欢吃苹果。 → 今天
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;一句话、一段代码、一篇文章，都是这样一个 token 一个 token 生成出来的。&lt;/p&gt;
+&lt;p&gt;这听起来像“文字接龙”，但关键在于：为了准确预测下一个 token，模型必须学会大量隐含能力。&lt;/p&gt;
+&lt;p&gt;它要知道：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;语法结构&lt;/li&gt;
+&lt;li&gt;词义关系&lt;/li&gt;
+&lt;li&gt;世界知识&lt;/li&gt;
+&lt;li&gt;常识推理&lt;/li&gt;
+&lt;li&gt;代码模式&lt;/li&gt;
+&lt;li&gt;对话格式&lt;/li&gt;
+&lt;li&gt;上下文约束&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;预测下一个 token 是训练目标，理解和推理是这个目标逼出来的能力。&lt;/p&gt;
+&lt;h2 id=&#34;token模型眼中的文字&#34;&gt;Token：模型眼中的文字
+&lt;/h2&gt;&lt;p&gt;模型不能直接读“文字”。它看到的是 token。&lt;/p&gt;
+&lt;p&gt;Token 可以是一个字、一个词、一个词的一部分，甚至是标点或空格。&lt;/p&gt;
+&lt;p&gt;例如：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;原文：ChatGPT 很强
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;可能被切成：[&amp;#34;Chat&amp;#34;, &amp;#34;GPT&amp;#34;, &amp;#34; 很&amp;#34;, &amp;#34;强&amp;#34;]
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;不同模型的分词器不一样，所以同一句话在不同模型里可能切成不同 token。&lt;/p&gt;
+&lt;h3 id=&#34;为什么不用字或词&#34;&gt;为什么不用字或词
+&lt;/h3&gt;&lt;p&gt;如果按字切，英文会很碎：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
 &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
 &lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;output = LayerNorm(x + Sublayer(x))
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;transformer → t r a n s f o r m e r
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;残差连接确保梯度可以无损地从顶层传导到底层，这是训练深网络的必要条件——100 层 Transformer 能训练，全靠残差提供的梯度&amp;quot;高速公路&amp;rdquo;。而 LayerNorm 稳定每一层的数值分布，防止数值发散。&lt;/p&gt;
-&lt;h2 id=&#34;tokenization模型如何读文本&#34;&gt;Tokenization：模型如何&amp;quot;读&amp;quot;文本
-&lt;/h2&gt;&lt;p&gt;模型不能直接理解原始文本，需要先分词（Tokenization）。现代 LLM 普遍使用 &lt;strong&gt;BPE（Byte Pair Encoding）&lt;/strong&gt; 子词分词算法。&lt;/p&gt;
-&lt;p&gt;BPE 的核心思想是：从字符级别开始，迭代地将最高频的相邻符号对合并为一个新符号。&lt;/p&gt;
-&lt;p&gt;比如词表有限时，&amp;ldquo;apple&amp;rdquo; &amp;ldquo;apples&amp;rdquo; &amp;ldquo;application&amp;rdquo; 可能被拆成 &amp;ldquo;app&amp;rdquo; + &amp;ldquo;le&amp;rdquo; / &amp;ldquo;app&amp;rdquo; + &amp;ldquo;les&amp;rdquo; / &amp;ldquo;app&amp;rdquo; + &amp;ldquo;lication&amp;rdquo;。共用词根 &amp;ldquo;app&amp;rdquo; 大大压缩词表大小。&lt;/p&gt;
-&lt;h3 id=&#34;bpe-训练过程&#34;&gt;BPE 训练过程
-&lt;/h3&gt;&lt;ol&gt;
-&lt;li&gt;初始化词表为所有单字符（256 个字节级别的基础符号）&lt;/li&gt;
-&lt;li&gt;统计训练语料中所有相邻符号对的频率&lt;/li&gt;
-&lt;li&gt;将最高频的符号对合并为一个新符号，加入词表&lt;/li&gt;
-&lt;li&gt;重复步骤 2-3，直到词表达目标大小（如 GPT-4 的 100K tokens）&lt;/li&gt;
-&lt;/ol&gt;
-&lt;h3 id=&#34;tokenization-的影响&#34;&gt;Tokenization 的影响
-&lt;/h3&gt;&lt;p&gt;分词方案直接决定模型的&amp;quot;世界观&amp;quot;。它带来几个关键约束：&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;尾部词问题。&lt;/strong&gt; BPE 对高频词完整保留（如 &amp;ldquo;the&amp;rdquo;），对低频词拆得很碎（如 &amp;ldquo;sesquipedalian&amp;rdquo; → [&amp;ldquo;ses&amp;rdquo;, &amp;ldquo;qui&amp;rdquo;, &amp;ldquo;ped&amp;rdquo;, &amp;ldquo;alian&amp;rdquo;]）。低频词占用更多 token，消耗更多算力。&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;多语言不平等。&lt;/strong&gt; 同一句话，&amp;ldquo;Hello world&amp;rdquo; 占 2 tokens，&amp;ldquo;你好世界&amp;rdquo; 却可能占 6-8 tokens。非英语内容效率低下且成本更高——因为训练语料以英文为主，中文短语合并机会少得多。&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;&amp;ldquo;反转诅咒&amp;rdquo;。&lt;/strong&gt; 模型知道&amp;quot;A 是 B&amp;quot;（A is B），但不会自动推出&amp;quot;B 是 A&amp;quot;（B is A）。这与训练数据的方向性有关——语料中很少同时出现两种表述。&lt;/p&gt;
-&lt;h2 id=&#34;训练流程从原始文本到智能对话&#34;&gt;训练流程：从原始文本到智能对话
-&lt;/h2&gt;&lt;p&gt;LLM 的训练分为三个阶段。&lt;/p&gt;
-&lt;h3 id=&#34;第一阶段预训练pre-training&#34;&gt;第一阶段：预训练（Pre-training）
-&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;目标&lt;/strong&gt;：让模型学会语言的统计规律和世界知识。&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;数据&lt;/strong&gt;：数万亿 token 的文本——网页、书籍、代码、论文等。Common Crawl、The Pile、RefinedWeb 等是常用的预训练数据集。&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;任务&lt;/strong&gt;：自回归语言建模——给定前面的 token，预测下一个 token。这个任务不需要标注数据，文本本身就是标签。&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;损失函数&lt;/strong&gt;：交叉熵损失。对每个位置 t，模型输出词表大小的概率分布，损失就是真实 token 的负对数概率。&lt;/p&gt;
-$$
-\mathcal{L} = -\sum_{t=1}^{T} \log P(w_t \mid w_1, \dots, w_{t-1})
-$$&lt;p&gt;预训练占整个训练成本的 99% 以上。GPT-3 训练成本约 460 万美元（2020 年价格），GPT-4 据说花了约 1 亿美元。&lt;/p&gt;
-&lt;p&gt;这个阶段产出的模型叫 &lt;strong&gt;Base Model&lt;/strong&gt;，它能做文本补全但不会聊天——你问它&amp;quot;1+1=?&amp;quot;，它会回答&amp;quot;2+2=?&amp;quot;，因为它见过太多数学题序列，只是在续写。&lt;/p&gt;
-&lt;h3 id=&#34;第二阶段监督微调supervised-fine-tuning-sft&#34;&gt;第二阶段：监督微调（Supervised Fine-Tuning, SFT）
-&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;目标&lt;/strong&gt;：让模型学会&amp;quot;对话格式&amp;quot;。&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;数据&lt;/strong&gt;：人工标注的高质量对话——几千到几万条。格式为 &lt;code&gt;{&amp;quot;prompt&amp;quot;: &amp;quot;用户问题&amp;quot;, &amp;quot;response&amp;quot;: &amp;quot;理想回答&amp;quot;}&lt;/code&gt;。&lt;/p&gt;
-&lt;p&gt;SFT 本质上还是相同的语言建模任务，只是训练数据从&amp;quot;下一步续写&amp;quot;变成了&amp;quot;给定指令，生成回答&amp;quot;。数据量虽小但质量极高，通常几千到几万条即可让 Base Model 掌握对话能力。&lt;/p&gt;
-&lt;p&gt;SFT 之后模型就变成了我们熟悉的 &lt;strong&gt;Chat 模型&lt;/strong&gt;。&lt;/p&gt;
-&lt;h3 id=&#34;第三阶段rlhf基于人类反馈的强化学习&#34;&gt;第三阶段：RLHF（基于人类反馈的强化学习）
-&lt;/h3&gt;&lt;p&gt;SFT 的局限在于：人类标注的&amp;quot;理想回答&amp;quot;只是人类偏好的一个点。模型需要理解的是——当有多种合理回答时，人类更偏好哪一种？长回答还是短回答？客观还是主观？详细还是简洁？&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;RLHF（Reinforcement Learning from Human Feedback）&lt;/strong&gt; 解决的就是这个问题，分为三步：&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;Step 1 — 训练奖励模型（Reward Model, RM）。&lt;/strong&gt; 让 SFT 模型对同一个 prompt 生成多个回答，人类标注员对这些回答进行排序（A &amp;gt; B &amp;gt; C &amp;gt; D）。用排序数据训练一个&amp;quot;打分器&amp;quot;——输入是 (prompt, response)，输出是一个标量分数（这个回答有多好）。&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;Step 2 — 用强化学习优化生成模型。&lt;/strong&gt; 使用 PPO（Proximal Policy Optimization）算法：SFT 模型作为初始策略，对 prompt 生成回答，RM 给回答打分，奖励信号回传更新模型参数。关键技巧是加入 KL 散度惩罚项——防止模型为了刷分而偏离太远，生成莫名其妙的内容。&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;Step 3 — 迭代。&lt;/strong&gt; 用更新后的模型生成新回答，收集新的人类偏好数据，重新训练 RM，再次 PPO。重复多次。&lt;/p&gt;
-&lt;p&gt;RLHF 让模型学到了人类难以用规则描述的偏好——什么是一个&amp;quot;好回答&amp;quot;。OpenAI 内部实验显示，1.3B 参数的 InstructGPT 在人类评估中胜过了 175B 的 GPT-3 Base Model——&lt;strong&gt;对齐比规模更能赢得人类认可&lt;/strong&gt;。&lt;/p&gt;
-&lt;h3 id=&#34;rlhf-的替代方案&#34;&gt;RLHF 的替代方案
-&lt;/h3&gt;&lt;p&gt;近两年业界也在探索 RLHF 的替代品：&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;DPO（Direct Preference Optimization）&lt;/strong&gt; 直接从偏好数据优化模型，不需要显式训练奖励模型，数学上等价于 RLHF 但实现简单得多。Llama 3、Qwen 2 等模型都有使用 DPO 进行对齐。&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;RLAIF（RL from AI Feedback）&lt;/strong&gt; 用更强的 AI（如 GPT-4）代替人类做偏好标注，降低人工成本。Anthropic 的 Constitutional AI 就是这一路线的代表——让 AI 根据一套&amp;quot;宪法&amp;quot;原则自我评估和改进。&lt;/p&gt;
-&lt;h2 id=&#34;scaling-law大就是好&#34;&gt;Scaling Law：大就是好
-&lt;/h2&gt;&lt;p&gt;2020年 OpenAI 发表论文提出 &lt;strong&gt;Scaling Law&lt;/strong&gt;：模型的性能（以交叉熵损失衡量）与&lt;strong&gt;参数量 N&lt;/strong&gt;、&lt;strong&gt;训练数据量 D&lt;/strong&gt; 和&lt;strong&gt;计算量 C&lt;/strong&gt; 三个因素之间遵循幂律关系。&lt;/p&gt;
-&lt;p&gt;通俗来说就是：算力每增加 10 倍，模型损失稳定下降一个可预测的量级，而且在相当大的范围内不存在平台期。&lt;/p&gt;
-&lt;h3 id=&#34;chinchilla-定律&#34;&gt;Chinchilla 定律
-&lt;/h3&gt;&lt;p&gt;2022年 DeepMind 提出的 Chinchilla 定律给出了最优配比：&lt;strong&gt;每增加一个参数，应该增加约 20 个训练 token&lt;/strong&gt;。&lt;/p&gt;
-&lt;p&gt;以 Llama 3 70B 为例，按 Chinchilla 定律需要约 1.4T 的训练 token。Meta 实际喂了约 15T——远超 Chinchilla 最优，属于&amp;quot;过度训练&amp;quot;（overtraining）策略，这是为了在推理成本（小模型更便宜）和训练成本之间做取舍。&lt;/p&gt;
-&lt;p&gt;但 Chinchilla 定律有重要的前置条件：它在给定 FLOPs 预算下寻找最优配比。如果你的约束不是 FLOPs 而是推理成本（如部署到手机），最优策略是用更多数据训练更小的模型——这也解释了 Llama 系列和各大开源模型为什么普遍&amp;quot;过度训练&amp;quot;。&lt;/p&gt;
-&lt;p&gt;Scaling Law 也不是万能的。&lt;strong&gt;数据质量&lt;/strong&gt;在 2024-2025 年成为新瓶颈——互联网上的高质量文本正在被耗尽（所谓的&amp;quot;数据墙&amp;quot;）。合成数据可能是突破瓶颈的关键：用顶级模型生成训练数据来训练新模型，但这同时带来了模型同质化（model collapse）的风险。Phi-3、Llama 3 等模型在发布时都强调了数据质量的提高（而非仅仅是数据量的增加）带来了显著收益。&lt;/p&gt;
-&lt;h2 id=&#34;涌现能力从量变到质变&#34;&gt;涌现能力：从量变到质变
-&lt;/h2&gt;&lt;p&gt;LLM 一个令人着迷的现象是 &lt;strong&gt;涌现能力（Emergent Abilities）&lt;/strong&gt;：某些能力在小模型中不存在，当参数超过某个阈值后突然出现。&lt;/p&gt;
-&lt;p&gt;典型的涌现能力——&lt;strong&gt;思维链（Chain-of-Thought, CoT）&lt;/strong&gt;：&lt;/p&gt;
-&lt;p&gt;小模型做多步数学题：&amp;ldquo;小明有 5 个苹果，给了小红 2 个，又买了 3 个，现在有几个？&amp;rdquo; → 直接猜答案，错误率高。&lt;/p&gt;
-&lt;p&gt;大模型（&amp;gt;100B）：自动分步推理——&amp;ldquo;小明开始有 5 个 → 给了小红 2 个，剩下 3 个 → 又买了 3 个 → 共 6 个&amp;rdquo;，准确率大幅提升。&lt;/p&gt;
-&lt;p&gt;无需显式训练，仅是在 prompt 中示例分步推理（Few-shot CoT），甚至只说一句 &amp;ldquo;Let&amp;rsquo;s think step by step&amp;rdquo;（Zero-shot CoT），模型就能展现推理能力。&lt;/p&gt;
-&lt;p&gt;涌现的机制至今没有定论。一种主流解释是：复杂任务由多层简单的子任务组合而成，小模型每层&amp;quot;胜任度&amp;quot;不够，到达不了&amp;quot;组合爆发&amp;quot;的临界点。随着参数增长，每层子任务超过阈值，能力就突然出现。但这也只是假说，我们实际上对这种能力跃迁的理解还非常有限。&lt;/p&gt;
-&lt;p&gt;已知的涌现能力包括：算术推理、多语言翻译、代码生成、讽刺理解、心智理论等。&lt;/p&gt;
-&lt;h2 id=&#34;推理阶段温度top-k-与-top-p&#34;&gt;推理阶段：温度、Top-K 与 Top-P
-&lt;/h2&gt;&lt;p&gt;模型输出的是一个概率分布（词表中每个 token 的概率），需要从中选择一个 token 作为输出。不同策略直接影响生成质量：&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;贪心解码（Greedy Decoding）&lt;/strong&gt; 每次选概率最高的 token。确定性高，但容易陷入重复循环。永远生成相同输出。&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;温度采样（Temperature Sampling）&lt;/strong&gt; 在 softmax 之前除以温度 T：&lt;/p&gt;
+&lt;/div&gt;&lt;p&gt;如果按词切，又会遇到新词、拼写变体、代码变量名：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;getUserProfileById
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;现代模型通常使用子词分词。它在“太碎”和“太粗”之间折中：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;unbelievable → un + believe + able
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;这样既能处理常见词，也能拼出没见过的新词。&lt;/p&gt;
+&lt;h3 id=&#34;token-影响成本和上下文&#34;&gt;Token 影响成本和上下文
+&lt;/h3&gt;&lt;p&gt;上下文窗口不是按字数算，而是按 token 算。&lt;/p&gt;
+&lt;p&gt;如果模型上下文是 128K token，意思是一次最多能看到约 128K 个 token，包括：&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;T→0：趋近贪心，趋于确定出最高概率 token&lt;/li&gt;
-&lt;li&gt;T=1：原始概率分布&lt;/li&gt;
-&lt;li&gt;T&amp;gt;1：概率分布更平滑，低概率 token 被&amp;quot;提权&amp;quot;，输出更多样但也更不可控&lt;/li&gt;
+&lt;li&gt;系统提示&lt;/li&gt;
+&lt;li&gt;用户输入&lt;/li&gt;
+&lt;li&gt;历史对话&lt;/li&gt;
+&lt;li&gt;检索文档&lt;/li&gt;
+&lt;li&gt;工具结果&lt;/li&gt;
+&lt;li&gt;模型输出&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;strong&gt;Top-K 采样&lt;/strong&gt; 只从概率最高的 K 个 token 中采样，切断长尾噪声。比如 K=50 意味着只考虑 top-50，屏蔽剩下几万个 token。&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;Top-P 采样（Nucleus Sampling）&lt;/strong&gt; 动态选择最小集合，使其累积概率 ≥ P。比 Top-K 更灵活：概率集中时选得少（精准），概率分散时选得多（多样）。&lt;/p&gt;
-&lt;p&gt;实际生产中通常是 Temperature + Top-P 组合使用。API 调用的 &lt;code&gt;temperature&lt;/code&gt; 和 &lt;code&gt;top_p&lt;/code&gt; 参数就是这么来的。&lt;/p&gt;
-&lt;h2 id=&#34;从原理到趋势&#34;&gt;从原理到趋势
-&lt;/h2&gt;&lt;p&gt;理解了上述原理，再看当下的技术趋势就会觉得顺理成章：&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;长上下文&lt;/strong&gt; 挑战 Attention 的 O(n²) 复杂度。RoPE 外推 + FlashAttention 等工程优化，将上下文从 4K 推到 1M+ token 级别。FlashAttention 通过分块计算和 IO 优化，将原始 Attention 的内存瓶颈从 HBM 移到 SRAM，实现数倍加速。&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;MoE（混合专家）&lt;/strong&gt; 将 FFN 层拆成 N 个&amp;quot;专家&amp;quot;，每个 token 只激活其中的 K 个（K&amp;laquo;N）。DeepSeek-V3（671B 总参，37B 激活）、Mixtral 8x7B 都是 MoE 架构。用路由网络（一个轻量分类器）为每个 token 选择最合适的专家，让容量接近稠密大模型，推理成本接近稠密小模型。&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;多模态&lt;/strong&gt; 将图像、音频也 token 化，用相同的 Transformer 统一处理。GPT-4V/GPT-4o 是闭源代表，LLaVA 是开源路线的典型。&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;推理时缩放（Inference-Time Scaling）&lt;/strong&gt; 改变了过去仅在训练阶段堆算力的范式——让模型在推理时&amp;quot;思考更久&amp;quot;也能提升性能。典型例子是 OpenAI o1/o3 的推理模型，以及 DeepSeek-R1 所展示的纯强化学习激发推理能力的方法。&lt;/p&gt;
-&lt;h2 id=&#34;总结&#34;&gt;总结
-&lt;/h2&gt;&lt;p&gt;大语言模型的原理体系可以总结为三个层次：&lt;/p&gt;
-&lt;table&gt;
-  &lt;thead&gt;
-      &lt;tr&gt;
-          &lt;th&gt;层次&lt;/th&gt;
-          &lt;th&gt;核心组件&lt;/th&gt;
-          &lt;th&gt;解决什么问题&lt;/th&gt;
-      &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-      &lt;tr&gt;
-          &lt;td&gt;架构层&lt;/td&gt;
-          &lt;td&gt;Transformer, Self-Attention, FFN&lt;/td&gt;
-          &lt;td&gt;如何高效地建模序列&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;训练层&lt;/td&gt;
-          &lt;td&gt;Pre-training, SFT, RLHF/DPO&lt;/td&gt;
-          &lt;td&gt;如何获得知识和遵循指令&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;规模层&lt;/td&gt;
-          &lt;td&gt;Scaling Law, Emergence&lt;/td&gt;
-          &lt;td&gt;做大能得到什么&lt;/td&gt;
-      &lt;/tr&gt;
-  &lt;/tbody&gt;
-&lt;/table&gt;
-&lt;p&gt;理解这些不意味着我们能造出 GPT-5，但至少在使用和评估它们时，我们不再是面对一个&amp;quot;魔法黑箱&amp;quot;，而是一个可以分解、可以分析的工程系统。&lt;/p&gt;
-&lt;p&gt;大模型的下一幕正在展开。Agent 架构、代码生成与执行、多模态融合、端侧部署——每个方向都在重新定义我们与机器的关系。越是深入原理，就越能在浪潮中找到自己的立足点。&lt;/p&gt;
+&lt;p&gt;token 越多，成本越高，推理越慢，上下文管理也越重要。&lt;/p&gt;
+&lt;h2 id=&#34;embedding把-token-变成向量&#34;&gt;Embedding：把 token 变成向量
+&lt;/h2&gt;&lt;p&gt;模型不能直接对 token 字符串做计算。它会先把每个 token 映射成一个向量。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&amp;#34;苹果&amp;#34; → [0.12, -0.38, 0.57, ...]
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&amp;#34;香蕉&amp;#34; → [0.10, -0.35, 0.61, ...]
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&amp;#34;数据库&amp;#34; → [-0.44, 0.72, 0.08, ...]
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;这个向量叫 Embedding。&lt;/p&gt;
+&lt;p&gt;可以把它理解成 token 在语义空间里的坐标。语义接近的 token，向量距离通常也更接近。&lt;/p&gt;
+&lt;p&gt;但在大语言模型里，Embedding 只是第一步。真正强大的地方在于：这个向量会经过很多层 Transformer，不断吸收上下文信息。&lt;/p&gt;
+&lt;p&gt;例如“苹果”这个 token，在不同句子里的含义不同：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;我买了一个苹果。
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;苹果发布了新款芯片。
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;初始 Embedding 可能相同，但经过上下文处理后，模型会逐渐区分它是水果还是公司。&lt;/p&gt;
+&lt;h2 id=&#34;transformerllm-的主干架构&#34;&gt;Transformer：LLM 的主干架构
+&lt;/h2&gt;&lt;p&gt;现代大语言模型的核心架构基本都来自 Transformer。&lt;/p&gt;
+&lt;p&gt;一个简化版流程：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;9
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;文本
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  ↓
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Tokenization
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  ↓
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Embedding
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  ↓
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Transformer Block × N
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  ↓
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;输出下一个 token 的概率
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;Transformer Block 可以理解成一层“信息加工器”。每一层主要做两件事：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;1. Attention：让每个 token 从其他 token 那里取信息
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;2. Feed Forward：对每个位置的信息做进一步加工
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;几十层甚至上百层叠起来后，模型就能从简单词义逐步抽象到语法、语义、推理和任务意图。&lt;/p&gt;
+&lt;h2 id=&#34;attention让-token-互相看见&#34;&gt;Attention：让 token 互相看见
+&lt;/h2&gt;&lt;p&gt;Attention 是 Transformer 最核心的机制。&lt;/p&gt;
+&lt;p&gt;一句话理解：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Attention 让当前位置的 token 判断：我应该重点关注前文里的哪些 token。&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;例如：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;小明把书放进书包，因为它太重了。
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;这里“它”指的更可能是“书”，不是“书包”。模型要理解这件事，就需要让“它”这个位置去关注前面的相关词。&lt;/p&gt;
+&lt;h3 id=&#34;querykeyvalue&#34;&gt;Query、Key、Value
+&lt;/h3&gt;&lt;p&gt;Attention 里常见三个词：Query、Key、Value。&lt;/p&gt;
+&lt;p&gt;可以用查资料来类比：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Query：我想找什么？
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Key：每份资料的标签是什么？
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Value：资料真正的内容是什么？
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;每个 token 都会生成自己的 Query、Key、Value。&lt;/p&gt;
+&lt;p&gt;然后当前位置的 Query 会和所有位置的 Key 做匹配，算出注意力分数。分数越高，说明越值得关注。最后再按这些分数加权汇总 Value。&lt;/p&gt;
+&lt;p&gt;简化成三步：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;1. 当前 token 发出 Query：我需要什么信息？
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;2. 其他 token 提供 Key：我能提供什么线索？
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;3. 根据匹配程度汇总 Value：把有用信息拿过来。
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h3 id=&#34;self-attention&#34;&gt;Self-Attention
+&lt;/h3&gt;&lt;p&gt;Self-Attention 的意思是：同一句话内部的 token 互相关注。&lt;/p&gt;
+&lt;p&gt;例如：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;张三告诉李四，他明天会来。
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;模型需要判断“他”更可能指谁。这就需要结合上下文中的多个 token。&lt;/p&gt;
+&lt;p&gt;Self-Attention 的强大之处在于：任意两个位置之间都可以直接建立联系。不像 RNN 那样必须从左到右一步步传递信息。&lt;/p&gt;
+&lt;h3 id=&#34;causal-mask&#34;&gt;Causal Mask
+&lt;/h3&gt;&lt;p&gt;GPT 这类生成式模型在训练和生成时不能偷看未来。&lt;/p&gt;
+&lt;p&gt;预测第 5 个 token 时，只能看前 4 个 token，不能看第 6 个 token。&lt;/p&gt;
+&lt;p&gt;这靠 Causal Mask 实现。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;位置 1 只能看 1
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;位置 2 只能看 1,2
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;位置 3 只能看 1,2,3
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;这样模型学到的才是“根据前文预测后文”，而不是提前看答案。&lt;/p&gt;
+&lt;h2 id=&#34;multi-head-attention从多个角度看上下文&#34;&gt;Multi-Head Attention：从多个角度看上下文
+&lt;/h2&gt;&lt;p&gt;一个 Attention 头只能从一种角度关注上下文。&lt;/p&gt;
+&lt;p&gt;但一句话里有很多关系：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;主谓关系&lt;/li&gt;
+&lt;li&gt;指代关系&lt;/li&gt;
+&lt;li&gt;时间关系&lt;/li&gt;
+&lt;li&gt;因果关系&lt;/li&gt;
+&lt;li&gt;代码里的变量引用&lt;/li&gt;
+&lt;li&gt;Markdown 里的结构层级&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Multi-Head Attention 就是让模型同时用多个 Attention 头观察文本。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Head 1：关注语法
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Head 2：关注指代
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Head 3：关注代码变量
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Head 4：关注段落结构
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;这些头的结果会被合并，让模型得到更丰富的上下文表示。&lt;/p&gt;
+&lt;p&gt;不需要把每个头想得太神秘。它们不一定真的严格分工成“语法头”“指代头”，但多头机制确实给了模型从不同子空间捕捉关系的能力。&lt;/p&gt;
+&lt;h2 id=&#34;feed-forward对信息做加工&#34;&gt;Feed Forward：对信息做加工
+&lt;/h2&gt;&lt;p&gt;Attention 负责“从哪里拿信息”，Feed Forward 负责“怎么加工信息”。&lt;/p&gt;
+&lt;p&gt;在每个 Transformer Block 中，Attention 汇总上下文后，会经过一个前馈网络。&lt;/p&gt;
+&lt;p&gt;可以粗略理解为：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Attention：把相关信息拿到当前 token 身边
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Feed Forward：根据这些信息更新当前 token 的表示
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;很多研究认为，模型里的事实知识和模式记忆相当一部分保存在前馈网络参数中。&lt;/p&gt;
+&lt;p&gt;例如模型知道：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;巴黎是法国的首都
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Redis 的 zset 常用跳表
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Go 的 goroutine 由调度器管理
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;这些知识并不是以数据库记录的形式存储，而是分散在大量参数里。&lt;/p&gt;
+&lt;h2 id=&#34;位置编码让模型知道顺序&#34;&gt;位置编码：让模型知道顺序
+&lt;/h2&gt;&lt;p&gt;Attention 本身不天然知道顺序。&lt;/p&gt;
+&lt;p&gt;如果只看一堆 token 向量，模型并不知道谁在前谁在后。&lt;/p&gt;
+&lt;p&gt;所以模型需要位置编码。&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;我 爱 你
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;你 爱 我
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;这两句话 token 一样，但顺序不同，意思不同。&lt;/p&gt;
+&lt;p&gt;位置编码就是给每个 token 加上“我在第几个位置”的信息。&lt;/p&gt;
+&lt;p&gt;现代模型常用 RoPE 这类相对位置编码。你不必记住复杂数学，只要知道它解决的是：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;模型如何理解 token 之间的距离和顺序。
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h2 id=&#34;残差连接与归一化让深层网络稳定训练&#34;&gt;残差连接与归一化：让深层网络稳定训练
+&lt;/h2&gt;&lt;p&gt;Transformer 可以堆很多层，但层数越深，训练越难。&lt;/p&gt;
+&lt;p&gt;残差连接和归一化是两个稳定训练的关键技巧。&lt;/p&gt;
+&lt;h3 id=&#34;残差连接&#34;&gt;残差连接
+&lt;/h3&gt;&lt;p&gt;残差连接就是让每层不要完全重写输入，而是在输入基础上做增量修改：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;输出 = 输入 + 本层加工结果
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;这样信息可以更顺畅地穿过很多层，训练也更稳定。&lt;/p&gt;
+&lt;h3 id=&#34;layernorm&#34;&gt;LayerNorm
+&lt;/h3&gt;&lt;p&gt;LayerNorm 用来让每层的数值分布更稳定。&lt;/p&gt;
+&lt;p&gt;可以类比成：每一层处理完后，把数据尺度整理一下，避免数值忽大忽小导致训练崩掉。&lt;/p&gt;
+&lt;p&gt;这些机制不直接决定模型“懂不懂”，但决定了模型能否被训练得足够深、足够大。&lt;/p&gt;
+&lt;h2 id=&#34;训练从海量文本中学习规律&#34;&gt;训练：从海量文本中学习规律
+&lt;/h2&gt;&lt;p&gt;预训练阶段的任务很简单：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;给定前文，预测下一个 token。
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;训练数据来自大量文本：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;网页&lt;/li&gt;
+&lt;li&gt;书籍&lt;/li&gt;
+&lt;li&gt;代码&lt;/li&gt;
+&lt;li&gt;论文&lt;/li&gt;
+&lt;li&gt;问答&lt;/li&gt;
+&lt;li&gt;文档&lt;/li&gt;
+&lt;li&gt;论坛&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;模型一开始是随机参数，预测很差。每次预测错了，就根据误差微调参数。&lt;/p&gt;
+&lt;p&gt;这个过程重复数万亿 token 后，模型逐渐学会语言和世界知识的统计规律。&lt;/p&gt;
+&lt;h3 id=&#34;预训练学到什么&#34;&gt;预训练学到什么
+&lt;/h3&gt;&lt;p&gt;预训练让模型学会：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;词和词如何搭配&lt;/li&gt;
+&lt;li&gt;句子如何组织&lt;/li&gt;
+&lt;li&gt;代码如何书写&lt;/li&gt;
+&lt;li&gt;常见事实&lt;/li&gt;
+&lt;li&gt;推理模式&lt;/li&gt;
+&lt;li&gt;不同领域的表达方式&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;但预训练模型本质上仍然是“续写器”。&lt;/p&gt;
+&lt;p&gt;你问：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;请解释什么是 Redis。
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;Base Model 可能会继续补成一段网页、问答、代码注释，未必像助手一样回答你。&lt;/p&gt;
+&lt;p&gt;这就是为什么还需要指令微调和对齐。&lt;/p&gt;
+&lt;h2 id=&#34;指令微调从续写器到助手&#34;&gt;指令微调：从续写器到助手
+&lt;/h2&gt;&lt;p&gt;SFT（Supervised Fine-Tuning，监督微调）会用人工整理的指令数据继续训练模型。&lt;/p&gt;
+&lt;p&gt;数据长这样：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-json&#34; data-lang=&#34;json&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &lt;span class=&#34;nt&#34;&gt;&amp;#34;instruction&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;解释什么是 Redis&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  &lt;span class=&#34;nt&#34;&gt;&amp;#34;response&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;Redis 是一种基于内存的键值数据库...&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;模型通过这些样本学会：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;用户提问应该回答&lt;/li&gt;
+&lt;li&gt;要遵循指令&lt;/li&gt;
+&lt;li&gt;要保持对话格式&lt;/li&gt;
+&lt;li&gt;要按要求输出结构&lt;/li&gt;
+&lt;li&gt;不要无意义续写&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;经过 SFT 后，模型才更像我们熟悉的聊天助手。&lt;/p&gt;
+&lt;h2 id=&#34;对齐让模型更符合人类偏好&#34;&gt;对齐：让模型更符合人类偏好
+&lt;/h2&gt;&lt;p&gt;SFT 解决“会不会听指令”，但不完全解决“回答得好不好”。&lt;/p&gt;
+&lt;p&gt;同一个问题可以有很多回答：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;太短：Redis 是数据库。
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;太长：从网络协议讲到源码实现。
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;刚好：解释核心概念、使用场景和特点。
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;对齐训练就是让模型更符合人类偏好。&lt;/p&gt;
+&lt;p&gt;常见方法包括：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;RLHF：基于人类反馈的强化学习&lt;/li&gt;
+&lt;li&gt;DPO：直接偏好优化&lt;/li&gt;
+&lt;li&gt;RLAIF：用 AI 反馈辅助偏好数据&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;它们的共同目标是让模型更倾向于输出：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;有帮助&lt;/li&gt;
+&lt;li&gt;准确&lt;/li&gt;
+&lt;li&gt;安全&lt;/li&gt;
+&lt;li&gt;不胡乱承诺&lt;/li&gt;
+&lt;li&gt;格式清晰&lt;/li&gt;
+&lt;li&gt;符合用户意图&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;可以把训练流程简化成：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;预训练：学语言和知识
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;SFT：学会按指令回答
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;对齐：学会什么回答更好
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h2 id=&#34;推理模型如何生成回答&#34;&gt;推理：模型如何生成回答
+&lt;/h2&gt;&lt;p&gt;训练完成后，模型参数固定。用户输入问题时，进入推理阶段。&lt;/p&gt;
+&lt;p&gt;推理流程：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;用户输入
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  ↓
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;转成 token
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  ↓
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;模型计算下一个 token 概率
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  ↓
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;采样或选择一个 token
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  ↓
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;加入上下文
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;  ↓
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;继续预测
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;这个循环一直进行，直到模型输出结束符或达到最大长度。&lt;/p&gt;
+&lt;h3 id=&#34;temperature&#34;&gt;Temperature
+&lt;/h3&gt;&lt;p&gt;Temperature 控制随机性。&lt;/p&gt;
+&lt;p&gt;低 temperature：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;更稳定、更保守、更可复现
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;高 temperature：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;更多样、更有创意、也更容易跑偏
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;写代码、做问答通常用较低温度；写故事、头脑风暴可以适当提高。&lt;/p&gt;
+&lt;h3 id=&#34;top-k&#34;&gt;Top-K
+&lt;/h3&gt;&lt;p&gt;Top-K 表示只从概率最高的 K 个 token 中选择。&lt;/p&gt;
+&lt;p&gt;如果 K=5，模型只会在前 5 个候选里采样，低概率 token 会被排除。&lt;/p&gt;
+&lt;h3 id=&#34;top-p&#34;&gt;Top-P
+&lt;/h3&gt;&lt;p&gt;Top-P 也叫 nucleus sampling。&lt;/p&gt;
+&lt;p&gt;它不是固定取前 K 个，而是取累计概率达到 P 的候选集合。&lt;/p&gt;
+&lt;p&gt;例如 P=0.9，模型会从累计概率前 90% 的候选里采样。&lt;/p&gt;
+&lt;p&gt;Top-P 比 Top-K 更灵活，因为不同位置的候选分布可能差异很大。&lt;/p&gt;
+&lt;h2 id=&#34;上下文窗口模型的工作记忆&#34;&gt;上下文窗口：模型的工作记忆
+&lt;/h2&gt;&lt;p&gt;模型不会真正“记住”当前对话之外的东西。它每次生成时，只能看到上下文窗口里的内容。&lt;/p&gt;
+&lt;p&gt;上下文包括：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;系统提示&lt;/li&gt;
+&lt;li&gt;用户消息&lt;/li&gt;
+&lt;li&gt;历史对话&lt;/li&gt;
+&lt;li&gt;工具结果&lt;/li&gt;
+&lt;li&gt;RAG 检索文档&lt;/li&gt;
+&lt;li&gt;代码片段&lt;/li&gt;
+&lt;li&gt;记忆摘要&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;如果信息不在上下文里，模型就无法直接使用。&lt;/p&gt;
+&lt;p&gt;这也是为什么 RAG、记忆系统、上下文压缩很重要。它们本质上都在解决一个问题：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;该把什么信息放进模型当前能看到的窗口？
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;上下文窗口变大不代表问题完全解决。信息越多，噪声也越多。真正关键的是上下文质量。&lt;/p&gt;
+&lt;h2 id=&#34;参数量数据和算力&#34;&gt;参数量、数据和算力
+&lt;/h2&gt;&lt;p&gt;大模型能力提升通常来自三件事：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;更多参数
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;更多高质量数据
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;更多训练算力
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;参数可以理解成模型内部可调的“旋钮”。参数越多，模型能表达的模式越复杂。&lt;/p&gt;
+&lt;p&gt;但参数不是越大越无脑好。&lt;/p&gt;
+&lt;p&gt;模型效果还取决于：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;数据质量&lt;/li&gt;
+&lt;li&gt;训练 token 数&lt;/li&gt;
+&lt;li&gt;模型架构&lt;/li&gt;
+&lt;li&gt;对齐质量&lt;/li&gt;
+&lt;li&gt;推理成本&lt;/li&gt;
+&lt;li&gt;部署约束&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;一个训练得好的小模型，在特定任务上可能比一个泛用大模型更划算。&lt;/p&gt;
+&lt;h2 id=&#34;涌现能力规模带来的质变&#34;&gt;涌现能力：规模带来的质变
+&lt;/h2&gt;&lt;p&gt;当模型规模、数据量和训练计算达到一定程度后，会出现一些小模型不明显的能力：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;多步推理&lt;/li&gt;
+&lt;li&gt;代码生成&lt;/li&gt;
+&lt;li&gt;工具调用&lt;/li&gt;
+&lt;li&gt;少样本学习&lt;/li&gt;
+&lt;li&gt;指令泛化&lt;/li&gt;
+&lt;li&gt;跨语言迁移&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;这类现象常被称为涌现能力。&lt;/p&gt;
+&lt;p&gt;但“涌现”不等于魔法。它更像是大量统计规律、表示能力和训练目标叠加后，在某些任务上表现出突然变强的现象。&lt;/p&gt;
+&lt;p&gt;理解这一点很重要：大模型很强，但它不是全知系统。&lt;/p&gt;
+&lt;h2 id=&#34;为什么会幻觉&#34;&gt;为什么会幻觉
+&lt;/h2&gt;&lt;p&gt;幻觉是大模型最典型的问题之一。&lt;/p&gt;
+&lt;p&gt;原因很简单：模型的目标是生成“概率上合理的下一个 token”，不是从数据库里查真相。&lt;/p&gt;
+&lt;p&gt;当它不知道答案时，也可能生成一个看起来像答案的回答。&lt;/p&gt;
+&lt;p&gt;幻觉常见于：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;问题超出训练知识&lt;/li&gt;
+&lt;li&gt;需要最新信息&lt;/li&gt;
+&lt;li&gt;上下文缺少证据&lt;/li&gt;
+&lt;li&gt;用户要求编造式任务&lt;/li&gt;
+&lt;li&gt;检索结果不相关&lt;/li&gt;
+&lt;li&gt;模型被错误前提诱导&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;降低幻觉的方法：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;RAG 引入外部证据&lt;/li&gt;
+&lt;li&gt;工具调用查询真实系统&lt;/li&gt;
+&lt;li&gt;要求引用来源&lt;/li&gt;
+&lt;li&gt;不确定时允许回答不知道&lt;/li&gt;
+&lt;li&gt;对高风险场景做人工审核&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;幻觉不能完全消除，只能通过工程手段降低。&lt;/p&gt;
+&lt;h2 id=&#34;为什么数学和逻辑会出错&#34;&gt;为什么数学和逻辑会出错
+&lt;/h2&gt;&lt;p&gt;LLM 不是传统符号推理引擎。&lt;/p&gt;
+&lt;p&gt;它可以学到很多推理模式，但本质上仍然在生成 token。&lt;/p&gt;
+&lt;p&gt;所以它可能：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;算术中间步骤出错&lt;/li&gt;
+&lt;li&gt;忘记约束条件&lt;/li&gt;
+&lt;li&gt;被题目措辞误导&lt;/li&gt;
+&lt;li&gt;在长推理链中偏离目标&lt;/li&gt;
+&lt;li&gt;给出看似合理但错误的解释&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;解决方法通常不是“让模型更努力想”，而是结合工具：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;计算器&lt;/li&gt;
+&lt;li&gt;代码执行器&lt;/li&gt;
+&lt;li&gt;定理证明器&lt;/li&gt;
+&lt;li&gt;SQL 查询&lt;/li&gt;
+&lt;li&gt;测试用例&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;模型负责理解问题和组织流程，工具负责精确计算和验证。&lt;/p&gt;
+&lt;h2 id=&#34;llm-与-agent-的关系&#34;&gt;LLM 与 Agent 的关系
+&lt;/h2&gt;&lt;p&gt;LLM 是大脑，但 Agent 是系统。&lt;/p&gt;
+&lt;p&gt;一个 Agent 通常包含：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;LLM 推理&lt;/li&gt;
+&lt;li&gt;工具调用&lt;/li&gt;
+&lt;li&gt;记忆系统&lt;/li&gt;
+&lt;li&gt;任务规划&lt;/li&gt;
+&lt;li&gt;权限控制&lt;/li&gt;
+&lt;li&gt;错误恢复&lt;/li&gt;
+&lt;li&gt;评估与日志&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;LLM 本身只负责生成下一步内容或动作意图。Agent 工程负责把它放进可执行、可观察、可控制的系统里。&lt;/p&gt;
+&lt;p&gt;这就是为什么同一个模型，在不同产品里的表现差异很大。真正决定可用性的，不只有模型，还有上下文、工具、流程和评估。&lt;/p&gt;
+&lt;h2 id=&#34;小结&#34;&gt;小结
+&lt;/h2&gt;&lt;p&gt;大语言模型的核心可以压缩成一句话：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;在大量文本上训练一个 Transformer，让它根据上下文预测下一个 token。
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;但这句话背后包含一整套机制：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Tokenization：把文字切成模型能处理的单位
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Embedding：把 token 变成向量
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Attention：让 token 从上下文中取信息
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Feed Forward：加工和存储模式
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Position Encoding：让模型知道顺序
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Pre-training：学习语言和世界规律
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;SFT：学会听指令
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Alignment：学会更符合人类偏好
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Decoding：一个 token 一个 token 生成答案
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Context：决定模型当前能看到什么
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;理解 LLM，不需要一开始就陷进公式。先抓住主线：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;它如何读文本 → 如何理解上下文 → 如何训练 → 如何生成 → 为什么会出错
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;这条线理清了，再去看 Transformer 细节、RAG、Agent、Tool Calling、模型部署，就会顺很多。&lt;/p&gt;
 </description>
         </item>
         <item>
