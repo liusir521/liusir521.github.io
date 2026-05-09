@@ -7,10 +7,10 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>zh-cn</language>
         <copyright>Example Person</copyright>
-        <lastBuildDate>Thu, 07 May 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://liusir521.github.io/tags/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Sat, 09 May 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://liusir521.github.io/tags/index.xml" rel="self" type="application/rss+xml" /><item>
         <title>Agent</title>
         <link>https://liusir521.github.io/tags/agent/</link>
-        <pubDate>Thu, 07 May 2026 00:00:00 +0000</pubDate>
+        <pubDate>Sat, 09 May 2026 00:00:00 +0000</pubDate>
         
         <guid>https://liusir521.github.io/tags/agent/</guid>
         <description></description>
@@ -18,7 +18,7 @@
         <item>
         <title>AI</title>
         <link>https://liusir521.github.io/tags/ai/</link>
-        <pubDate>Thu, 07 May 2026 00:00:00 +0000</pubDate>
+        <pubDate>Sat, 09 May 2026 00:00:00 +0000</pubDate>
         
         <guid>https://liusir521.github.io/tags/ai/</guid>
         <description></description>
@@ -26,9 +26,25 @@
         <item>
         <title>LLM</title>
         <link>https://liusir521.github.io/tags/llm/</link>
-        <pubDate>Thu, 07 May 2026 00:00:00 +0000</pubDate>
+        <pubDate>Sat, 09 May 2026 00:00:00 +0000</pubDate>
         
         <guid>https://liusir521.github.io/tags/llm/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>可观测性</title>
+        <link>https://liusir521.github.io/tags/%E5%8F%AF%E8%A7%82%E6%B5%8B%E6%80%A7/</link>
+        <pubDate>Sat, 09 May 2026 00:00:00 +0000</pubDate>
+        
+        <guid>https://liusir521.github.io/tags/%E5%8F%AF%E8%A7%82%E6%B5%8B%E6%80%A7/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>评估体系</title>
+        <link>https://liusir521.github.io/tags/%E8%AF%84%E4%BC%B0%E4%BD%93%E7%B3%BB/</link>
+        <pubDate>Sat, 09 May 2026 00:00:00 +0000</pubDate>
+        
+        <guid>https://liusir521.github.io/tags/%E8%AF%84%E4%BC%B0%E4%BD%93%E7%B3%BB/</guid>
         <description></description>
         </item>
         <item>
