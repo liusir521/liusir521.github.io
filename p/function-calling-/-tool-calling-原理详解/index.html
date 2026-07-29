@@ -815,38 +815,38 @@
 </ul>
 <h3 id="工具选择的关键影响因素">工具选择的关键影响因素
 </h3><div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>因素</th>
-          <th>影响</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>工具名称</td>
-          <td>决定第一印象</td>
-      </tr>
-      <tr>
-          <td>description</td>
-          <td>决定适用边界</td>
-      </tr>
-      <tr>
-          <td>schema 严格度</td>
-          <td>决定参数稳定性</td>
-      </tr>
-      <tr>
-          <td>示例</td>
-          <td>帮助模型学习调用模式</td>
-      </tr>
-      <tr>
-          <td>工具数量</td>
-          <td>越多越难选</td>
-      </tr>
-      <tr>
-          <td>上下文位置</td>
-          <td>越接近当前任务越容易被关注</td>
-      </tr>
-  </tbody>
+	<thead>
+			<tr>
+					<th>因素</th>
+					<th>影响</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>工具名称</td>
+					<td>决定第一印象</td>
+			</tr>
+			<tr>
+					<td>description</td>
+					<td>决定适用边界</td>
+			</tr>
+			<tr>
+					<td>schema 严格度</td>
+					<td>决定参数稳定性</td>
+			</tr>
+			<tr>
+					<td>示例</td>
+					<td>帮助模型学习调用模式</td>
+			</tr>
+			<tr>
+					<td>工具数量</td>
+					<td>越多越难选</td>
+			</tr>
+			<tr>
+					<td>上下文位置</td>
+					<td>越接近当前任务越容易被关注</td>
+			</tr>
+	</tbody>
 </table></div>
 <p>工具设计本质上是一种面向模型的 API 设计。</p>
 <h2 id="function-calling-与-tool-calling-的关系">Function Calling 与 Tool Calling 的关系
@@ -874,40 +874,40 @@
 <h2 id="tool-calling-与-mcp-的区别">Tool Calling 与 MCP 的区别
 </h2><p>Tool Calling 和 MCP 容易混淆。</p>
 <div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>维度</th>
-          <th>Tool Calling</th>
-          <th>MCP</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>关注点</td>
-          <td>模型如何请求调用工具</td>
-          <td>工具如何标准化接入 Host</td>
-      </tr>
-      <tr>
-          <td>所属层</td>
-          <td>模型 API / Agent Runtime</td>
-          <td>应用协议</td>
-      </tr>
-      <tr>
-          <td>工具来源</td>
-          <td>应用代码传入</td>
-          <td>MCP Server 动态提供</td>
-      </tr>
-      <tr>
-          <td>协议</td>
-          <td>通常由模型 API 定义</td>
-          <td>JSON-RPC + 传输层</td>
-      </tr>
-      <tr>
-          <td>目标</td>
-          <td>让模型表达动作意图</td>
-          <td>让外部能力可被发现和调用</td>
-      </tr>
-  </tbody>
+	<thead>
+			<tr>
+					<th>维度</th>
+					<th>Tool Calling</th>
+					<th>MCP</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>关注点</td>
+					<td>模型如何请求调用工具</td>
+					<td>工具如何标准化接入 Host</td>
+			</tr>
+			<tr>
+					<td>所属层</td>
+					<td>模型 API / Agent Runtime</td>
+					<td>应用协议</td>
+			</tr>
+			<tr>
+					<td>工具来源</td>
+					<td>应用代码传入</td>
+					<td>MCP Server 动态提供</td>
+			</tr>
+			<tr>
+					<td>协议</td>
+					<td>通常由模型 API 定义</td>
+					<td>JSON-RPC + 传输层</td>
+			</tr>
+			<tr>
+					<td>目标</td>
+					<td>让模型表达动作意图</td>
+					<td>让外部能力可被发现和调用</td>
+			</tr>
+	</tbody>
 </table></div>
 <p>二者经常组合使用：</p>
 <div class="highlight"><div class="chroma">
@@ -983,38 +983,38 @@
 </h2><p>工具调用一定会失败。</p>
 <p>常见失败类型：</p>
 <div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>类型</th>
-          <th>示例</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>参数错误</td>
-          <td>缺少 order_id</td>
-      </tr>
-      <tr>
-          <td>权限错误</td>
-          <td>token 没有写权限</td>
-      </tr>
-      <tr>
-          <td>外部失败</td>
-          <td>API 超时、数据库不可用</td>
-      </tr>
-      <tr>
-          <td>结果为空</td>
-          <td>查不到订单</td>
-      </tr>
-      <tr>
-          <td>业务冲突</td>
-          <td>订单已取消，不能退款</td>
-      </tr>
-      <tr>
-          <td>安全拦截</td>
-          <td>试图读取敏感文件</td>
-      </tr>
-  </tbody>
+	<thead>
+			<tr>
+					<th>类型</th>
+					<th>示例</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>参数错误</td>
+					<td>缺少 order_id</td>
+			</tr>
+			<tr>
+					<td>权限错误</td>
+					<td>token 没有写权限</td>
+			</tr>
+			<tr>
+					<td>外部失败</td>
+					<td>API 超时、数据库不可用</td>
+			</tr>
+			<tr>
+					<td>结果为空</td>
+					<td>查不到订单</td>
+			</tr>
+			<tr>
+					<td>业务冲突</td>
+					<td>订单已取消，不能退款</td>
+			</tr>
+			<tr>
+					<td>安全拦截</td>
+					<td>试图读取敏感文件</td>
+			</tr>
+	</tbody>
 </table></div>
 <p>好的工具返回应该让模型知道怎么恢复：</p>
 <div class="highlight"><div class="chroma">
@@ -1047,38 +1047,38 @@
 </div><p>模型无法基于这种信息做有效下一步。</p>
 <h3 id="恢复策略">恢复策略
 </h3><div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>场景</th>
-          <th>策略</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>参数缺失</td>
-          <td>让模型补参数或追问用户</td>
-      </tr>
-      <tr>
-          <td>临时超时</td>
-          <td>自动重试，限制次数</td>
-      </tr>
-      <tr>
-          <td>权限不足</td>
-          <td>告知用户需要授权</td>
-      </tr>
-      <tr>
-          <td>数据不存在</td>
-          <td>明确说明未找到</td>
-      </tr>
-      <tr>
-          <td>高风险操作</td>
-          <td>请求用户确认</td>
-      </tr>
-      <tr>
-          <td>工具不可用</td>
-          <td>降级为解释性回答</td>
-      </tr>
-  </tbody>
+	<thead>
+			<tr>
+					<th>场景</th>
+					<th>策略</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>参数缺失</td>
+					<td>让模型补参数或追问用户</td>
+			</tr>
+			<tr>
+					<td>临时超时</td>
+					<td>自动重试，限制次数</td>
+			</tr>
+			<tr>
+					<td>权限不足</td>
+					<td>告知用户需要授权</td>
+			</tr>
+			<tr>
+					<td>数据不存在</td>
+					<td>明确说明未找到</td>
+			</tr>
+			<tr>
+					<td>高风险操作</td>
+					<td>请求用户确认</td>
+			</tr>
+			<tr>
+					<td>工具不可用</td>
+					<td>降级为解释性回答</td>
+			</tr>
+	</tbody>
 </table></div>
 <p>Agent 的可靠性很大程度取决于工具错误设计。</p>
 <h2 id="安全边界">安全边界
@@ -1244,92 +1244,92 @@
 </h2><p>Tool Calling 的评估不能只看最终回答。</p>
 <h3 id="调用指标">调用指标
 </h3><div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>指标</th>
-          <th>含义</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>Tool Selection Accuracy</td>
-          <td>工具选择准确率</td>
-      </tr>
-      <tr>
-          <td>Argument Accuracy</td>
-          <td>参数准确率</td>
-      </tr>
-      <tr>
-          <td>Call Necessity</td>
-          <td>是否该调用工具</td>
-      </tr>
-      <tr>
-          <td>Over-call Rate</td>
-          <td>过度调用率</td>
-      </tr>
-      <tr>
-          <td>Under-call Rate</td>
-          <td>漏调用率</td>
-      </tr>
-  </tbody>
+	<thead>
+			<tr>
+					<th>指标</th>
+					<th>含义</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>Tool Selection Accuracy</td>
+					<td>工具选择准确率</td>
+			</tr>
+			<tr>
+					<td>Argument Accuracy</td>
+					<td>参数准确率</td>
+			</tr>
+			<tr>
+					<td>Call Necessity</td>
+					<td>是否该调用工具</td>
+			</tr>
+			<tr>
+					<td>Over-call Rate</td>
+					<td>过度调用率</td>
+			</tr>
+			<tr>
+					<td>Under-call Rate</td>
+					<td>漏调用率</td>
+			</tr>
+	</tbody>
 </table></div>
 <h3 id="执行指标">执行指标
 </h3><div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>指标</th>
-          <th>含义</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>Tool Success Rate</td>
-          <td>工具执行成功率</td>
-      </tr>
-      <tr>
-          <td>Retry Rate</td>
-          <td>重试比例</td>
-      </tr>
-      <tr>
-          <td>Recovery Success Rate</td>
-          <td>失败恢复成功率</td>
-      </tr>
-      <tr>
-          <td>Permission Denial Rate</td>
-          <td>权限拒绝率</td>
-      </tr>
-      <tr>
-          <td>Latency</td>
-          <td>工具调用耗时</td>
-      </tr>
-  </tbody>
+	<thead>
+			<tr>
+					<th>指标</th>
+					<th>含义</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>Tool Success Rate</td>
+					<td>工具执行成功率</td>
+			</tr>
+			<tr>
+					<td>Retry Rate</td>
+					<td>重试比例</td>
+			</tr>
+			<tr>
+					<td>Recovery Success Rate</td>
+					<td>失败恢复成功率</td>
+			</tr>
+			<tr>
+					<td>Permission Denial Rate</td>
+					<td>权限拒绝率</td>
+			</tr>
+			<tr>
+					<td>Latency</td>
+					<td>工具调用耗时</td>
+			</tr>
+	</tbody>
 </table></div>
 <h3 id="安全指标">安全指标
 </h3><div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>指标</th>
-          <th>含义</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>Unsafe Call Block Rate</td>
-          <td>危险调用拦截率</td>
-      </tr>
-      <tr>
-          <td>Sensitive Data Exposure</td>
-          <td>敏感数据泄露次数</td>
-      </tr>
-      <tr>
-          <td>Confirmation Coverage</td>
-          <td>高风险操作确认覆盖率</td>
-      </tr>
-      <tr>
-          <td>Injection Resistance</td>
-          <td>对工具结果注入的抵抗能力</td>
-      </tr>
-  </tbody>
+	<thead>
+			<tr>
+					<th>指标</th>
+					<th>含义</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>Unsafe Call Block Rate</td>
+					<td>危险调用拦截率</td>
+			</tr>
+			<tr>
+					<td>Sensitive Data Exposure</td>
+					<td>敏感数据泄露次数</td>
+			</tr>
+			<tr>
+					<td>Confirmation Coverage</td>
+					<td>高风险操作确认覆盖率</td>
+			</tr>
+			<tr>
+					<td>Injection Resistance</td>
+					<td>对工具结果注入的抵抗能力</td>
+			</tr>
+	</tbody>
 </table></div>
 <p>如果没有这些指标，Tool Calling 很容易看起来“能用”，但生产环境不可靠。</p>
 <h2 id="一个完整例子">一个完整例子
@@ -1483,7 +1483,7 @@
         
         
             <div class="article-image">
-                <img src="/p/ai-agent-%E8%AF%84%E4%BC%B0%E4%BD%93%E7%B3%BB%E8%AF%A6%E8%A7%A3%E4%BB%8E%E5%87%86%E7%A1%AE%E7%8E%87%E5%88%B0%E7%AB%AF%E5%88%B0%E7%AB%AF%E4%BB%BB%E5%8A%A1%E6%88%90%E5%8A%9F%E7%8E%87/agent.eeda6d8a8b2dcc1f636fc8f0b922c53d_hu_7ae131697522e39f.png" 
+                <img src="/p/ai-agent-%E8%AF%84%E4%BC%B0%E4%BD%93%E7%B3%BB%E8%AF%A6%E8%A7%A3%E4%BB%8E%E5%87%86%E7%A1%AE%E7%8E%87%E5%88%B0%E7%AB%AF%E5%88%B0%E7%AB%AF%E4%BB%BB%E5%8A%A1%E6%88%90%E5%8A%9F%E7%8E%87/agent.eeda6d8a8b2dcc1f636fc8f0b922c53d_hu_9b56cdc14f822e9f.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -1507,7 +1507,7 @@
         
         
             <div class="article-image">
-                <img src="/p/mcp-%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E5%8D%8F%E8%AE%AE%E5%B7%A5%E5%85%B7%E8%B5%84%E6%BA%90%E4%B8%8E%E5%AE%89%E5%85%A8%E8%BE%B9%E7%95%8C/claude-code.4c3fec44ee666712a4aad49f3530dea8_hu_8a43fbfe2f060b29.png" 
+                <img src="/p/mcp-%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E5%8D%8F%E8%AE%AE%E5%B7%A5%E5%85%B7%E8%B5%84%E6%BA%90%E4%B8%8E%E5%AE%89%E5%85%A8%E8%BE%B9%E7%95%8C/claude-code.4c3fec44ee666712a4aad49f3530dea8_hu_5e4dbc97ba468828.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -1531,7 +1531,7 @@
         
         
             <div class="article-image">
-                <img src="/p/%E5%A4%9A-agent-%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1%E8%AF%A6%E8%A7%A3%E4%BB%8E%E4%BB%BB%E5%8A%A1%E5%88%86%E8%A7%A3%E5%88%B0%E5%8D%8F%E4%BD%9C%E8%B0%83%E5%BA%A6/agent.eeda6d8a8b2dcc1f636fc8f0b922c53d_hu_7ae131697522e39f.png" 
+                <img src="/p/%E5%A4%9A-agent-%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1%E8%AF%A6%E8%A7%A3%E4%BB%8E%E4%BB%BB%E5%8A%A1%E5%88%86%E8%A7%A3%E5%88%B0%E5%8D%8F%E4%BD%9C%E8%B0%83%E5%BA%A6/agent.eeda6d8a8b2dcc1f636fc8f0b922c53d_hu_9b56cdc14f822e9f.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -1555,7 +1555,7 @@
         
         
             <div class="article-image">
-                <img src="/p/ai-agent-%E5%B7%A5%E7%A8%8B%E4%BD%93%E7%B3%BB%E8%AF%A6%E8%A7%A3%E6%8F%90%E7%A4%BA%E5%B7%A5%E7%A8%8B%E4%B8%8A%E4%B8%8B%E6%96%87%E5%B7%A5%E7%A8%8B%E4%B8%8E%E7%BC%96%E6%8E%92%E5%B7%A5%E7%A8%8B/agent.eeda6d8a8b2dcc1f636fc8f0b922c53d_hu_7ae131697522e39f.png" 
+                <img src="/p/ai-agent-%E5%B7%A5%E7%A8%8B%E4%BD%93%E7%B3%BB%E8%AF%A6%E8%A7%A3%E6%8F%90%E7%A4%BA%E5%B7%A5%E7%A8%8B%E4%B8%8A%E4%B8%8B%E6%96%87%E5%B7%A5%E7%A8%8B%E4%B8%8E%E7%BC%96%E6%8E%92%E5%B7%A5%E7%A8%8B/agent.eeda6d8a8b2dcc1f636fc8f0b922c53d_hu_9b56cdc14f822e9f.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -1579,7 +1579,7 @@
         
         
             <div class="article-image">
-                <img src="/p/ai-agent-%E8%AE%B0%E5%BF%86%E6%9C%BA%E5%88%B6%E8%AF%A6%E8%A7%A3%E4%BB%8E%E4%BC%9A%E8%AF%9D%E4%B8%8A%E4%B8%8B%E6%96%87%E5%88%B0%E6%8C%81%E4%B9%85%E5%8C%96%E8%AE%B0%E5%BF%86%E7%B3%BB%E7%BB%9F/agent.eeda6d8a8b2dcc1f636fc8f0b922c53d_hu_7ae131697522e39f.png" 
+                <img src="/p/ai-agent-%E8%AE%B0%E5%BF%86%E6%9C%BA%E5%88%B6%E8%AF%A6%E8%A7%A3%E4%BB%8E%E4%BC%9A%E8%AF%9D%E4%B8%8A%E4%B8%8B%E6%96%87%E5%88%B0%E6%8C%81%E4%B9%85%E5%8C%96%E8%AE%B0%E5%BF%86%E7%B3%BB%E7%BB%9F/agent.eeda6d8a8b2dcc1f636fc8f0b922c53d_hu_9b56cdc14f822e9f.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -1623,8 +1623,9 @@
         (d.head || d.body).appendChild(s);
     })();
 </script>
-<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+		<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+		<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+	
 </div>
 
 <style>

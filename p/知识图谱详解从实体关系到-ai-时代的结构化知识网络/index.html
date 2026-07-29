@@ -685,45 +685,45 @@
 <h2 id="知识图谱和关系型数据库的区别">知识图谱和关系型数据库的区别
 </h2><p>知识图谱不是为了替代关系型数据库，而是解决不同类型的问题。</p>
 <div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>维度</th>
-          <th>关系型数据库</th>
-          <th>知识图谱</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>数据组织</td>
-          <td>表、行、列</td>
-          <td>节点、边、属性</td>
-      </tr>
-      <tr>
-          <td>核心关注</td>
-          <td>记录与事务</td>
-          <td>实体与关系</td>
-      </tr>
-      <tr>
-          <td>查询方式</td>
-          <td>SQL</td>
-          <td>Cypher / SPARQL / Gremlin</td>
-      </tr>
-      <tr>
-          <td>擅长场景</td>
-          <td>订单、库存、报表、事务处理</td>
-          <td>关系查询、路径分析、语义推理</td>
-      </tr>
-      <tr>
-          <td>扩展关系</td>
-          <td>常需要改表或加中间表</td>
-          <td>增加节点和边即可</td>
-      </tr>
-      <tr>
-          <td>可解释性</td>
-          <td>依赖表结构和业务逻辑</td>
-          <td>关系路径天然可解释</td>
-      </tr>
-  </tbody>
+	<thead>
+			<tr>
+					<th>维度</th>
+					<th>关系型数据库</th>
+					<th>知识图谱</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>数据组织</td>
+					<td>表、行、列</td>
+					<td>节点、边、属性</td>
+			</tr>
+			<tr>
+					<td>核心关注</td>
+					<td>记录与事务</td>
+					<td>实体与关系</td>
+			</tr>
+			<tr>
+					<td>查询方式</td>
+					<td>SQL</td>
+					<td>Cypher / SPARQL / Gremlin</td>
+			</tr>
+			<tr>
+					<td>擅长场景</td>
+					<td>订单、库存、报表、事务处理</td>
+					<td>关系查询、路径分析、语义推理</td>
+			</tr>
+			<tr>
+					<td>扩展关系</td>
+					<td>常需要改表或加中间表</td>
+					<td>增加节点和边即可</td>
+			</tr>
+			<tr>
+					<td>可解释性</td>
+					<td>依赖表结构和业务逻辑</td>
+					<td>关系路径天然可解释</td>
+			</tr>
+	</tbody>
 </table></div>
 <p>举个例子，如果要查询“刘德华参演过哪些由刘伟强导演的电影”，关系型数据库可能需要多表 join：</p>
 <div class="highlight"><div class="chroma">
@@ -1275,40 +1275,40 @@
 </div><p>这些问题不是单段文本匹配，而是关系路径查询。</p>
 <p>知识图谱增强 RAG 可以把检索对象从“文本块”扩展为“实体、关系和路径”。</p>
 <div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>维度</th>
-          <th>普通 RAG</th>
-          <th>知识图谱增强 RAG</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>检索对象</td>
-          <td>文本片段</td>
-          <td>实体、关系、路径、子图</td>
-      </tr>
-      <tr>
-          <td>结果形式</td>
-          <td>非结构化文本</td>
-          <td>结构化事实</td>
-      </tr>
-      <tr>
-          <td>擅长问题</td>
-          <td>文档问答、语义匹配</td>
-          <td>多跳关系、事实推理、路径解释</td>
-      </tr>
-      <tr>
-          <td>优势</td>
-          <td>实现简单、泛化好</td>
-          <td>可解释、结构清晰、事实稳定</td>
-      </tr>
-      <tr>
-          <td>挑战</td>
-          <td>召回噪声、上下文冗余</td>
-          <td>图谱构建成本高、维护复杂</td>
-      </tr>
-  </tbody>
+	<thead>
+			<tr>
+					<th>维度</th>
+					<th>普通 RAG</th>
+					<th>知识图谱增强 RAG</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>检索对象</td>
+					<td>文本片段</td>
+					<td>实体、关系、路径、子图</td>
+			</tr>
+			<tr>
+					<td>结果形式</td>
+					<td>非结构化文本</td>
+					<td>结构化事实</td>
+			</tr>
+			<tr>
+					<td>擅长问题</td>
+					<td>文档问答、语义匹配</td>
+					<td>多跳关系、事实推理、路径解释</td>
+			</tr>
+			<tr>
+					<td>优势</td>
+					<td>实现简单、泛化好</td>
+					<td>可解释、结构清晰、事实稳定</td>
+			</tr>
+			<tr>
+					<td>挑战</td>
+					<td>召回噪声、上下文冗余</td>
+					<td>图谱构建成本高、维护复杂</td>
+			</tr>
+	</tbody>
 </table></div>
 <p>GraphRAG、KG-RAG 都是这个方向的代表。</p>
 <p>它们的共同思路是：</p>
@@ -1590,7 +1590,7 @@
         
         
             <div class="article-image">
-                <img src="/p/rag%E5%90%91%E9%87%8F%E6%A3%80%E7%B4%A2%E7%AD%96%E7%95%A5%E4%B8%8E%E5%8F%AC%E5%9B%9E%E4%BC%98%E5%8C%96%E8%AF%A6%E8%A7%A3/rag.f564c28f3dec0443ec341ead5d988aef_hu_1fa5ae915280b71e.png" 
+                <img src="/p/rag%E5%90%91%E9%87%8F%E6%A3%80%E7%B4%A2%E7%AD%96%E7%95%A5%E4%B8%8E%E5%8F%AC%E5%9B%9E%E4%BC%98%E5%8C%96%E8%AF%A6%E8%A7%A3/rag.f564c28f3dec0443ec341ead5d988aef_hu_a9bb05fac32afd75.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -1614,7 +1614,7 @@
         
         
             <div class="article-image">
-                <img src="/p/rag%E6%9E%B6%E6%9E%84%E8%AF%A6%E8%A7%A3%E4%BB%8E%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%B1%80%E9%99%90%E5%88%B0%E6%A3%80%E7%B4%A2%E5%A2%9E%E5%BC%BA%E7%94%9F%E6%88%90/rag.f564c28f3dec0443ec341ead5d988aef_hu_1fa5ae915280b71e.png" 
+                <img src="/p/rag%E6%9E%B6%E6%9E%84%E8%AF%A6%E8%A7%A3%E4%BB%8E%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%B1%80%E9%99%90%E5%88%B0%E6%A3%80%E7%B4%A2%E5%A2%9E%E5%BC%BA%E7%94%9F%E6%88%90/rag.f564c28f3dec0443ec341ead5d988aef_hu_a9bb05fac32afd75.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -1638,7 +1638,7 @@
         
         
             <div class="article-image">
-                <img src="/p/ai-agent-%E8%AF%84%E4%BC%B0%E4%BD%93%E7%B3%BB%E8%AF%A6%E8%A7%A3%E4%BB%8E%E5%87%86%E7%A1%AE%E7%8E%87%E5%88%B0%E7%AB%AF%E5%88%B0%E7%AB%AF%E4%BB%BB%E5%8A%A1%E6%88%90%E5%8A%9F%E7%8E%87/agent.eeda6d8a8b2dcc1f636fc8f0b922c53d_hu_7ae131697522e39f.png" 
+                <img src="/p/ai-agent-%E8%AF%84%E4%BC%B0%E4%BD%93%E7%B3%BB%E8%AF%A6%E8%A7%A3%E4%BB%8E%E5%87%86%E7%A1%AE%E7%8E%87%E5%88%B0%E7%AB%AF%E5%88%B0%E7%AB%AF%E4%BB%BB%E5%8A%A1%E6%88%90%E5%8A%9F%E7%8E%87/agent.eeda6d8a8b2dcc1f636fc8f0b922c53d_hu_9b56cdc14f822e9f.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -1662,7 +1662,7 @@
         
         
             <div class="article-image">
-                <img src="/p/function-calling-/-tool-calling-%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3/agent.eeda6d8a8b2dcc1f636fc8f0b922c53d_hu_7ae131697522e39f.png" 
+                <img src="/p/function-calling-/-tool-calling-%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3/agent.eeda6d8a8b2dcc1f636fc8f0b922c53d_hu_9b56cdc14f822e9f.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -1686,7 +1686,7 @@
         
         
             <div class="article-image">
-                <img src="/p/mcp-%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E5%8D%8F%E8%AE%AE%E5%B7%A5%E5%85%B7%E8%B5%84%E6%BA%90%E4%B8%8E%E5%AE%89%E5%85%A8%E8%BE%B9%E7%95%8C/claude-code.4c3fec44ee666712a4aad49f3530dea8_hu_8a43fbfe2f060b29.png" 
+                <img src="/p/mcp-%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E5%8D%8F%E8%AE%AE%E5%B7%A5%E5%85%B7%E8%B5%84%E6%BA%90%E4%B8%8E%E5%AE%89%E5%85%A8%E8%BE%B9%E7%95%8C/claude-code.4c3fec44ee666712a4aad49f3530dea8_hu_5e4dbc97ba468828.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -1730,8 +1730,9 @@
         (d.head || d.body).appendChild(s);
     })();
 </script>
-<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+		<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+		<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+	
 </div>
 
 <style>

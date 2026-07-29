@@ -7,7 +7,23 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>zh-cn</language>
         <copyright>Example Person</copyright>
-        <lastBuildDate>Fri, 15 May 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://liusir521.github.io/categories/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Sat, 25 Jul 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://liusir521.github.io/categories/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>工具</title>
+        <link>https://liusir521.github.io/categories/%E5%B7%A5%E5%85%B7/</link>
+        <pubDate>Sat, 25 Jul 2026 00:00:00 +0000</pubDate>
+        
+        <guid>https://liusir521.github.io/categories/%E5%B7%A5%E5%85%B7/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>容器化</title>
+        <link>https://liusir521.github.io/categories/%E5%AE%B9%E5%99%A8%E5%8C%96/</link>
+        <pubDate>Sat, 25 Jul 2026 00:00:00 +0000</pubDate>
+        
+        <guid>https://liusir521.github.io/categories/%E5%AE%B9%E5%99%A8%E5%8C%96/</guid>
+        <description></description>
+        </item>
+        <item>
         <title>AI</title>
         <link>https://liusir521.github.io/categories/ai/</link>
         <pubDate>Fri, 15 May 2026 00:00:00 +0000</pubDate>
@@ -21,14 +37,6 @@
         <pubDate>Fri, 15 May 2026 00:00:00 +0000</pubDate>
         
         <guid>https://liusir521.github.io/categories/%E7%9F%A5%E8%AF%86%E5%9B%BE%E8%B0%B1/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>工具</title>
-        <link>https://liusir521.github.io/categories/%E5%B7%A5%E5%85%B7/</link>
-        <pubDate>Sun, 10 May 2026 00:00:00 +0800</pubDate>
-        
-        <guid>https://liusir521.github.io/categories/%E5%B7%A5%E5%85%B7/</guid>
         <description></description>
         </item>
         <item>

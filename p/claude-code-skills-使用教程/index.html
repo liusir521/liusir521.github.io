@@ -457,35 +457,35 @@
 <h2 id="skills-vs-mcp">Skills vs MCP
 </h2><p>很多同学会把两者搞混，先区分一下：</p>
 <div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>维度</th>
-          <th>Skills</th>
-          <th>MCP</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>本质</td>
-          <td>提示词 + 工作流模板</td>
-          <td>工具/数据源连接协议</td>
-      </tr>
-      <tr>
-          <td>作用</td>
-          <td>教 Claude&quot;怎么做&quot;</td>
-          <td>让 Claude&quot;能访问什么&quot;</td>
-      </tr>
-      <tr>
-          <td>配置</td>
-          <td><code>npx skills add</code> 安装</td>
-          <td><code>.claude/claude.json</code> 配置</td>
-      </tr>
-      <tr>
-          <td>示例</td>
-          <td>自动生成 commit、代码审查</td>
-          <td>文件系统、GitHub API</td>
-      </tr>
-  </tbody>
+	<thead>
+			<tr>
+					<th>维度</th>
+					<th>Skills</th>
+					<th>MCP</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>本质</td>
+					<td>提示词 + 工作流模板</td>
+					<td>工具/数据源连接协议</td>
+			</tr>
+			<tr>
+					<td>作用</td>
+					<td>教 Claude&quot;怎么做&quot;</td>
+					<td>让 Claude&quot;能访问什么&quot;</td>
+			</tr>
+			<tr>
+					<td>配置</td>
+					<td><code>npx skills add</code> 安装</td>
+					<td><code>.claude/claude.json</code> 配置</td>
+			</tr>
+			<tr>
+					<td>示例</td>
+					<td>自动生成 commit、代码审查</td>
+					<td>文件系统、GitHub API</td>
+			</tr>
+	</tbody>
 </table></div>
 <p>两者互补，经常配合使用。比如安装了 <code>gh-cli</code> Skill，还需要 GitHub MCP 提供 API 访问能力。</p>
 <h2 id="查找-skills">查找 Skills
@@ -517,30 +517,30 @@
     >skills.sh</a> 查看排行榜，按安装量排序。热门 Skill 通常更可靠。</p>
 <p>目前最受欢迎的 Skill 系列：</p>
 <div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>系列</th>
-          <th>来源</th>
-          <th>热门 Skill</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td><code>vercel-labs/agent-skills</code></td>
-          <td>Vercel 官方</td>
-          <td>react-best-practices, next-js, web-design</td>
-      </tr>
-      <tr>
-          <td><code>github/awesome-copilot</code></td>
-          <td>GitHub</td>
-          <td>git-commit, gh-cli, prd</td>
-      </tr>
-      <tr>
-          <td><code>anthropics/skills</code></td>
-          <td>Anthropic 官方</td>
-          <td>frontend-design, document-processing</td>
-      </tr>
-  </tbody>
+	<thead>
+			<tr>
+					<th>系列</th>
+					<th>来源</th>
+					<th>热门 Skill</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>vercel-labs/agent-skills</code></td>
+					<td>Vercel 官方</td>
+					<td>react-best-practices, next-js, web-design</td>
+			</tr>
+			<tr>
+					<td><code>github/awesome-copilot</code></td>
+					<td>GitHub</td>
+					<td>git-commit, gh-cli, prd</td>
+			</tr>
+			<tr>
+					<td><code>anthropics/skills</code></td>
+					<td>Anthropic 官方</td>
+					<td>frontend-design, document-processing</td>
+			</tr>
+	</tbody>
 </table></div>
 <h3 id="挑选-skill-的三条原则">挑选 Skill 的三条原则
 </h3><ol>
@@ -691,30 +691,30 @@
 </div><h2 id="常用-skill-推荐">常用 Skill 推荐
 </h2><h3 id="开发效率">开发效率
 </h3><div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>Skill</th>
-          <th>用途</th>
-          <th>安装量</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td><code>github/awesome-copilot@git-commit</code></td>
-          <td>自动生成规范 commit</td>
-          <td>26.7K</td>
-      </tr>
-      <tr>
-          <td><code>github/awesome-copilot@gh-cli</code></td>
-          <td>GitHub CLI 辅助</td>
-          <td>19.3K</td>
-      </tr>
-      <tr>
-          <td><code>github/awesome-copilot@prd</code></td>
-          <td>自动生成 PR 描述</td>
-          <td>15.8K</td>
-      </tr>
-  </tbody>
+	<thead>
+			<tr>
+					<th>Skill</th>
+					<th>用途</th>
+					<th>安装量</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>github/awesome-copilot@git-commit</code></td>
+					<td>自动生成规范 commit</td>
+					<td>26.7K</td>
+			</tr>
+			<tr>
+					<td><code>github/awesome-copilot@gh-cli</code></td>
+					<td>GitHub CLI 辅助</td>
+					<td>19.3K</td>
+			</tr>
+			<tr>
+					<td><code>github/awesome-copilot@prd</code></td>
+					<td>自动生成 PR 描述</td>
+					<td>15.8K</td>
+			</tr>
+	</tbody>
 </table></div>
 <p>安装：</p>
 <div class="highlight"><div class="chroma">
@@ -729,30 +729,30 @@
 </div>
 </div><h3 id="代码质量">代码质量
 </h3><div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>Skill</th>
-          <th>用途</th>
-          <th>安装量</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td><code>simplify</code> (内置)</td>
-          <td>审查代码质量和效率</td>
-          <td>内置</td>
-      </tr>
-      <tr>
-          <td><code>security-review</code> (内置)</td>
-          <td>安全审查</td>
-          <td>内置</td>
-      </tr>
-      <tr>
-          <td><code>review</code> (内置)</td>
-          <td>PR Review</td>
-          <td>内置</td>
-      </tr>
-  </tbody>
+	<thead>
+			<tr>
+					<th>Skill</th>
+					<th>用途</th>
+					<th>安装量</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>simplify</code> (内置)</td>
+					<td>审查代码质量和效率</td>
+					<td>内置</td>
+			</tr>
+			<tr>
+					<td><code>security-review</code> (内置)</td>
+					<td>安全审查</td>
+					<td>内置</td>
+			</tr>
+			<tr>
+					<td><code>review</code> (内置)</td>
+					<td>PR Review</td>
+					<td>内置</td>
+			</tr>
+	</tbody>
 </table></div>
 <p>注：<code>simplify</code>、<code>security-review</code>、<code>review</code> 是 Claude Code 自带的基础 Skill，无需额外安装。</p>
 <h3 id="前端开发">前端开发
@@ -860,7 +860,7 @@
         
         
             <div class="article-image">
-                <img src="/p/codex-vs-claude-codeai-%E7%BC%96%E7%A8%8B%E5%8A%A9%E6%89%8B%E5%AE%9E%E8%B7%B5%E5%AF%B9%E6%AF%94/claude-code.4c3fec44ee666712a4aad49f3530dea8_hu_8a43fbfe2f060b29.png" 
+                <img src="/p/codex-vs-claude-codeai-%E7%BC%96%E7%A8%8B%E5%8A%A9%E6%89%8B%E5%AE%9E%E8%B7%B5%E5%AF%B9%E6%AF%94/claude-code.4c3fec44ee666712a4aad49f3530dea8_hu_5e4dbc97ba468828.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -884,7 +884,7 @@
         
         
             <div class="article-image">
-                <img src="/p/claude-code-%E5%AE%89%E8%A3%85%E4%B8%8E-superpowers-%E5%AE%9E%E6%88%98%E4%BB%8E%E6%83%B3%E6%B3%95%E5%88%B0%E5%8F%91%E5%B8%83%E7%9A%84%E5%B7%A5%E7%A8%8B%E5%8C%96%E5%B7%A5%E4%BD%9C%E6%B5%81/claude-code.4c3fec44ee666712a4aad49f3530dea8_hu_8a43fbfe2f060b29.png" 
+                <img src="/p/claude-code-%E5%AE%89%E8%A3%85%E4%B8%8E-superpowers-%E5%AE%9E%E6%88%98%E4%BB%8E%E6%83%B3%E6%B3%95%E5%88%B0%E5%8F%91%E5%B8%83%E7%9A%84%E5%B7%A5%E7%A8%8B%E5%8C%96%E5%B7%A5%E4%BD%9C%E6%B5%81/claude-code.4c3fec44ee666712a4aad49f3530dea8_hu_5e4dbc97ba468828.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -908,7 +908,7 @@
         
         
             <div class="article-image">
-                <img src="/p/claude-code-%E5%AE%89%E8%A3%85%E9%85%8D%E7%BD%AE-mcp-%E6%95%99%E7%A8%8B/claude-code.4c3fec44ee666712a4aad49f3530dea8_hu_8a43fbfe2f060b29.png" 
+                <img src="/p/claude-code-%E5%AE%89%E8%A3%85%E9%85%8D%E7%BD%AE-mcp-%E6%95%99%E7%A8%8B/claude-code.4c3fec44ee666712a4aad49f3530dea8_hu_5e4dbc97ba468828.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -932,7 +932,7 @@
         
         
             <div class="article-image">
-                <img src="/p/claude-code-%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4%E9%80%9F%E6%9F%A5%E6%89%8B%E5%86%8C/claude-code.4c3fec44ee666712a4aad49f3530dea8_hu_8a43fbfe2f060b29.png" 
+                <img src="/p/claude-code-%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4%E9%80%9F%E6%9F%A5%E6%89%8B%E5%86%8C/claude-code.4c3fec44ee666712a4aad49f3530dea8_hu_5e4dbc97ba468828.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -951,24 +951,13 @@
 
             
                 
-<article class="has-image">
-    <a href="/p/%E7%9F%A5%E8%AF%86%E5%9B%BE%E8%B0%B1%E8%AF%A6%E8%A7%A3%E4%BB%8E%E5%AE%9E%E4%BD%93%E5%85%B3%E7%B3%BB%E5%88%B0-ai-%E6%97%B6%E4%BB%A3%E7%9A%84%E7%BB%93%E6%9E%84%E5%8C%96%E7%9F%A5%E8%AF%86%E7%BD%91%E7%BB%9C/">
+<article class="">
+    <a href="/p/docker-%E5%85%A5%E9%97%A8%E4%B8%8E%E5%AE%9E%E6%88%98%E4%BB%8E%E5%AE%B9%E5%99%A8%E5%88%B0-compose/">
         
-        
-            <div class="article-image">
-                <img src="/p/%E7%9F%A5%E8%AF%86%E5%9B%BE%E8%B0%B1%E8%AF%A6%E8%A7%A3%E4%BB%8E%E5%AE%9E%E4%BD%93%E5%85%B3%E7%B3%BB%E5%88%B0-ai-%E6%97%B6%E4%BB%A3%E7%9A%84%E7%BB%93%E6%9E%84%E5%8C%96%E7%9F%A5%E8%AF%86%E7%BD%91%E7%BB%9C/knowledge-graph.0e67d8b93f5aee3390c1e7ac97094c95_hu_a74a52531b7a9b0e.png" 
-                        width="250" 
-                        height="150" 
-                        loading="lazy"
-                        alt="Featured image of post 知识图谱详解：从实体关系到 AI 时代的结构化知识网络"
-                        
-                        data-hash="md5-DmfYuT9a7jOQweeslwlMlQ==">
-                
-            </div>
         
 
         <div class="article-details">
-            <h2 class="article-title">知识图谱详解：从实体关系到 AI 时代的结构化知识网络</h2>
+            <h2 class="article-title">Docker 入门与实战：从容器到 Compose</h2>
         </div>
     </a>
 </article>
@@ -1000,8 +989,9 @@
         (d.head || d.body).appendChild(s);
     })();
 </script>
-<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+		<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+		<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+	
 </div>
 
 <style>

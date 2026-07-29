@@ -566,34 +566,34 @@
 </h3><p>Agent 的“专业化”并不一定来自不同模型，也可以来自不同的系统提示、工具权限、上下文来源和评估标准。</p>
 <p>同一个基础模型，给它不同角色边界，就会表现出不同工作方式：</p>
 <div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>Agent</th>
-          <th>关注点</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>Planner</td>
-          <td>任务拆解、依赖关系、执行顺序</td>
-      </tr>
-      <tr>
-          <td>Researcher</td>
-          <td>搜索资料、读取上下文、整理证据</td>
-      </tr>
-      <tr>
-          <td>Executor</td>
-          <td>调用工具、修改文件、运行命令</td>
-      </tr>
-      <tr>
-          <td>Reviewer</td>
-          <td>检查风险、找漏洞、验证结果</td>
-      </tr>
-      <tr>
-          <td>Summarizer</td>
-          <td>汇总信息、压缩上下文、输出结论</td>
-      </tr>
-  </tbody>
+	<thead>
+			<tr>
+					<th>Agent</th>
+					<th>关注点</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>Planner</td>
+					<td>任务拆解、依赖关系、执行顺序</td>
+			</tr>
+			<tr>
+					<td>Researcher</td>
+					<td>搜索资料、读取上下文、整理证据</td>
+			</tr>
+			<tr>
+					<td>Executor</td>
+					<td>调用工具、修改文件、运行命令</td>
+			</tr>
+			<tr>
+					<td>Reviewer</td>
+					<td>检查风险、找漏洞、验证结果</td>
+			</tr>
+			<tr>
+					<td>Summarizer</td>
+					<td>汇总信息、压缩上下文、输出结论</td>
+			</tr>
+	</tbody>
 </table></div>
 <p>这比让一个 Agent 在同一轮对话里同时扮演所有角色更稳定。</p>
 <h3 id="并行探索">并行探索
@@ -761,56 +761,56 @@
 </ul>
 <p>共享状态不是越多越好。应该区分三类信息：</p>
 <div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>类型</th>
-          <th>说明</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>私有上下文</td>
-          <td>单个 Agent 内部推理使用</td>
-      </tr>
-      <tr>
-          <td>共享事实</td>
-          <td>多个 Agent 都需要依赖的结论</td>
-      </tr>
-      <tr>
-          <td>最终产物</td>
-          <td>面向用户输出的结果</td>
-      </tr>
-  </tbody>
+	<thead>
+			<tr>
+					<th>类型</th>
+					<th>说明</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>私有上下文</td>
+					<td>单个 Agent 内部推理使用</td>
+			</tr>
+			<tr>
+					<td>共享事实</td>
+					<td>多个 Agent 都需要依赖的结论</td>
+			</tr>
+			<tr>
+					<td>最终产物</td>
+					<td>面向用户输出的结果</td>
+			</tr>
+	</tbody>
 </table></div>
 <p>不要把每个 Agent 的完整思考过程全部广播出去。那会让系统变得嘈杂，也会放大错误。</p>
 <h3 id="communication">Communication
 </h3><p>通信机制决定 Agent 之间如何传递信息。</p>
 <p>常见方式有三种：</p>
 <div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>方式</th>
-          <th>说明</th>
-          <th>适用场景</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>直接消息</td>
-          <td>Agent A 把结果发给 Agent B</td>
-          <td>串行流水线</td>
-      </tr>
-      <tr>
-          <td>共享黑板</td>
-          <td>所有 Agent 读写同一个状态区</td>
-          <td>探索和汇总</td>
-      </tr>
-      <tr>
-          <td>事件流</td>
-          <td>Agent 订阅任务事件并响应</td>
-          <td>长流程、异步系统</td>
-      </tr>
-  </tbody>
+	<thead>
+			<tr>
+					<th>方式</th>
+					<th>说明</th>
+					<th>适用场景</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>直接消息</td>
+					<td>Agent A 把结果发给 Agent B</td>
+					<td>串行流水线</td>
+			</tr>
+			<tr>
+					<td>共享黑板</td>
+					<td>所有 Agent 读写同一个状态区</td>
+					<td>探索和汇总</td>
+			</tr>
+			<tr>
+					<td>事件流</td>
+					<td>Agent 订阅任务事件并响应</td>
+					<td>长流程、异步系统</td>
+			</tr>
+	</tbody>
 </table></div>
 <p>直接消息简单，但容易形成强耦合。共享黑板灵活，但需要冲突控制。事件流适合复杂系统，但实现成本最高。</p>
 <h3 id="evaluator">Evaluator
@@ -1010,30 +1010,30 @@
 </h3><p>当多个 Agent 给出不同结论时，需要仲裁机制。</p>
 <p>常见方式：</p>
 <div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>方式</th>
-          <th>说明</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>多数投票</td>
-          <td>多个独立 Agent 给答案，取多数</td>
-      </tr>
-      <tr>
-          <td>加权投票</td>
-          <td>按 Agent 可靠性或领域权重投票</td>
-      </tr>
-      <tr>
-          <td>仲裁者</td>
-          <td>单独 Reviewer 基于证据裁决</td>
-      </tr>
-      <tr>
-          <td>规则优先</td>
-          <td>安全、权限、测试结果等硬规则优先</td>
-      </tr>
-  </tbody>
+	<thead>
+			<tr>
+					<th>方式</th>
+					<th>说明</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>多数投票</td>
+					<td>多个独立 Agent 给答案，取多数</td>
+			</tr>
+			<tr>
+					<td>加权投票</td>
+					<td>按 Agent 可靠性或领域权重投票</td>
+			</tr>
+			<tr>
+					<td>仲裁者</td>
+					<td>单独 Reviewer 基于证据裁决</td>
+			</tr>
+			<tr>
+					<td>规则优先</td>
+					<td>安全、权限、测试结果等硬规则优先</td>
+			</tr>
+	</tbody>
 </table></div>
 <p>不要迷信投票。多个 Agent 如果共享同一个错误上下文，投票只会放大错误。</p>
 <p>更好的仲裁方式是要求每个结论带证据：</p>
@@ -1174,46 +1174,46 @@
 </div>
 </div><h3 id="常见消息类型">常见消息类型
 </h3><div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>类型</th>
-          <th>含义</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>task</td>
-          <td>分配子任务</td>
-      </tr>
-      <tr>
-          <td>finding</td>
-          <td>返回发现</td>
-      </tr>
-      <tr>
-          <td>question</td>
-          <td>请求补充信息</td>
-      </tr>
-      <tr>
-          <td>evidence</td>
-          <td>提交证据</td>
-      </tr>
-      <tr>
-          <td>decision</td>
-          <td>记录决策</td>
-      </tr>
-      <tr>
-          <td>critique</td>
-          <td>审查意见</td>
-      </tr>
-      <tr>
-          <td>final</td>
-          <td>最终输出</td>
-      </tr>
-      <tr>
-          <td>error</td>
-          <td>执行失败</td>
-      </tr>
-  </tbody>
+	<thead>
+			<tr>
+					<th>类型</th>
+					<th>含义</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>task</td>
+					<td>分配子任务</td>
+			</tr>
+			<tr>
+					<td>finding</td>
+					<td>返回发现</td>
+			</tr>
+			<tr>
+					<td>question</td>
+					<td>请求补充信息</td>
+			</tr>
+			<tr>
+					<td>evidence</td>
+					<td>提交证据</td>
+			</tr>
+			<tr>
+					<td>decision</td>
+					<td>记录决策</td>
+			</tr>
+			<tr>
+					<td>critique</td>
+					<td>审查意见</td>
+			</tr>
+			<tr>
+					<td>final</td>
+					<td>最终输出</td>
+			</tr>
+			<tr>
+					<td>error</td>
+					<td>执行失败</td>
+			</tr>
+	</tbody>
 </table></div>
 <p>有了消息类型，Orchestrator 才能做路由、重试和统计。</p>
 <h3 id="控制消息长度">控制消息长度
@@ -1231,34 +1231,34 @@
 </h2><p>不同 Agent 应该拥有不同工具权限。</p>
 <p>例如：</p>
 <div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>Agent</th>
-          <th>工具权限</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>Researcher</td>
-          <td>search、read、fetch</td>
-      </tr>
-      <tr>
-          <td>Executor</td>
-          <td>read、edit、run_test</td>
-      </tr>
-      <tr>
-          <td>Reviewer</td>
-          <td>read、diff、test_result</td>
-      </tr>
-      <tr>
-          <td>Security</td>
-          <td>read、scan、policy_check</td>
-      </tr>
-      <tr>
-          <td>Orchestrator</td>
-          <td>dispatch、merge、stop</td>
-      </tr>
-  </tbody>
+	<thead>
+			<tr>
+					<th>Agent</th>
+					<th>工具权限</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>Researcher</td>
+					<td>search、read、fetch</td>
+			</tr>
+			<tr>
+					<td>Executor</td>
+					<td>read、edit、run_test</td>
+			</tr>
+			<tr>
+					<td>Reviewer</td>
+					<td>read、diff、test_result</td>
+			</tr>
+			<tr>
+					<td>Security</td>
+					<td>read、scan、policy_check</td>
+			</tr>
+			<tr>
+					<td>Orchestrator</td>
+					<td>dispatch、merge、stop</td>
+			</tr>
+	</tbody>
 </table></div>
 <p>不要让每个 Agent 都能调用所有工具。工具越多，模型越容易选错；权限越大，风险越高。</p>
 <h3 id="最小权限原则">最小权限原则
@@ -1327,88 +1327,88 @@
 </h2><p>多 Agent 系统不能只看最终回答。</p>
 <h3 id="任务指标">任务指标
 </h3><div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>指标</th>
-          <th>含义</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>Task Success Rate</td>
-          <td>任务成功率</td>
-      </tr>
-      <tr>
-          <td>First-pass Success</td>
-          <td>首轮成功率</td>
-      </tr>
-      <tr>
-          <td>Human Acceptance Rate</td>
-          <td>人工验收通过率</td>
-      </tr>
-      <tr>
-          <td>Regression Pass Rate</td>
-          <td>回归样本通过率</td>
-      </tr>
-  </tbody>
+	<thead>
+			<tr>
+					<th>指标</th>
+					<th>含义</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>Task Success Rate</td>
+					<td>任务成功率</td>
+			</tr>
+			<tr>
+					<td>First-pass Success</td>
+					<td>首轮成功率</td>
+			</tr>
+			<tr>
+					<td>Human Acceptance Rate</td>
+					<td>人工验收通过率</td>
+			</tr>
+			<tr>
+					<td>Regression Pass Rate</td>
+					<td>回归样本通过率</td>
+			</tr>
+	</tbody>
 </table></div>
 <h3 id="协作指标">协作指标
 </h3><div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>指标</th>
-          <th>含义</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>Handoff Success Rate</td>
-          <td>交接成功率</td>
-      </tr>
-      <tr>
-          <td>Conflict Rate</td>
-          <td>结论冲突率</td>
-      </tr>
-      <tr>
-          <td>Duplicate Work Rate</td>
-          <td>重复工作比例</td>
-      </tr>
-      <tr>
-          <td>Replan Count</td>
-          <td>重新规划次数</td>
-      </tr>
-      <tr>
-          <td>Message Count</td>
-          <td>Agent 间消息数量</td>
-      </tr>
-  </tbody>
+	<thead>
+			<tr>
+					<th>指标</th>
+					<th>含义</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>Handoff Success Rate</td>
+					<td>交接成功率</td>
+			</tr>
+			<tr>
+					<td>Conflict Rate</td>
+					<td>结论冲突率</td>
+			</tr>
+			<tr>
+					<td>Duplicate Work Rate</td>
+					<td>重复工作比例</td>
+			</tr>
+			<tr>
+					<td>Replan Count</td>
+					<td>重新规划次数</td>
+			</tr>
+			<tr>
+					<td>Message Count</td>
+					<td>Agent 间消息数量</td>
+			</tr>
+	</tbody>
 </table></div>
 <h3 id="成本指标">成本指标
 </h3><div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>指标</th>
-          <th>含义</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>Token per Task</td>
-          <td>每个任务 token 消耗</td>
-      </tr>
-      <tr>
-          <td>Tool Calls per Task</td>
-          <td>每个任务工具调用次数</td>
-      </tr>
-      <tr>
-          <td>Wall-clock Time</td>
-          <td>端到端耗时</td>
-      </tr>
-      <tr>
-          <td>Parallel Efficiency</td>
-          <td>并行节省的时间比例</td>
-      </tr>
-  </tbody>
+	<thead>
+			<tr>
+					<th>指标</th>
+					<th>含义</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>Token per Task</td>
+					<td>每个任务 token 消耗</td>
+			</tr>
+			<tr>
+					<td>Tool Calls per Task</td>
+					<td>每个任务工具调用次数</td>
+			</tr>
+			<tr>
+					<td>Wall-clock Time</td>
+					<td>端到端耗时</td>
+			</tr>
+			<tr>
+					<td>Parallel Efficiency</td>
+					<td>并行节省的时间比例</td>
+			</tr>
+	</tbody>
 </table></div>
 <p>多 Agent 的关键评估问题是：</p>
 <div class="highlight"><div class="chroma">
@@ -1494,30 +1494,30 @@
 <h3 id="第三步选择拓扑">第三步：选择拓扑
 </h3><p>按任务选择拓扑：</p>
 <div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>任务特征</th>
-          <th>推荐拓扑</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>固定流程</td>
-          <td>流水线</td>
-      </tr>
-      <tr>
-          <td>多方向探索</td>
-          <td>星型</td>
-      </tr>
-      <tr>
-          <td>大型复杂任务</td>
-          <td>层级</td>
-      </tr>
-      <tr>
-          <td>开放式研究</td>
-          <td>受控网络</td>
-      </tr>
-  </tbody>
+	<thead>
+			<tr>
+					<th>任务特征</th>
+					<th>推荐拓扑</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>固定流程</td>
+					<td>流水线</td>
+			</tr>
+			<tr>
+					<td>多方向探索</td>
+					<td>星型</td>
+			</tr>
+			<tr>
+					<td>大型复杂任务</td>
+					<td>层级</td>
+			</tr>
+			<tr>
+					<td>开放式研究</td>
+					<td>受控网络</td>
+			</tr>
+	</tbody>
 </table></div>
 <p>多数工程场景里，星型 + Reviewer 是最稳的起点。</p>
 <h3 id="第四步设计共享状态">第四步：设计共享状态
@@ -1791,7 +1791,7 @@
         
         
             <div class="article-image">
-                <img src="/p/ai-agent-%E8%AF%84%E4%BC%B0%E4%BD%93%E7%B3%BB%E8%AF%A6%E8%A7%A3%E4%BB%8E%E5%87%86%E7%A1%AE%E7%8E%87%E5%88%B0%E7%AB%AF%E5%88%B0%E7%AB%AF%E4%BB%BB%E5%8A%A1%E6%88%90%E5%8A%9F%E7%8E%87/agent.eeda6d8a8b2dcc1f636fc8f0b922c53d_hu_7ae131697522e39f.png" 
+                <img src="/p/ai-agent-%E8%AF%84%E4%BC%B0%E4%BD%93%E7%B3%BB%E8%AF%A6%E8%A7%A3%E4%BB%8E%E5%87%86%E7%A1%AE%E7%8E%87%E5%88%B0%E7%AB%AF%E5%88%B0%E7%AB%AF%E4%BB%BB%E5%8A%A1%E6%88%90%E5%8A%9F%E7%8E%87/agent.eeda6d8a8b2dcc1f636fc8f0b922c53d_hu_9b56cdc14f822e9f.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -1815,7 +1815,7 @@
         
         
             <div class="article-image">
-                <img src="/p/function-calling-/-tool-calling-%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3/agent.eeda6d8a8b2dcc1f636fc8f0b922c53d_hu_7ae131697522e39f.png" 
+                <img src="/p/function-calling-/-tool-calling-%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3/agent.eeda6d8a8b2dcc1f636fc8f0b922c53d_hu_9b56cdc14f822e9f.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -1839,7 +1839,7 @@
         
         
             <div class="article-image">
-                <img src="/p/mcp-%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E5%8D%8F%E8%AE%AE%E5%B7%A5%E5%85%B7%E8%B5%84%E6%BA%90%E4%B8%8E%E5%AE%89%E5%85%A8%E8%BE%B9%E7%95%8C/claude-code.4c3fec44ee666712a4aad49f3530dea8_hu_8a43fbfe2f060b29.png" 
+                <img src="/p/mcp-%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E5%8D%8F%E8%AE%AE%E5%B7%A5%E5%85%B7%E8%B5%84%E6%BA%90%E4%B8%8E%E5%AE%89%E5%85%A8%E8%BE%B9%E7%95%8C/claude-code.4c3fec44ee666712a4aad49f3530dea8_hu_5e4dbc97ba468828.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -1863,7 +1863,7 @@
         
         
             <div class="article-image">
-                <img src="/p/ai-agent-%E5%B7%A5%E7%A8%8B%E4%BD%93%E7%B3%BB%E8%AF%A6%E8%A7%A3%E6%8F%90%E7%A4%BA%E5%B7%A5%E7%A8%8B%E4%B8%8A%E4%B8%8B%E6%96%87%E5%B7%A5%E7%A8%8B%E4%B8%8E%E7%BC%96%E6%8E%92%E5%B7%A5%E7%A8%8B/agent.eeda6d8a8b2dcc1f636fc8f0b922c53d_hu_7ae131697522e39f.png" 
+                <img src="/p/ai-agent-%E5%B7%A5%E7%A8%8B%E4%BD%93%E7%B3%BB%E8%AF%A6%E8%A7%A3%E6%8F%90%E7%A4%BA%E5%B7%A5%E7%A8%8B%E4%B8%8A%E4%B8%8B%E6%96%87%E5%B7%A5%E7%A8%8B%E4%B8%8E%E7%BC%96%E6%8E%92%E5%B7%A5%E7%A8%8B/agent.eeda6d8a8b2dcc1f636fc8f0b922c53d_hu_9b56cdc14f822e9f.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -1887,7 +1887,7 @@
         
         
             <div class="article-image">
-                <img src="/p/ai-agent-%E8%AE%B0%E5%BF%86%E6%9C%BA%E5%88%B6%E8%AF%A6%E8%A7%A3%E4%BB%8E%E4%BC%9A%E8%AF%9D%E4%B8%8A%E4%B8%8B%E6%96%87%E5%88%B0%E6%8C%81%E4%B9%85%E5%8C%96%E8%AE%B0%E5%BF%86%E7%B3%BB%E7%BB%9F/agent.eeda6d8a8b2dcc1f636fc8f0b922c53d_hu_7ae131697522e39f.png" 
+                <img src="/p/ai-agent-%E8%AE%B0%E5%BF%86%E6%9C%BA%E5%88%B6%E8%AF%A6%E8%A7%A3%E4%BB%8E%E4%BC%9A%E8%AF%9D%E4%B8%8A%E4%B8%8B%E6%96%87%E5%88%B0%E6%8C%81%E4%B9%85%E5%8C%96%E8%AE%B0%E5%BF%86%E7%B3%BB%E7%BB%9F/agent.eeda6d8a8b2dcc1f636fc8f0b922c53d_hu_9b56cdc14f822e9f.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -1931,8 +1931,9 @@
         (d.head || d.body).appendChild(s);
     })();
 </script>
-<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+		<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+		<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+	
 </div>
 
 <style>

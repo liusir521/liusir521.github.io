@@ -513,26 +513,26 @@
 </h3><p>大模型的知识来自训练数据和当前上下文。它不知道你本地项目有哪些文件，也不能天然访问数据库、浏览器、GitHub Issue、CI 日志。</p>
 <p>要让模型真正做事，必须补上三类能力：</p>
 <div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>能力</th>
-          <th>例子</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>获取上下文</td>
-          <td>读取文件、查询数据库、获取网页内容</td>
-      </tr>
-      <tr>
-          <td>执行动作</td>
-          <td>创建 Issue、运行命令、写入文档</td>
-      </tr>
-      <tr>
-          <td>复用流程</td>
-          <td>代码审查模板、发布检查清单、排障流程</td>
-      </tr>
-  </tbody>
+	<thead>
+			<tr>
+					<th>能力</th>
+					<th>例子</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>获取上下文</td>
+					<td>读取文件、查询数据库、获取网页内容</td>
+			</tr>
+			<tr>
+					<td>执行动作</td>
+					<td>创建 Issue、运行命令、写入文档</td>
+			</tr>
+			<tr>
+					<td>复用流程</td>
+					<td>代码审查模板、发布检查清单、排障流程</td>
+			</tr>
+	</tbody>
 </table></div>
 <p>MCP 把这三类能力抽象成 Resources、Tools、Prompts。</p>
 <h3 id="降低集成成本">降低集成成本
@@ -643,34 +643,34 @@
 </h3><p>Server 是能力提供方。它把某个外部系统封装成 MCP 能理解的形式。</p>
 <p>例如：</p>
 <div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>Server</th>
-          <th>暴露能力</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>filesystem</td>
-          <td>读取/写入指定目录文件</td>
-      </tr>
-      <tr>
-          <td>github</td>
-          <td>查询仓库、Issue、PR、Actions</td>
-      </tr>
-      <tr>
-          <td>postgres</td>
-          <td>查询数据库 schema 和执行 SQL</td>
-      </tr>
-      <tr>
-          <td>browser</td>
-          <td>打开网页、截图、提取 DOM</td>
-      </tr>
-      <tr>
-          <td>figma</td>
-          <td>获取设计稿节点和样式</td>
-      </tr>
-  </tbody>
+	<thead>
+			<tr>
+					<th>Server</th>
+					<th>暴露能力</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>filesystem</td>
+					<td>读取/写入指定目录文件</td>
+			</tr>
+			<tr>
+					<td>github</td>
+					<td>查询仓库、Issue、PR、Actions</td>
+			</tr>
+			<tr>
+					<td>postgres</td>
+					<td>查询数据库 schema 和执行 SQL</td>
+			</tr>
+			<tr>
+					<td>browser</td>
+					<td>打开网页、截图、提取 DOM</td>
+			</tr>
+			<tr>
+					<td>figma</td>
+					<td>获取设计稿节点和样式</td>
+			</tr>
+	</tbody>
 </table></div>
 <p>Server 不需要关心背后连接的是 Claude 还是其他 Agent，只要遵守 MCP 协议即可。</p>
 <h2 id="协议层json-rpc-与生命周期">协议层：JSON-RPC 与生命周期
@@ -756,22 +756,22 @@
 <h3 id="传输层">传输层
 </h3><p>MCP 常见传输方式有两种。</p>
 <div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>传输</th>
-          <th>适用场景</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>stdio</td>
-          <td>本地 Server，随 Host 启动，通过标准输入输出通信</td>
-      </tr>
-      <tr>
-          <td>Streamable HTTP</td>
-          <td>远程 Server，通过 HTTP 连接，适合云服务和多用户场景</td>
-      </tr>
-  </tbody>
+	<thead>
+			<tr>
+					<th>传输</th>
+					<th>适用场景</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>stdio</td>
+					<td>本地 Server，随 Host 启动，通过标准输入输出通信</td>
+			</tr>
+			<tr>
+					<td>Streamable HTTP</td>
+					<td>远程 Server，通过 HTTP 连接，适合云服务和多用户场景</td>
+			</tr>
+	</tbody>
 </table></div>
 <p>stdio 最适合本地工具，例如 filesystem、sqlite、git。它简单、隔离性好，不需要额外端口。</p>
 <p>Streamable HTTP 适合远程能力，例如企业知识库、SaaS API、集中式工具网关。但它也带来更多安全问题：认证、授权、跨租户隔离、DNS rebinding、防止未授权访问等。</p>
@@ -940,40 +940,40 @@
 </div><p>对模型来说，Resource 的价值在于把“有哪些上下文可以用”标准化。</p>
 <h3 id="resource-与-tool-的区别">Resource 与 Tool 的区别
 </h3><div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>维度</th>
-          <th>Resource</th>
-          <th>Tool</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>目的</td>
-          <td>提供上下文</td>
-          <td>执行动作</td>
-      </tr>
-      <tr>
-          <td>风险</td>
-          <td>通常较低</td>
-          <td>可能有副作用</td>
-      </tr>
-      <tr>
-          <td>类比</td>
-          <td>文件、网页、数据库记录</td>
-          <td>函数、命令、API 调用</td>
-      </tr>
-      <tr>
-          <td>典型操作</td>
-          <td>read/list/subscribe</td>
-          <td>call</td>
-      </tr>
-      <tr>
-          <td>是否改变外部系统</td>
-          <td>通常不改变</td>
-          <td>可能改变</td>
-      </tr>
-  </tbody>
+	<thead>
+			<tr>
+					<th>维度</th>
+					<th>Resource</th>
+					<th>Tool</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>目的</td>
+					<td>提供上下文</td>
+					<td>执行动作</td>
+			</tr>
+			<tr>
+					<td>风险</td>
+					<td>通常较低</td>
+					<td>可能有副作用</td>
+			</tr>
+			<tr>
+					<td>类比</td>
+					<td>文件、网页、数据库记录</td>
+					<td>函数、命令、API 调用</td>
+			</tr>
+			<tr>
+					<td>典型操作</td>
+					<td>read/list/subscribe</td>
+					<td>call</td>
+			</tr>
+			<tr>
+					<td>是否改变外部系统</td>
+					<td>通常不改变</td>
+					<td>可能改变</td>
+			</tr>
+	</tbody>
 </table></div>
 <p>不要把所有东西都做成 Tool。只读上下文更适合 Resource，因为它更容易被 Host 管理、展示、缓存和引用。</p>
 <h3 id="resource-template">Resource Template
@@ -1048,35 +1048,35 @@
 <h3 id="prompts-与-skills-的区别">Prompts 与 Skills 的区别
 </h3><p>以 Claude Code 生态为例，Prompts 和 Skills 容易混淆。</p>
 <div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>维度</th>
-          <th>MCP Prompts</th>
-          <th>Skills</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>所属层</td>
-          <td>协议能力</td>
-          <td>Agent 工作方法</td>
-      </tr>
-      <tr>
-          <td>来源</td>
-          <td>MCP Server 提供</td>
-          <td>本地/插件技能目录</td>
-      </tr>
-      <tr>
-          <td>内容</td>
-          <td>可调用提示模板</td>
-          <td>领域知识、流程、工具说明</td>
-      </tr>
-      <tr>
-          <td>作用</td>
-          <td>复用某个任务入口</td>
-          <td>改变 Agent 做事方式</td>
-      </tr>
-  </tbody>
+	<thead>
+			<tr>
+					<th>维度</th>
+					<th>MCP Prompts</th>
+					<th>Skills</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>所属层</td>
+					<td>协议能力</td>
+					<td>Agent 工作方法</td>
+			</tr>
+			<tr>
+					<td>来源</td>
+					<td>MCP Server 提供</td>
+					<td>本地/插件技能目录</td>
+			</tr>
+			<tr>
+					<td>内容</td>
+					<td>可调用提示模板</td>
+					<td>领域知识、流程、工具说明</td>
+			</tr>
+			<tr>
+					<td>作用</td>
+					<td>复用某个任务入口</td>
+					<td>改变 Agent 做事方式</td>
+			</tr>
+	</tbody>
 </table></div>
 <p>可以这样理解：</p>
 <div class="highlight"><div class="chroma">
@@ -1179,35 +1179,35 @@
 <h3 id="tool-调用需要分级">Tool 调用需要分级
 </h3><p>不同工具风险不同，不能一视同仁。</p>
 <div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>等级</th>
-          <th>示例</th>
-          <th>策略</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>低风险只读</td>
-          <td>读取 README、查询 Issue</td>
-          <td>可自动执行</td>
-      </tr>
-      <tr>
-          <td>中风险写入</td>
-          <td>创建 Issue、更新文档</td>
-          <td>用户确认</td>
-      </tr>
-      <tr>
-          <td>高风险操作</td>
-          <td>删除文件、执行命令、修改生产配置</td>
-          <td>默认禁止或强确认</td>
-      </tr>
-      <tr>
-          <td>敏感数据</td>
-          <td>读取密钥、导出用户数据</td>
-          <td>最小权限，通常禁止</td>
-      </tr>
-  </tbody>
+	<thead>
+			<tr>
+					<th>等级</th>
+					<th>示例</th>
+					<th>策略</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>低风险只读</td>
+					<td>读取 README、查询 Issue</td>
+					<td>可自动执行</td>
+			</tr>
+			<tr>
+					<td>中风险写入</td>
+					<td>创建 Issue、更新文档</td>
+					<td>用户确认</td>
+			</tr>
+			<tr>
+					<td>高风险操作</td>
+					<td>删除文件、执行命令、修改生产配置</td>
+					<td>默认禁止或强确认</td>
+			</tr>
+			<tr>
+					<td>敏感数据</td>
+					<td>读取密钥、导出用户数据</td>
+					<td>最小权限，通常禁止</td>
+			</tr>
+	</tbody>
 </table></div>
 <p>Tool schema 只能约束参数结构，不能替代权限系统。</p>
 <h3 id="输入和输出都不可信">输入和输出都不可信
@@ -1284,40 +1284,40 @@
 <h2 id="mcp-与-function-calling-的区别">MCP 与 Function Calling 的区别
 </h2><p>MCP 和 Function Calling 经常被放在一起讨论，但它们不是同一层。</p>
 <div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>维度</th>
-          <th>Function Calling</th>
-          <th>MCP</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>所属层</td>
-          <td>模型接口能力</td>
-          <td>应用到工具的协议</td>
-      </tr>
-      <tr>
-          <td>关注点</td>
-          <td>模型如何输出函数调用</td>
-          <td>工具如何被发现、调用、返回</td>
-      </tr>
-      <tr>
-          <td>作用范围</td>
-          <td>单个模型 API</td>
-          <td>Host、Client、Server、外部系统</td>
-      </tr>
-      <tr>
-          <td>工具来源</td>
-          <td>应用代码传入</td>
-          <td>MCP Server 动态提供</td>
-      </tr>
-      <tr>
-          <td>是否规定传输</td>
-          <td>不规定</td>
-          <td>规定 JSON-RPC 与传输方式</td>
-      </tr>
-  </tbody>
+	<thead>
+			<tr>
+					<th>维度</th>
+					<th>Function Calling</th>
+					<th>MCP</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>所属层</td>
+					<td>模型接口能力</td>
+					<td>应用到工具的协议</td>
+			</tr>
+			<tr>
+					<td>关注点</td>
+					<td>模型如何输出函数调用</td>
+					<td>工具如何被发现、调用、返回</td>
+			</tr>
+			<tr>
+					<td>作用范围</td>
+					<td>单个模型 API</td>
+					<td>Host、Client、Server、外部系统</td>
+			</tr>
+			<tr>
+					<td>工具来源</td>
+					<td>应用代码传入</td>
+					<td>MCP Server 动态提供</td>
+			</tr>
+			<tr>
+					<td>是否规定传输</td>
+					<td>不规定</td>
+					<td>规定 JSON-RPC 与传输方式</td>
+			</tr>
+	</tbody>
 </table></div>
 <p>Function Calling 解决的是：</p>
 <div class="highlight"><div class="chroma">
@@ -1569,7 +1569,7 @@
         
         
             <div class="article-image">
-                <img src="/p/ai-agent-%E8%AF%84%E4%BC%B0%E4%BD%93%E7%B3%BB%E8%AF%A6%E8%A7%A3%E4%BB%8E%E5%87%86%E7%A1%AE%E7%8E%87%E5%88%B0%E7%AB%AF%E5%88%B0%E7%AB%AF%E4%BB%BB%E5%8A%A1%E6%88%90%E5%8A%9F%E7%8E%87/agent.eeda6d8a8b2dcc1f636fc8f0b922c53d_hu_7ae131697522e39f.png" 
+                <img src="/p/ai-agent-%E8%AF%84%E4%BC%B0%E4%BD%93%E7%B3%BB%E8%AF%A6%E8%A7%A3%E4%BB%8E%E5%87%86%E7%A1%AE%E7%8E%87%E5%88%B0%E7%AB%AF%E5%88%B0%E7%AB%AF%E4%BB%BB%E5%8A%A1%E6%88%90%E5%8A%9F%E7%8E%87/agent.eeda6d8a8b2dcc1f636fc8f0b922c53d_hu_9b56cdc14f822e9f.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -1593,7 +1593,7 @@
         
         
             <div class="article-image">
-                <img src="/p/function-calling-/-tool-calling-%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3/agent.eeda6d8a8b2dcc1f636fc8f0b922c53d_hu_7ae131697522e39f.png" 
+                <img src="/p/function-calling-/-tool-calling-%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3/agent.eeda6d8a8b2dcc1f636fc8f0b922c53d_hu_9b56cdc14f822e9f.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -1617,7 +1617,7 @@
         
         
             <div class="article-image">
-                <img src="/p/%E5%A4%9A-agent-%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1%E8%AF%A6%E8%A7%A3%E4%BB%8E%E4%BB%BB%E5%8A%A1%E5%88%86%E8%A7%A3%E5%88%B0%E5%8D%8F%E4%BD%9C%E8%B0%83%E5%BA%A6/agent.eeda6d8a8b2dcc1f636fc8f0b922c53d_hu_7ae131697522e39f.png" 
+                <img src="/p/%E5%A4%9A-agent-%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1%E8%AF%A6%E8%A7%A3%E4%BB%8E%E4%BB%BB%E5%8A%A1%E5%88%86%E8%A7%A3%E5%88%B0%E5%8D%8F%E4%BD%9C%E8%B0%83%E5%BA%A6/agent.eeda6d8a8b2dcc1f636fc8f0b922c53d_hu_9b56cdc14f822e9f.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -1641,7 +1641,7 @@
         
         
             <div class="article-image">
-                <img src="/p/ai-agent-%E5%B7%A5%E7%A8%8B%E4%BD%93%E7%B3%BB%E8%AF%A6%E8%A7%A3%E6%8F%90%E7%A4%BA%E5%B7%A5%E7%A8%8B%E4%B8%8A%E4%B8%8B%E6%96%87%E5%B7%A5%E7%A8%8B%E4%B8%8E%E7%BC%96%E6%8E%92%E5%B7%A5%E7%A8%8B/agent.eeda6d8a8b2dcc1f636fc8f0b922c53d_hu_7ae131697522e39f.png" 
+                <img src="/p/ai-agent-%E5%B7%A5%E7%A8%8B%E4%BD%93%E7%B3%BB%E8%AF%A6%E8%A7%A3%E6%8F%90%E7%A4%BA%E5%B7%A5%E7%A8%8B%E4%B8%8A%E4%B8%8B%E6%96%87%E5%B7%A5%E7%A8%8B%E4%B8%8E%E7%BC%96%E6%8E%92%E5%B7%A5%E7%A8%8B/agent.eeda6d8a8b2dcc1f636fc8f0b922c53d_hu_9b56cdc14f822e9f.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -1665,7 +1665,7 @@
         
         
             <div class="article-image">
-                <img src="/p/ai-agent-%E8%AE%B0%E5%BF%86%E6%9C%BA%E5%88%B6%E8%AF%A6%E8%A7%A3%E4%BB%8E%E4%BC%9A%E8%AF%9D%E4%B8%8A%E4%B8%8B%E6%96%87%E5%88%B0%E6%8C%81%E4%B9%85%E5%8C%96%E8%AE%B0%E5%BF%86%E7%B3%BB%E7%BB%9F/agent.eeda6d8a8b2dcc1f636fc8f0b922c53d_hu_7ae131697522e39f.png" 
+                <img src="/p/ai-agent-%E8%AE%B0%E5%BF%86%E6%9C%BA%E5%88%B6%E8%AF%A6%E8%A7%A3%E4%BB%8E%E4%BC%9A%E8%AF%9D%E4%B8%8A%E4%B8%8B%E6%96%87%E5%88%B0%E6%8C%81%E4%B9%85%E5%8C%96%E8%AE%B0%E5%BF%86%E7%B3%BB%E7%BB%9F/agent.eeda6d8a8b2dcc1f636fc8f0b922c53d_hu_9b56cdc14f822e9f.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -1709,8 +1709,9 @@
         (d.head || d.body).appendChild(s);
     })();
 </script>
-<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+		<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+		<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+	
 </div>
 
 <style>

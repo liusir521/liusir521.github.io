@@ -580,50 +580,50 @@
 </h4><p>采用的是 Sampled LFU（随机采样找出最不常用的候选）淘汰算法，当添加时发现空间不足时会先用 TinyLFU  估算新key的频率，然后从已有的item中随机抽取5个（源码写死，研究表明，5 个样本的概率足以近似全局最低频项）估算key的频率，如果新key最低，就不值得进入缓存，不是最低就将要淘汰的key添加到相关队列中，重复上述步骤，直到能把新key放进去。</p>
 <h2 id="总结">总结
 </h2><div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>对比</th>
-          <th>数据类型限制</th>
-          <th>淘汰策略</th>
-          <th>一致性</th>
-          <th>过期设置</th>
-          <th>GC</th>
-          <th>内存利用率</th>
-          <th>适用场景</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td><strong>bigcache</strong></td>
-          <td>value 必须是 <code>[]byte</code></td>
-          <td>FIFO</td>
-          <td>强一致性</td>
-          <td>仅支持 <strong>全局过期时间</strong>，不支持单个 key 设置过期；获取时若过期按成功处理</td>
-          <td>0 GC</td>
-          <td>支持动态扩展，利用率较高，但没有淘汰策略，过期数据可能占用内存较久</td>
-          <td>数据生命周期短，不太在意命中率；适合 <strong>短时缓存、临时存储</strong></td>
-      </tr>
-      <tr>
-          <td><strong>freecache</strong></td>
-          <td>key 和 value 都必须是 <code>[]byte</code></td>
-          <td>Nearly LRU（近似 LRU）</td>
-          <td>强一致性</td>
-          <td>支持 <strong>单个 key 设置过期时间</strong>；获取时若过期按失败处理</td>
-          <td>0 GC</td>
-          <td>内存固定分配，利用率高；但 <strong>key 小 value 大</strong> 时可能产生空间碎片</td>
-          <td>命中率要求不高；适合 <strong>日志、监控指标等大量 KV 缓存</strong></td>
-      </tr>
-      <tr>
-          <td><strong>ristretto</strong></td>
-          <td>无限制</td>
-          <td>Sampled LFU（随机采样选出最不常用候选）</td>
-          <td>最终一致性</td>
-          <td>支持 <strong>单个 key 设置过期时间</strong>；获取时若过期按失败处理</td>
-          <td>Go GC</td>
-          <td>有容量上限且控制精细，结合淘汰策略，整体 <strong>内存利用率最高</strong></td>
-          <td>需要 <strong>高命中率</strong>；适合 <strong>业务缓存（用户会话、推荐系统、热点数据）</strong></td>
-      </tr>
-  </tbody>
+	<thead>
+			<tr>
+					<th>对比</th>
+					<th>数据类型限制</th>
+					<th>淘汰策略</th>
+					<th>一致性</th>
+					<th>过期设置</th>
+					<th>GC</th>
+					<th>内存利用率</th>
+					<th>适用场景</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><strong>bigcache</strong></td>
+					<td>value 必须是 <code>[]byte</code></td>
+					<td>FIFO</td>
+					<td>强一致性</td>
+					<td>仅支持 <strong>全局过期时间</strong>，不支持单个 key 设置过期；获取时若过期按成功处理</td>
+					<td>0 GC</td>
+					<td>支持动态扩展，利用率较高，但没有淘汰策略，过期数据可能占用内存较久</td>
+					<td>数据生命周期短，不太在意命中率；适合 <strong>短时缓存、临时存储</strong></td>
+			</tr>
+			<tr>
+					<td><strong>freecache</strong></td>
+					<td>key 和 value 都必须是 <code>[]byte</code></td>
+					<td>Nearly LRU（近似 LRU）</td>
+					<td>强一致性</td>
+					<td>支持 <strong>单个 key 设置过期时间</strong>；获取时若过期按失败处理</td>
+					<td>0 GC</td>
+					<td>内存固定分配，利用率高；但 <strong>key 小 value 大</strong> 时可能产生空间碎片</td>
+					<td>命中率要求不高；适合 <strong>日志、监控指标等大量 KV 缓存</strong></td>
+			</tr>
+			<tr>
+					<td><strong>ristretto</strong></td>
+					<td>无限制</td>
+					<td>Sampled LFU（随机采样选出最不常用候选）</td>
+					<td>最终一致性</td>
+					<td>支持 <strong>单个 key 设置过期时间</strong>；获取时若过期按失败处理</td>
+					<td>Go GC</td>
+					<td>有容量上限且控制精细，结合淘汰策略，整体 <strong>内存利用率最高</strong></td>
+					<td>需要 <strong>高命中率</strong>；适合 <strong>业务缓存（用户会话、推荐系统、热点数据）</strong></td>
+			</tr>
+	</tbody>
 </table></div>
 
 </section>
@@ -677,7 +677,7 @@
         
         
             <div class="article-image">
-                <img src="/p/go-map-1.24%E6%96%B0%E5%AE%9E%E7%8E%B0/go.a4569e34ee3c8189513108a2f7bedc42_hu_a7d8e649438b8d60.jpg" 
+                <img src="/p/go-map-1.24%E6%96%B0%E5%AE%9E%E7%8E%B0/go.a4569e34ee3c8189513108a2f7bedc42_hu_1f7d05054b7fd997.jpg" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -701,7 +701,7 @@
         
         
             <div class="article-image">
-                <img src="/p/go%E5%86%85%E9%83%A8%E9%94%81/go.a4569e34ee3c8189513108a2f7bedc42_hu_a7d8e649438b8d60.jpg" 
+                <img src="/p/go%E5%86%85%E9%83%A8%E9%94%81/go.a4569e34ee3c8189513108a2f7bedc42_hu_1f7d05054b7fd997.jpg" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -725,7 +725,7 @@
         
         
             <div class="article-image">
-                <img src="/p/go%E8%AF%AD%E8%A8%80gmp%E6%A8%A1%E5%9E%8B/go.a4569e34ee3c8189513108a2f7bedc42_hu_a7d8e649438b8d60.jpg" 
+                <img src="/p/go%E8%AF%AD%E8%A8%80gmp%E6%A8%A1%E5%9E%8B/go.a4569e34ee3c8189513108a2f7bedc42_hu_1f7d05054b7fd997.jpg" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -749,7 +749,7 @@
         
         
             <div class="article-image">
-                <img src="/p/go%E8%AF%AD%E8%A8%80sync.map/go.a4569e34ee3c8189513108a2f7bedc42_hu_a7d8e649438b8d60.jpg" 
+                <img src="/p/go%E8%AF%AD%E8%A8%80sync.map/go.a4569e34ee3c8189513108a2f7bedc42_hu_1f7d05054b7fd997.jpg" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -773,7 +773,7 @@
         
         
             <div class="article-image">
-                <img src="/p/go%E8%AF%AD%E8%A8%80%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%A8%A1%E5%9E%8B/go.a4569e34ee3c8189513108a2f7bedc42_hu_a7d8e649438b8d60.jpg" 
+                <img src="/p/go%E8%AF%AD%E8%A8%80%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E6%A8%A1%E5%9E%8B/go.a4569e34ee3c8189513108a2f7bedc42_hu_1f7d05054b7fd997.jpg" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -817,8 +817,9 @@
         (d.head || d.body).appendChild(s);
     })();
 </script>
-<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+		<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+		<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+	
 </div>
 
 <style>

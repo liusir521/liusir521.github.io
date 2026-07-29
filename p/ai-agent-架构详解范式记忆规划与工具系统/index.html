@@ -587,35 +587,35 @@
 </div><p>这是 AutoGen、CrewAI 等项目采用的多 Agent 架构。优势是各 Agent 独立 prompt、独立工具集，协作效率高；挑战是通信开销、一致性问题。</p>
 <h3 id="范式对比">范式对比
 </h3><div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>范式</th>
-          <th>特点</th>
-          <th>适用场景</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>ReAct</td>
-          <td>思考-行动循环，灵活可解释</td>
-          <td>需要动态决策的任务</td>
-      </tr>
-      <tr>
-          <td>Plan-Act</td>
-          <td>先规划再执行</td>
-          <td>步骤明确的任务</td>
-      </tr>
-      <tr>
-          <td>Plan-Execute-Replan</td>
-          <td>执行中动态调整计划</td>
-          <td>结果不确定的任务</td>
-      </tr>
-      <tr>
-          <td>多 Agent</td>
-          <td>多个专业 Agent 协作</td>
-          <td>跨领域的复杂任务</td>
-      </tr>
-  </tbody>
+	<thead>
+			<tr>
+					<th>范式</th>
+					<th>特点</th>
+					<th>适用场景</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>ReAct</td>
+					<td>思考-行动循环，灵活可解释</td>
+					<td>需要动态决策的任务</td>
+			</tr>
+			<tr>
+					<td>Plan-Act</td>
+					<td>先规划再执行</td>
+					<td>步骤明确的任务</td>
+			</tr>
+			<tr>
+					<td>Plan-Execute-Replan</td>
+					<td>执行中动态调整计划</td>
+					<td>结果不确定的任务</td>
+			</tr>
+			<tr>
+					<td>多 Agent</td>
+					<td>多个专业 Agent 协作</td>
+					<td>跨领域的复杂任务</td>
+			</tr>
+	</tbody>
 </table></div>
 <h2 id="agent-记忆系统">Agent 记忆系统
 </h2><p>记忆是 Agent 区别于单次 LLM 调用的关键。没有记忆，Agent 每次对话都是&quot;新手&quot;。</p>
@@ -681,35 +681,35 @@
 </div>
 </div><p>长期记忆的内容类型：</p>
 <div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>类型</th>
-          <th>内容</th>
-          <th>示例</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>用户偏好</td>
-          <td>用户的使用习惯和配置</td>
-          <td>&ldquo;用户是 Go 开发者，习惯 Linux 风格&rdquo;</td>
-      </tr>
-      <tr>
-          <td>项目知识</td>
-          <td>项目结构、框架约定</td>
-          <td>&ldquo;项目的鉴权中间件在 auth/ 下&rdquo;</td>
-      </tr>
-      <tr>
-          <td>经验教训</td>
-          <td>过去的错误和改进</td>
-          <td>&ldquo;上次修改这个接口导致测试失败&rdquo;</td>
-      </tr>
-      <tr>
-          <td>操作记录</td>
-          <td>历史操作摘要</td>
-          <td>&ldquo;上个月完成了数据库迁移&rdquo;</td>
-      </tr>
-  </tbody>
+	<thead>
+			<tr>
+					<th>类型</th>
+					<th>内容</th>
+					<th>示例</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>用户偏好</td>
+					<td>用户的使用习惯和配置</td>
+					<td>&ldquo;用户是 Go 开发者，习惯 Linux 风格&rdquo;</td>
+			</tr>
+			<tr>
+					<td>项目知识</td>
+					<td>项目结构、框架约定</td>
+					<td>&ldquo;项目的鉴权中间件在 auth/ 下&rdquo;</td>
+			</tr>
+			<tr>
+					<td>经验教训</td>
+					<td>过去的错误和改进</td>
+					<td>&ldquo;上次修改这个接口导致测试失败&rdquo;</td>
+			</tr>
+			<tr>
+					<td>操作记录</td>
+					<td>历史操作摘要</td>
+					<td>&ldquo;上个月完成了数据库迁移&rdquo;</td>
+			</tr>
+	</tbody>
 </table></div>
 <h3 id="记忆管理的挑战">记忆管理的挑战
 </h3><ul>
@@ -841,45 +841,45 @@
 </div><p>LLM 根据工具描述判断何时调用哪个工具、传递什么参数。</p>
 <h3 id="工具分类">工具分类
 </h3><div class="table-wrapper"><table>
-  <thead>
-      <tr>
-          <th>类别</th>
-          <th>工具举例</th>
-          <th>用途</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>文件系统</td>
-          <td>read/write/edit/glob/grep</td>
-          <td>读写代码、搜索文件</td>
-      </tr>
-      <tr>
-          <td>网络</td>
-          <td>web_search/web_fetch</td>
-          <td>获取实时信息</td>
-      </tr>
-      <tr>
-          <td>Shell</td>
-          <td>bash/exec</td>
-          <td>执行命令、运行测试</td>
-      </tr>
-      <tr>
-          <td>数据库</td>
-          <td>query/execute</td>
-          <td>读写数据库</td>
-      </tr>
-      <tr>
-          <td>外部API</td>
-          <td>github/jira/slack</td>
-          <td>与外部平台交互</td>
-      </tr>
-      <tr>
-          <td>浏览器</td>
-          <td>click/type/screenshot</td>
-          <td>Web 自动化测试</td>
-      </tr>
-  </tbody>
+	<thead>
+			<tr>
+					<th>类别</th>
+					<th>工具举例</th>
+					<th>用途</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>文件系统</td>
+					<td>read/write/edit/glob/grep</td>
+					<td>读写代码、搜索文件</td>
+			</tr>
+			<tr>
+					<td>网络</td>
+					<td>web_search/web_fetch</td>
+					<td>获取实时信息</td>
+			</tr>
+			<tr>
+					<td>Shell</td>
+					<td>bash/exec</td>
+					<td>执行命令、运行测试</td>
+			</tr>
+			<tr>
+					<td>数据库</td>
+					<td>query/execute</td>
+					<td>读写数据库</td>
+			</tr>
+			<tr>
+					<td>外部API</td>
+					<td>github/jira/slack</td>
+					<td>与外部平台交互</td>
+			</tr>
+			<tr>
+					<td>浏览器</td>
+					<td>click/type/screenshot</td>
+					<td>Web 自动化测试</td>
+			</tr>
+	</tbody>
 </table></div>
 <h3 id="工具调用流程">工具调用流程
 </h3><div class="highlight"><div class="chroma">
@@ -1076,7 +1076,7 @@
         
         
             <div class="article-image">
-                <img src="/p/ai-agent-%E8%AF%84%E4%BC%B0%E4%BD%93%E7%B3%BB%E8%AF%A6%E8%A7%A3%E4%BB%8E%E5%87%86%E7%A1%AE%E7%8E%87%E5%88%B0%E7%AB%AF%E5%88%B0%E7%AB%AF%E4%BB%BB%E5%8A%A1%E6%88%90%E5%8A%9F%E7%8E%87/agent.eeda6d8a8b2dcc1f636fc8f0b922c53d_hu_7ae131697522e39f.png" 
+                <img src="/p/ai-agent-%E8%AF%84%E4%BC%B0%E4%BD%93%E7%B3%BB%E8%AF%A6%E8%A7%A3%E4%BB%8E%E5%87%86%E7%A1%AE%E7%8E%87%E5%88%B0%E7%AB%AF%E5%88%B0%E7%AB%AF%E4%BB%BB%E5%8A%A1%E6%88%90%E5%8A%9F%E7%8E%87/agent.eeda6d8a8b2dcc1f636fc8f0b922c53d_hu_9b56cdc14f822e9f.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -1100,7 +1100,7 @@
         
         
             <div class="article-image">
-                <img src="/p/function-calling-/-tool-calling-%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3/agent.eeda6d8a8b2dcc1f636fc8f0b922c53d_hu_7ae131697522e39f.png" 
+                <img src="/p/function-calling-/-tool-calling-%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3/agent.eeda6d8a8b2dcc1f636fc8f0b922c53d_hu_9b56cdc14f822e9f.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -1124,7 +1124,7 @@
         
         
             <div class="article-image">
-                <img src="/p/mcp-%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E5%8D%8F%E8%AE%AE%E5%B7%A5%E5%85%B7%E8%B5%84%E6%BA%90%E4%B8%8E%E5%AE%89%E5%85%A8%E8%BE%B9%E7%95%8C/claude-code.4c3fec44ee666712a4aad49f3530dea8_hu_8a43fbfe2f060b29.png" 
+                <img src="/p/mcp-%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E5%8D%8F%E8%AE%AE%E5%B7%A5%E5%85%B7%E8%B5%84%E6%BA%90%E4%B8%8E%E5%AE%89%E5%85%A8%E8%BE%B9%E7%95%8C/claude-code.4c3fec44ee666712a4aad49f3530dea8_hu_5e4dbc97ba468828.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -1148,7 +1148,7 @@
         
         
             <div class="article-image">
-                <img src="/p/%E5%A4%9A-agent-%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1%E8%AF%A6%E8%A7%A3%E4%BB%8E%E4%BB%BB%E5%8A%A1%E5%88%86%E8%A7%A3%E5%88%B0%E5%8D%8F%E4%BD%9C%E8%B0%83%E5%BA%A6/agent.eeda6d8a8b2dcc1f636fc8f0b922c53d_hu_7ae131697522e39f.png" 
+                <img src="/p/%E5%A4%9A-agent-%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1%E8%AF%A6%E8%A7%A3%E4%BB%8E%E4%BB%BB%E5%8A%A1%E5%88%86%E8%A7%A3%E5%88%B0%E5%8D%8F%E4%BD%9C%E8%B0%83%E5%BA%A6/agent.eeda6d8a8b2dcc1f636fc8f0b922c53d_hu_9b56cdc14f822e9f.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -1172,7 +1172,7 @@
         
         
             <div class="article-image">
-                <img src="/p/ai-agent-%E5%B7%A5%E7%A8%8B%E4%BD%93%E7%B3%BB%E8%AF%A6%E8%A7%A3%E6%8F%90%E7%A4%BA%E5%B7%A5%E7%A8%8B%E4%B8%8A%E4%B8%8B%E6%96%87%E5%B7%A5%E7%A8%8B%E4%B8%8E%E7%BC%96%E6%8E%92%E5%B7%A5%E7%A8%8B/agent.eeda6d8a8b2dcc1f636fc8f0b922c53d_hu_7ae131697522e39f.png" 
+                <img src="/p/ai-agent-%E5%B7%A5%E7%A8%8B%E4%BD%93%E7%B3%BB%E8%AF%A6%E8%A7%A3%E6%8F%90%E7%A4%BA%E5%B7%A5%E7%A8%8B%E4%B8%8A%E4%B8%8B%E6%96%87%E5%B7%A5%E7%A8%8B%E4%B8%8E%E7%BC%96%E6%8E%92%E5%B7%A5%E7%A8%8B/agent.eeda6d8a8b2dcc1f636fc8f0b922c53d_hu_9b56cdc14f822e9f.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -1216,8 +1216,9 @@
         (d.head || d.body).appendChild(s);
     })();
 </script>
-<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+		<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+		<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+	
 </div>
 
 <style>

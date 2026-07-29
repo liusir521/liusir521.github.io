@@ -202,26 +202,26 @@
 &lt;h2 id=&#34;对象分配流程&#34;&gt;对象分配流程
 &lt;/h2&gt;&lt;h3 id=&#34;go语言内存管理中的对象划分&#34;&gt;go语言内存管理中的对象划分：
 &lt;/h3&gt;&lt;table&gt;
-  &lt;thead&gt;
-      &lt;tr&gt;
-          &lt;th&gt;对象级别&lt;/th&gt;
-          &lt;th&gt;大小范围&lt;/th&gt;
-      &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-      &lt;tr&gt;
-          &lt;td&gt;微对象（Tiny对象）&lt;/td&gt;
-          &lt;td&gt;[1，16B）&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;小对象&lt;/td&gt;
-          &lt;td&gt;[16B，32KB]&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td&gt;大对象&lt;/td&gt;
-          &lt;td&gt;(32KB，无限大）&lt;/td&gt;
-      &lt;/tr&gt;
-  &lt;/tbody&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;对象级别&lt;/th&gt;
+					&lt;th&gt;大小范围&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;微对象（Tiny对象）&lt;/td&gt;
+					&lt;td&gt;[1，16B）&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;小对象&lt;/td&gt;
+					&lt;td&gt;[16B，32KB]&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;大对象&lt;/td&gt;
+					&lt;td&gt;(32KB，无限大）&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
 &lt;/table&gt;
 &lt;h3 id=&#34;tiny对象分配流程&#34;&gt;Tiny对象分配流程
 &lt;/h3&gt;&lt;p&gt;针对Tiny对象，go语言做了特殊处理，MCache中不仅保存着各个span class级别的内存块空间，还有一个比较特殊的 &lt;code&gt;Tiny存储空间&lt;/code&gt;。&lt;/p&gt;
