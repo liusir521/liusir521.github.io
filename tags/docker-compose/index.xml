@@ -13,7 +13,7 @@
         <pubDate>Sat, 25 Jul 2026 00:00:00 +0000</pubDate>
         
         <guid>https://liusir521.github.io/p/docker-%E5%85%A5%E9%97%A8%E4%B8%8E%E5%AE%9E%E6%88%98%E4%BB%8E%E5%AE%B9%E5%99%A8%E5%88%B0-compose/</guid>
-        <description>&lt;h2 id=&#34;引言&#34;&gt;引言
+        <description>&lt;img src="https://liusir521.github.io/p/docker-%E5%85%A5%E9%97%A8%E4%B8%8E%E5%AE%9E%E6%88%98%E4%BB%8E%E5%AE%B9%E5%99%A8%E5%88%B0-compose/image.png" alt="Featured image of post Docker 入门与实战：从容器到 Compose" /&gt;&lt;h2 id=&#34;引言&#34;&gt;引言
 &lt;/h2&gt;&lt;p&gt;开发一个应用时，经常会遇到这样的情况：代码在自己的电脑上可以运行，换到另一台机器后，可能因为操作系统、运行时版本、系统库或配置不同而启动失败。&lt;/p&gt;
 &lt;p&gt;Docker 解决的核心问题，就是把应用和它依赖的运行环境一起打包，并用统一的方式完成构建、分发和运行。&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
