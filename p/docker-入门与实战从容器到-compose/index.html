@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html lang="zh-cn" dir="ltr">
     <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="系统介绍 Docker 的核心概念、常用命令、Dockerfile、数据卷、网络与 Docker Compose，并通过完整示例掌握容器化应用的基本工作流">
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="从运行第一个容器开始，用 Go 服务与 Caddy 反向代理串联镜像构建、数据持久化、容器网络和 Docker Compose，附日常命令与排障速查">
 <title>Docker 入门与实战：从容器到 Compose</title>
 
 <link rel='canonical' href='https://liusir521.github.io/p/docker-%E5%85%A5%E9%97%A8%E4%B8%8E%E5%AE%9E%E6%88%98%E4%BB%8E%E5%AE%B9%E5%99%A8%E5%88%B0-compose/'>
 
-<link rel="stylesheet" href="/scss/style.min.ae56834d8e6c736a3fd56f971794f8c0705364d4411c7000fbf5dc668862af2f.css"><meta property='og:title' content="Docker 入门与实战：从容器到 Compose">
-<meta property='og:description' content="系统介绍 Docker 的核心概念、常用命令、Dockerfile、数据卷、网络与 Docker Compose，并通过完整示例掌握容器化应用的基本工作流">
+<link rel="stylesheet" href="/scss/style.min.db5b58cfbb81c62ddc8a55c6384335626e74f304aa8992172c79c3ab7db71b41.css"><meta property='og:title' content="Docker 入门与实战：从容器到 Compose">
+<meta property='og:description' content="从运行第一个容器开始，用 Go 服务与 Caddy 反向代理串联镜像构建、数据持久化、容器网络和 Docker Compose，附日常命令与排障速查">
 <meta property='og:url' content='https://liusir521.github.io/p/docker-%E5%85%A5%E9%97%A8%E4%B8%8E%E5%AE%9E%E6%88%98%E4%BB%8E%E5%AE%B9%E5%99%A8%E5%88%B0-compose/'>
 <meta property='og:site_name' content='你怂你mua'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Docker' /><meta property='article:tag' content='容器' /><meta property='article:tag' content='Docker Compose' /><meta property='article:tag' content='DevOps' /><meta property='article:published_time' content='2026-07-25T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2026-07-25T00:00:00&#43;00:00'/><meta property='og:image' content='https://liusir521.github.io/p/docker-%E5%85%A5%E9%97%A8%E4%B8%8E%E5%AE%9E%E6%88%98%E4%BB%8E%E5%AE%B9%E5%99%A8%E5%88%B0-compose/image.png' />
 <meta name="twitter:title" content="Docker 入门与实战：从容器到 Compose">
-<meta name="twitter:description" content="系统介绍 Docker 的核心概念、常用命令、Dockerfile、数据卷、网络与 Docker Compose，并通过完整示例掌握容器化应用的基本工作流"><meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:description" content="从运行第一个容器开始，用 Go 服务与 Caddy 反向代理串联镜像构建、数据持久化、容器网络和 Docker Compose，附日常命令与排障速查"><meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:image" content='https://liusir521.github.io/p/docker-%E5%85%A5%E9%97%A8%E4%B8%8E%E5%AE%9E%E6%88%98%E4%BB%8E%E5%AE%B9%E5%99%A8%E5%88%B0-compose/image.png' />
     <link rel="shortcut icon" href="/favicon.png" />
 
@@ -59,7 +59,7 @@
                     
                     
                         
-                        <img src="/img/avatar_hu_f8501f45e2b24951.png" width="300"
+                        <img src="/img/avatar_hu_3619e91efb610b21.png" width="300"
                             height="300" class="site-logo" loading="lazy" alt="Avatar">
                     
                 
@@ -317,74 +317,61 @@
         <div class="widget--toc">
             <nav id="TableOfContents">
   <ol>
-    <li><a href="#引言">引言</a></li>
-    <li><a href="#docker-是什么">Docker 是什么</a>
+    <li><a href="#先运行一个容器">先运行一个容器</a>
       <ol>
-        <li><a href="#docker-的核心对象">Docker 的核心对象</a></li>
-        <li><a href="#docker-的工作架构">Docker 的工作架构</a></li>
-        <li><a href="#容器与虚拟机的区别">容器与虚拟机的区别</a></li>
+        <li><a href="#检查环境">检查环境</a></li>
+        <li><a href="#启动-nginx">启动 Nginx</a></li>
+        <li><a href="#查看日志再结束实验">查看日志，再结束实验</a></li>
       </ol>
     </li>
-    <li><a href="#准备环境">准备环境</a></li>
-    <li><a href="#docker-常用命令">Docker 常用命令</a>
+    <li><a href="#理解镜像容器与运行环境">理解镜像、容器与运行环境</a>
       <ol>
-        <li><a href="#镜像管理">镜像管理</a></li>
-        <li><a href="#镜像离线保存与载入">镜像离线保存与载入</a></li>
-        <li><a href="#创建并运行容器">创建并运行容器</a></li>
-        <li><a href="#查看与管理容器">查看与管理容器</a></li>
-        <li><a href="#日志与排障">日志与排障</a></li>
-        <li><a href="#按需使用的容器命令">按需使用的容器命令</a></li>
-        <li><a href="#资源限制">资源限制</a></li>
-        <li><a href="#查看占用与清理">查看占用与清理</a></li>
+        <li><a href="#从构建到运行">从构建到运行</a></li>
+        <li><a href="#镜像不会随着容器一起改变">镜像不会随着容器一起改变</a></li>
+        <li><a href="#容器与虚拟机的边界">容器与虚拟机的边界</a></li>
       </ol>
     </li>
-    <li><a href="#dockerfile">Dockerfile</a>
+    <li><a href="#用-dockerfile-构建自己的服务">用 Dockerfile 构建自己的服务</a>
       <ol>
-        <li><a href="#构建上下文">构建上下文</a></li>
-        <li><a href="#常用指令">常用指令</a></li>
-        <li><a href="#一个完整的-go-示例">一个完整的 Go 示例</a></li>
-        <li><a href="#为什么使用多阶段构建">为什么使用多阶段构建</a></li>
-        <li><a href="#镜像层与构建缓存">镜像层与构建缓存</a></li>
-        <li><a href="#dockerfile-最佳实践">Dockerfile 最佳实践</a></li>
+        <li><a href="#准备应用文件">准备应用文件</a></li>
+        <li><a href="#编写多阶段-dockerfile">编写多阶段 Dockerfile</a></li>
+        <li><a href="#控制构建上下文与缓存">控制构建上下文与缓存</a></li>
+        <li><a href="#构建运行并验证">构建、运行并验证</a></li>
       </ol>
     </li>
-    <li><a href="#数据卷">数据卷</a>
+    <li><a href="#把数据与网络接到容器上">把数据与网络接到容器上</a>
       <ol>
-        <li><a href="#命名数据卷">命名数据卷</a></li>
-        <li><a href="#绑定挂载">绑定挂载</a></li>
-        <li><a href="#tmpfs">tmpfs</a></li>
-        <li><a href="#挂载时的注意事项">挂载时的注意事项</a></li>
-        <li><a href="#备份与恢复数据卷">备份与恢复数据卷</a></li>
+        <li><a href="#验证数据卷的生命周期">验证数据卷的生命周期</a></li>
+        <li><a href="#通过容器名称访问服务">通过容器名称访问服务</a></li>
       </ol>
     </li>
-    <li><a href="#docker-网络">Docker 网络</a>
+    <li><a href="#用-compose-组织完整应用">用 Compose 组织完整应用</a>
       <ol>
-        <li><a href="#常见网络驱动">常见网络驱动</a></li>
-        <li><a href="#创建自定义网络">创建自定义网络</a></li>
-        <li><a href="#端口映射">端口映射</a></li>
-        <li><a href="#localhost-与服务发现">localhost 与服务发现</a></li>
+        <li><a href="#添加-caddy-与-compose-配置">添加 Caddy 与 Compose 配置</a></li>
+        <li><a href="#启动并检查整条请求链路">启动并检查整条请求链路</a></li>
+        <li><a href="#修改配置区分插值与容器环境变量">修改配置：区分插值与容器环境变量</a></li>
+        <li><a href="#更新与停止">更新与停止</a></li>
       </ol>
     </li>
-    <li><a href="#docker-compose">Docker Compose</a>
+    <li><a href="#command-reference">命令速查</a>
       <ol>
-        <li><a href="#完整-compose-示例">完整 Compose 示例</a></li>
-        <li><a href="#compose-常用命令">Compose 常用命令</a></li>
-        <li><a href="#环境变量">环境变量</a></li>
-        <li><a href="#compose-使用建议">Compose 使用建议</a></li>
+        <li><a href="#镜像与分发">镜像与分发</a></li>
+        <li><a href="#容器与日志">容器与日志</a></li>
+        <li><a href="#compose-与资源限制">Compose 与资源限制</a></li>
+        <li><a href="#磁盘占用与清理">磁盘占用与清理</a></li>
       </ol>
     </li>
-    <li><a href="#一套完整的日常工作流">一套完整的日常工作流</a></li>
-    <li><a href="#常见问题">常见问题</a>
+    <li><a href="#troubleshooting">常见问题</a>
       <ol>
         <li><a href="#容器启动后立即退出">容器启动后立即退出</a></li>
-        <li><a href="#端口映射后仍无法访问">端口映射后仍无法访问</a></li>
-        <li><a href="#容器之间无法连接">容器之间无法连接</a></li>
-        <li><a href="#修改代码后镜像没有变化">修改代码后镜像没有变化</a></li>
-        <li><a href="#磁盘空间持续增长">磁盘空间持续增长</a></li>
+        <li><a href="#端口已经发布却无法访问">端口已经发布，却无法访问</a></li>
+        <li><a href="#服务名解析失败或代理返回-502">服务名解析失败，或代理返回 502</a></li>
+        <li><a href="#修改代码或配置后没有生效">修改代码或配置后没有生效</a></li>
+        <li><a href="#重建容器后数据不见了">重建容器后数据不见了</a></li>
       </ol>
     </li>
-    <li><a href="#安全边界">安全边界</a></li>
-    <li><a href="#小结">小结</a></li>
+    <li><a href="#用到真实项目时">用到真实项目时</a></li>
+    <li><a href="#参考资料">参考资料</a></li>
   </ol>
 </nav>
         </div>
@@ -400,8 +387,8 @@
     <header class="article-header">
         <div class="article-image">
             <a href="/p/docker-%E5%85%A5%E9%97%A8%E4%B8%8E%E5%AE%9E%E6%88%98%E4%BB%8E%E5%AE%B9%E5%99%A8%E5%88%B0-compose/">
-                <img src="/p/docker-%E5%85%A5%E9%97%A8%E4%B8%8E%E5%AE%9E%E6%88%98%E4%BB%8E%E5%AE%B9%E5%99%A8%E5%88%B0-compose/image_hu_f0b9e04263f66608.png"
-                        srcset="/p/docker-%E5%85%A5%E9%97%A8%E4%B8%8E%E5%AE%9E%E6%88%98%E4%BB%8E%E5%AE%B9%E5%99%A8%E5%88%B0-compose/image_hu_f0b9e04263f66608.png 800w, /p/docker-%E5%85%A5%E9%97%A8%E4%B8%8E%E5%AE%9E%E6%88%98%E4%BB%8E%E5%AE%B9%E5%99%A8%E5%88%B0-compose/image_hu_1325bd848858140e.png 1600w"
+                <img src="/p/docker-%E5%85%A5%E9%97%A8%E4%B8%8E%E5%AE%9E%E6%88%98%E4%BB%8E%E5%AE%B9%E5%99%A8%E5%88%B0-compose/image_hu_98acffb5660969dc.png"
+                        srcset="/p/docker-%E5%85%A5%E9%97%A8%E4%B8%8E%E5%AE%9E%E6%88%98%E4%BB%8E%E5%AE%B9%E5%99%A8%E5%88%B0-compose/image_hu_98acffb5660969dc.png 800w, /p/docker-%E5%85%A5%E9%97%A8%E4%B8%8E%E5%AE%9E%E6%88%98%E4%BB%8E%E5%AE%B9%E5%99%A8%E5%88%B0-compose/image_hu_df37834a0f06506e.png 1600w"
                         width="800" 
                         height="450" 
                         loading="lazy"
@@ -439,7 +426,7 @@
     
         
         <h3 class="article-subtitle">
-            系统介绍 Docker 的核心概念、常用命令、Dockerfile、数据卷、网络与 Docker Compose，并通过完整示例掌握容器化应用的基本工作流
+            从运行第一个容器开始，用 Go 服务与 Caddy 反向代理串联镜像构建、数据持久化、容器网络和 Docker Compose，附日常命令与排障速查
         </h3>
         
     </div>
@@ -475,7 +462,7 @@
 
 
                 <time class="article-time--reading">
-                    阅读时长: 12 分钟
+                    阅读时长: 9 分钟
                 </time>
             </div>
         
@@ -490,9 +477,135 @@
     <section class="article-content">
     
     
-    <h2 id="引言">引言
-</h2><p>开发一个应用时，经常会遇到这样的情况：代码在自己的电脑上可以运行，换到另一台机器后，可能因为操作系统、运行时版本、系统库或配置不同而启动失败。</p>
-<p>Docker 解决的核心问题，就是把应用和它依赖的运行环境一起打包，并用统一的方式完成构建、分发和运行。</p>
+    <p>从下面的 Nginx 实验开始：启动容器，访问页面，再停止并删除它。完成一次运行之后，再看镜像、数据卷和网络各自解决什么问题。</p>
+<p>本文使用 <strong>Linux 容器、现代 <code>docker compose</code> 命令和 Bash/Zsh 语法</strong>。macOS、Windows 通常使用 Docker Desktop，Linux 可以安装 Docker Engine 与 Compose 插件；Windows 用户可在 WSL 中执行示例。示例假设 CLI 连接本机 Docker，首次拉取镜像需要网络。</p>
+<div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th>阶段</th>
+					<th>要解决的问题</th>
+					<th>完成标志</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>1. 运行容器</td>
+					<td>怎样启动一个现成的服务？</td>
+					<td>浏览器显示 Nginx 欢迎页</td>
+			</tr>
+			<tr>
+					<td>2. 理解对象</td>
+					<td>镜像、容器和宿主机是什么关系？</td>
+					<td>分清创建、停止与删除</td>
+			</tr>
+			<tr>
+					<td>3. 构建镜像</td>
+					<td>怎样交付自己的应用？</td>
+					<td>Go 服务返回主机名和健康状态</td>
+			</tr>
+			<tr>
+					<td>4. 管理数据与网络</td>
+					<td>数据放哪里，服务怎么互相访问？</td>
+					<td>新容器读到旧数据，通过名称访问应用</td>
+			</tr>
+			<tr>
+					<td>5. 使用 Compose</td>
+					<td>怎样用一份配置启动多个服务？</td>
+					<td>请求经 Caddy 转发到 Go 服务</td>
+			</tr>
+	</tbody>
+</table></div>
+<p>顺序阅读可完成整套实验；日常使用时可直接跳到<a class="link" href="#command-reference" >命令速查</a>或<a class="link" href="#troubleshooting" >常见问题</a>。</p>
+<h2 id="先运行一个容器">先运行一个容器
+</h2><h3 id="检查环境">检查环境
+</h3><p>安装入口见 <a class="link" href="https://docs.docker.com/get-started/get-docker/"  target="_blank" rel="noopener"
+    >Docker 官方安装文档</a>。安装后执行：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">docker version
+</span></span><span class="line"><span class="cl">docker compose version
+</span></span><span class="line"><span class="cl">docker run --rm hello-world
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><code>docker version</code> 应同时显示 Client 和 Server；<code>hello-world</code> 应输出 <code>Hello from Docker!</code>。如果无法连接 daemon，先启动 Docker Desktop 或 Linux 上的 Docker 服务。<code>docker info</code> 可以进一步查看服务端环境。</p>
+<h3 id="启动-nginx">启动 Nginx
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">docker run --detach <span class="se">\
+</span></span></span><span class="line"><span class="cl">  --name docker-web <span class="se">\
+</span></span></span><span class="line"><span class="cl">  --publish 127.0.0.1:8080:80 <span class="se">\
+</span></span></span><span class="line"><span class="cl">  nginx:alpine
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>打开 <a class="link" href="http://127.0.0.1:8080"  target="_blank" rel="noopener"
+    >http://127.0.0.1:8080</a>，应看到 Nginx 欢迎页，也可以用下面的命令检查：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">curl -I http://127.0.0.1:8080
+</span></span><span class="line"><span class="cl">docker ps --filter <span class="nv">name</span><span class="o">=</span>docker-web
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>预期 HTTP 状态为 <code>200 OK</code>，容器状态为 <code>Up</code>。如果宿主机的 <code>8080</code> 已被占用，把发布参数改成 <code>127.0.0.1:18080:80</code>，访问地址也改为 <code>18080</code>。后面的独立容器实验同样只修改宿主机端口，Compose 示例则通过 <code>APP_PORT</code> 调整。</p>
+<div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th>片段</th>
+					<th>含义</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>docker run</code></td>
+					<td>根据镜像创建并启动一个新容器；本地没有镜像时自动拉取</td>
+			</tr>
+			<tr>
+					<td><code>--detach</code> / <code>-d</code></td>
+					<td>在后台运行</td>
+			</tr>
+			<tr>
+					<td><code>--name docker-web</code></td>
+					<td>为容器指定名称，后续命令可直接引用</td>
+			</tr>
+			<tr>
+					<td><code>--publish 127.0.0.1:8080:80</code> / <code>-p</code></td>
+					<td>把宿主机本地的 <code>8080</code> 转发到容器的 <code>80</code></td>
+			</tr>
+			<tr>
+					<td><code>nginx:alpine</code></td>
+					<td>镜像仓库名与标签</td>
+			</tr>
+	</tbody>
+</table></div>
+<p>命令结构是 <code>docker run [Docker 选项] 镜像 [命令及参数]</code>。<code>-p</code>、<code>--name</code> 等 Docker 选项必须写在镜像名之前。</p>
+<h3 id="查看日志再结束实验">查看日志，再结束实验
+</h3><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">docker logs --tail <span class="m">20</span> docker-web
+</span></span><span class="line"><span class="cl">docker stop docker-web
+</span></span><span class="line"><span class="cl">docker ps -a --filter <span class="nv">name</span><span class="o">=</span>docker-web
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>此时容器仍然存在，只是状态变为 <code>Exited</code>。重新启动和删除是两个不同操作：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -500,643 +613,150 @@
 </span><span class="lnt">3
 </span><span class="lnt">4
 </span><span class="lnt">5
+</span><span class="lnt">6
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">源代码 + 依赖 + 运行时 + 配置约定
-</span></span><span class="line"><span class="cl">                ↓ docker build
-</span></span><span class="line"><span class="cl">              Docker 镜像
-</span></span><span class="line"><span class="cl">                ↓ docker run
-</span></span><span class="line"><span class="cl">              Docker 容器
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 重新启动原来的容器</span>
+</span></span><span class="line"><span class="cl">docker start docker-web
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 实验结束：先停止，再删除</span>
+</span></span><span class="line"><span class="cl">docker stop docker-web
+</span></span><span class="line"><span class="cl">docker rm docker-web
 </span></span></code></pre></td></tr></table>
 </div>
-</div><p>本文从 Docker 的基本概念开始，依次介绍常用命令、Dockerfile、数据卷、网络和 Docker Compose，最后把这些能力串成一套完整的容器化工作流。</p>
-<h2 id="docker-是什么">Docker 是什么
-</h2><p>Docker 是一套用于构建（build）、分发（ship）和运行（run）容器化应用的工具与平台。</p>
-<p>在 Linux 上，容器主要利用多种内核能力实现隔离和限制：</p>
-<ul>
-<li>namespaces 隔离进程、网络、挂载点、主机名等资源视图。</li>
-<li>cgroups 限制和统计 CPU、内存、进程数等资源。</li>
-<li>分层文件系统复用镜像层，减少重复存储和传输。</li>
-<li>Linux capabilities、seccomp 等机制缩小容器进程的权限范围。</li>
-</ul>
-<p>容器并不是一台缩小版虚拟机。Linux 容器与宿主机共享内核，隔离边界通常弱于拥有独立内核的虚拟机。在 macOS 和 Windows 上使用 Docker Desktop 时，Linux 容器一般运行在 Docker Desktop 管理的 Linux 虚拟机中。</p>
-<h3 id="docker-的核心对象">Docker 的核心对象
-</h3><div class="table-wrapper"><table>
+</div><p>删除后可以再次使用 <code>docker-web</code> 这个名称。镜像仍保留在本机，下次运行可直接复用。</p>
+<h2 id="理解镜像容器与运行环境">理解镜像、容器与运行环境
+</h2><p>Docker 用统一的工具构建、分发和运行容器化应用。它把应用、用户空间依赖和运行时打包成镜像，减少“换一台机器就无法启动”的环境差异；端口、数据和密钥等运行配置仍需要单独提供。</p>
+<h3 id="从构建到运行">从构建到运行
+</h3><pre class="mermaid">
+  flowchart LR
+    A[源代码与 Dockerfile] --&gt;|docker build| B[镜像]
+    B --&gt;|docker push| C[镜像仓库 Registry]
+    C --&gt;|docker pull| D[另一台机器上的镜像]
+    B --&gt;|docker run| E[容器]
+    D --&gt;|docker run| F[容器]
+</pre>
+
+<div class="table-wrapper"><table>
 	<thead>
 			<tr>
 					<th>对象</th>
-					<th>作用</th>
-					<th>可以类比为</th>
+					<th>保存什么</th>
+					<th>生命周期</th>
 			</tr>
 	</thead>
 	<tbody>
 			<tr>
 					<td>Dockerfile</td>
-					<td>声明镜像如何构建</td>
-					<td>构建配方</td>
+					<td>基础镜像、复制文件和构建命令等配方</td>
+					<td>随源代码维护</td>
 			</tr>
 			<tr>
 					<td>镜像（image）</td>
-					<td>包含应用、运行时和文件系统的只读模板</td>
-					<td>安装包</td>
+					<td>应用、依赖、只读文件系统层与默认配置</td>
+					<td>可用于创建多个容器</td>
 			</tr>
 			<tr>
 					<td>容器（container）</td>
-					<td>镜像的一次运行实例，并拥有独立可写层</td>
-					<td>运行中的进程</td>
-			</tr>
-			<tr>
-					<td>镜像仓库（registry）</td>
-					<td>存储和分发镜像</td>
-					<td>软件制品仓库</td>
+					<td>运行配置、进程状态和独立可写层</td>
+					<td>停止后仍存在，删除时可写层消失</td>
 			</tr>
 			<tr>
 					<td>数据卷（volume）</td>
-					<td>独立于容器生命周期保存数据</td>
-					<td>持久化磁盘</td>
+					<td>需要跨容器保留的数据</td>
+					<td>命名数据卷可独立于容器存在</td>
 			</tr>
 			<tr>
 					<td>网络（network）</td>
-					<td>连接容器并提供隔离和服务发现</td>
-					<td>虚拟局域网</td>
+					<td>容器之间的连接、地址与服务发现</td>
+					<td>可供多个容器加入</td>
 			</tr>
 	</tbody>
 </table></div>
-<p>同一个镜像可以启动多个彼此隔离的容器。删除容器会删除该容器的可写层，但不会删除镜像，也不会自动删除显式创建的命名数据卷。</p>
-<h3 id="docker-的工作架构">Docker 的工作架构
-</h3><div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span><span class="lnt">7
-</span><span class="lnt">8
-</span><span class="lnt">9
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">Docker CLI
-</span></span><span class="line"><span class="cl">    │  Docker API
-</span></span><span class="line"><span class="cl">    ▼
-</span></span><span class="line"><span class="cl">Docker daemon（守护进程）── pull / push ── Registry
-</span></span><span class="line"><span class="cl">    │
-</span></span><span class="line"><span class="cl">    ├── 管理镜像、容器、网络和数据卷
-</span></span><span class="line"><span class="cl">    │
-</span></span><span class="line"><span class="cl">    ▼
-</span></span><span class="line"><span class="cl">containerd → OCI runtime → Linux kernel
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>日常输入的 <code>docker</code> 命令由 Docker CLI 发出，Docker 守护进程（daemon）接收请求并管理对象。创建容器时，Docker Engine 会继续调用底层容器运行时启动隔离进程。</p>
-<h3 id="容器与虚拟机的区别">容器与虚拟机的区别
+<p>Registry 是存储和分发镜像的服务，例如 Docker Hub 或私有镜像仓库。日常命令由 Docker CLI 发出，经 API 交给 Docker daemon；daemon 管理这些对象，并通过 containerd、OCI runtime 等组件启动容器进程。</p>
+<h3 id="镜像不会随着容器一起改变">镜像不会随着容器一起改变
+</h3><p>容器运行时，在镜像的只读层之上使用自己的可写层。写入这个可写层的文件不会修改原镜像，也不会自动进入其他容器。</p>
+<div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th>操作</th>
+					<th>实际发生的事</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>docker run IMAGE</code></td>
+					<td>创建一个新容器并启动</td>
+			</tr>
+			<tr>
+					<td><code>docker stop CONTAINER</code></td>
+					<td>停止容器进程，保留容器及其可写层</td>
+			</tr>
+			<tr>
+					<td><code>docker start CONTAINER</code></td>
+					<td>再次启动已有容器</td>
+			</tr>
+			<tr>
+					<td><code>docker rm CONTAINER</code></td>
+					<td>删除容器及其可写层；命名数据卷通常保留</td>
+			</tr>
+			<tr>
+					<td><code>docker pull IMAGE</code></td>
+					<td>下载镜像，不会替换已经运行的容器</td>
+			</tr>
+	</tbody>
+</table></div>
+<p><strong>更新应用需要使用新镜像重新创建容器。</strong> 单纯拉取镜像或重启旧容器，不会把新镜像内容应用进去。</p>
+<p><code>nginx:alpine</code> 中的 <code>alpine</code> 是标签。标签可以被发布者重新指向另一个镜像；省略标签时默认使用 <code>latest</code>，它也只是普通标签，不保证最新或最稳定。本文使用便于练习的版本或变体标签，正式交付应选择经过测试的版本；严格复现时使用 digest，并安排后续更新。</p>
+<h3 id="容器与虚拟机的边界">容器与虚拟机的边界
 </h3><div class="table-wrapper"><table>
 	<thead>
 			<tr>
 					<th>维度</th>
-					<th>容器</th>
+					<th>Linux 容器</th>
 					<th>虚拟机</th>
 			</tr>
 	</thead>
 	<tbody>
 			<tr>
 					<td>内核</td>
-					<td>与宿主机或宿主 VM 共享内核</td>
-					<td>每台虚拟机拥有独立内核</td>
+					<td>共享宿主 Linux 内核</td>
+					<td>每台虚拟机运行自己的内核</td>
 			</tr>
 			<tr>
-					<td>启动速度</td>
-					<td>通常较快</td>
-					<td>通常较慢</td>
+					<td>隔离方式</td>
+					<td>进程与资源隔离</td>
+					<td>硬件虚拟化</td>
 			</tr>
 			<tr>
-					<td>制品体积</td>
-					<td>通常为 MB 到数 GB</td>
-					<td>通常为数 GB 以上</td>
+					<td>启动与开销</td>
+					<td>通常较快、较轻</td>
+					<td>通常需要启动完整操作系统</td>
 			</tr>
 			<tr>
-					<td>隔离边界</td>
-					<td>进程级隔离</td>
-					<td>硬件虚拟化隔离</td>
-			</tr>
-			<tr>
-					<td>适用场景</td>
-					<td>应用交付、微服务、CI/CD</td>
-					<td>强隔离、不同内核、完整操作系统</td>
+					<td>常见用途</td>
+					<td>应用交付、开发环境、CI/CD</td>
+					<td>不同内核、完整系统环境、较强隔离</td>
 			</tr>
 	</tbody>
 </table></div>
-<p>Docker 镜像也不是在所有机器上都能无条件运行。操作系统类型、CPU 架构和内核能力仍需兼容，例如 <code>linux/amd64</code> 镜像不能在不具备兼容或模拟能力的 <code>linux/arm64</code> 环境中直接运行。</p>
-<h2 id="准备环境">准备环境
-</h2><p>Linux 可以安装 Docker Engine，macOS 和 Windows 通常使用 Docker Desktop。本文使用 Compose v2 的现代命令 <code>docker compose</code>，不再使用旧的 <code>docker-compose</code> 独立命令。</p>
-<p>安装后先检查客户端、服务端和 Compose：</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 查看客户端与服务端版本</span>
-</span></span><span class="line"><span class="cl">docker version
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># 查看存储驱动、运行时、资源等信息</span>
-</span></span><span class="line"><span class="cl">docker info
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># 查看 Compose 版本</span>
-</span></span><span class="line"><span class="cl">docker compose version
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># 运行官方测试镜像，结束后自动删除容器</span>
-</span></span><span class="line"><span class="cl">docker run --rm hello-world
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p><code>docker version</code> 只显示客户端信息或提示无法连接 daemon 时，需要先启动 Docker 服务或 Docker Desktop。</p>
-<h2 id="docker-常用命令">Docker 常用命令
-</h2><p>Docker 命令大多采用 <code>docker &lt;对象&gt; &lt;操作&gt;</code> 的结构，例如 <code>docker image ls</code> 和 <code>docker container rm</code>。Docker 同时保留了 <code>docker images</code>、<code>docker ps</code> 等传统短命令，日常使用中两种写法都很常见。</p>
-<div class="table-wrapper"><table>
-	<thead>
-			<tr>
-					<th>常用短命令</th>
-					<th>对象式命令</th>
-					<th>作用</th>
-			</tr>
-	</thead>
-	<tbody>
-			<tr>
-					<td><code>docker images</code></td>
-					<td><code>docker image ls</code></td>
-					<td>查看本地镜像</td>
-			</tr>
-			<tr>
-					<td><code>docker ps</code></td>
-					<td><code>docker container ls</code></td>
-					<td>查看运行中的容器</td>
-			</tr>
-			<tr>
-					<td><code>docker ps -a</code></td>
-					<td><code>docker container ls -a</code></td>
-					<td>查看全部容器</td>
-			</tr>
-			<tr>
-					<td><code>docker rmi IMAGE</code></td>
-					<td><code>docker image rm IMAGE</code></td>
-					<td>删除镜像引用</td>
-			</tr>
-			<tr>
-					<td><code>docker rm CONTAINER</code></td>
-					<td><code>docker container rm CONTAINER</code></td>
-					<td>删除已停止的容器</td>
-			</tr>
-	</tbody>
-</table></div>
-<h3 id="镜像管理">镜像管理
-</h3><p>下面的 <code>registry.example.com/team</code> 是私有仓库地址占位值，登录和推送前需要替换为自己的仓库与命名空间。</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 在 Docker Hub 搜索官方镜像</span>
-</span></span><span class="line"><span class="cl">docker search nginx --filter is-official<span class="o">=</span><span class="nb">true</span> --limit <span class="m">10</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># 拉取镜像；标签省略时默认使用 latest</span>
-</span></span><span class="line"><span class="cl">docker pull nginx:alpine
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># 查看本地镜像</span>
-</span></span><span class="line"><span class="cl">docker images
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># 查看镜像详细信息</span>
-</span></span><span class="line"><span class="cl">docker image inspect nginx:alpine
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># 查看镜像层历史</span>
-</span></span><span class="line"><span class="cl">docker image <span class="nb">history</span> nginx:alpine
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># 为镜像添加新标签</span>
-</span></span><span class="line"><span class="cl">docker tag nginx:alpine registry.example.com/team/nginx:1.0
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># 推送镜像到仓库</span>
-</span></span><span class="line"><span class="cl">docker push registry.example.com/team/nginx:1.0
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># 删除本地镜像标签或引用</span>
-</span></span><span class="line"><span class="cl">docker image rm nginx:alpine
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>标签是镜像的可读引用。<code>latest</code> 只是一个普通且可变的标签，不保证它一定是最新或最稳定版本。生产环境应固定经过测试的版本标签；需要严格复现时，可以进一步固定镜像 digest，同时建立主动升级和漏洞修复流程。</p>
-<p><code>docker search</code> 只搜索 Docker Hub 仓库，不会列出私有仓库内容或完整标签。选镜像时仍需核对发布者、具体标签、支持架构和更新时间。</p>
-<h3 id="镜像离线保存与载入">镜像离线保存与载入
-</h3><p>无法直接访问镜像仓库时，可以把镜像及其配置、标签和镜像层保存为归档文件：</p>
+<p>Linux 通过 namespaces 隔离进程、网络和挂载等资源视图，通过 cgroups 统计和限制资源，结合 capabilities、seccomp 等机制约束权限。容器默认不会自动获得合适的 CPU、内存限制。</p>
+<p>在 macOS 和 Windows 的 Docker Desktop 中，Linux 容器通常运行在其管理的 Linux 虚拟机里。镜像仍受操作系统、CPU 架构和内核能力约束；<code>linux/amd64</code> 与 <code>linux/arm64</code> 之间的运行需要兼容架构或模拟支持。</p>
+<h2 id="用-dockerfile-构建自己的服务">用 Dockerfile 构建自己的服务
+</h2><p>这一节创建一个只依赖 Go 标准库的 HTTP 服务。编译器放在构建镜像中，本机不需要安装 Go。</p>
+<h3 id="准备应用文件">准备应用文件
+</h3><p>创建目录，后续构建和 Compose 命令都在这里执行：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
 </span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 将镜像保存为 tar 归档</span>
-</span></span><span class="line"><span class="cl">docker save --output nginx-alpine.tar nginx:alpine
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># 从归档载入镜像</span>
-</span></span><span class="line"><span class="cl">docker load --input nginx-alpine.tar
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">mkdir -p docker-demo
+</span></span><span class="line"><span class="cl"><span class="nb">cd</span> docker-demo
 </span></span></code></pre></td></tr></table>
 </div>
-</div><p><code>docker save/load</code> 不包含容器可写层和数据卷。<code>docker export/import</code> 导出的是容器文件系统，会丢失镜像层、构建历史和部分配置，不适合作为常规镜像迁移方案。</p>
-<h3 id="创建并运行容器">创建并运行容器
-</h3><p>下面启动一个 Nginx 容器，并只允许从宿主机本地访问：</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">docker run <span class="se">\
-</span></span></span><span class="line"><span class="cl">  --name web <span class="se">\
-</span></span></span><span class="line"><span class="cl">  --detach <span class="se">\
-</span></span></span><span class="line"><span class="cl">  --publish 127.0.0.1:8080:80 <span class="se">\
-</span></span></span><span class="line"><span class="cl">  nginx:alpine
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>访问 <code>http://127.0.0.1:8080</code> 时，请求会从宿主机的 <code>8080</code> 端口转发到容器的 <code>80</code> 端口。</p>
-<div class="table-wrapper"><table>
-	<thead>
-			<tr>
-					<th>参数</th>
-					<th>简写</th>
-					<th>作用</th>
-			</tr>
-	</thead>
-	<tbody>
-			<tr>
-					<td><code>--name web</code></td>
-					<td>无</td>
-					<td>指定容器名称</td>
-			</tr>
-			<tr>
-					<td><code>--detach</code></td>
-					<td><code>-d</code></td>
-					<td>在后台运行</td>
-			</tr>
-			<tr>
-					<td><code>--publish 8080:80</code></td>
-					<td><code>-p</code></td>
-					<td>映射宿主机端口到容器端口</td>
-			</tr>
-			<tr>
-					<td><code>--env KEY=value</code></td>
-					<td><code>-e</code></td>
-					<td>设置容器环境变量</td>
-			</tr>
-			<tr>
-					<td><code>--interactive --tty</code></td>
-					<td><code>-it</code></td>
-					<td>保持标准输入并分配终端</td>
-			</tr>
-			<tr>
-					<td><code>--rm</code></td>
-					<td>无</td>
-					<td>容器退出后自动删除</td>
-			</tr>
-			<tr>
-					<td><code>--network NAME</code></td>
-					<td>无</td>
-					<td>连接指定网络</td>
-			</tr>
-			<tr>
-					<td><code>--mount ...</code></td>
-					<td>无</td>
-					<td>挂载数据卷、目录或 tmpfs</td>
-			</tr>
-	</tbody>
-</table></div>
-<p>镜像名之后的内容会被当作容器内要执行的命令，因此 Docker 自身的选项必须放在镜像名之前。下面两行只用于对比参数位置，错误示例不要执行：</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 正确：-p 是 docker run 的参数</span>
-</span></span><span class="line"><span class="cl">docker run --rm -p 127.0.0.1:8081:80 nginx:alpine
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># 错误：-p 会被当作传给 nginx 镜像入口的参数</span>
-</span></span><span class="line"><span class="cl">docker run nginx:alpine -p 127.0.0.1:8081:80
-</span></span></code></pre></td></tr></table>
-</div>
-</div><h3 id="查看与管理容器">查看与管理容器
-</h3><div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 只查看运行中的容器</span>
-</span></span><span class="line"><span class="cl">docker ps
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># 查看全部容器，包括已经退出的容器</span>
-</span></span><span class="line"><span class="cl">docker ps -a
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># 停止、启动和重启容器</span>
-</span></span><span class="line"><span class="cl">docker stop web
-</span></span><span class="line"><span class="cl">docker start web
-</span></span><span class="line"><span class="cl">docker restart web
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># 重命名容器</span>
-</span></span><span class="line"><span class="cl">docker rename web web-server
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># 删除已停止的容器</span>
-</span></span><span class="line"><span class="cl">docker stop web-server
-</span></span><span class="line"><span class="cl">docker container rm web-server
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p><code>docker run</code> 会基于镜像创建一个新容器，而 <code>docker start</code> 只是重新启动已经存在的容器。<code>docker pull</code> 也不会自动更新正在运行的容器；更新镜像后，需要用新镜像重新创建容器。</p>
-<h3 id="日志与排障">日志与排障
-</h3><p>下面用 <code>CONTAINER</code> 表示实际的容器名称或 ID，执行时需要替换。</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 持续查看最后 100 行日志</span>
-</span></span><span class="line"><span class="cl">docker logs --follow --tail <span class="m">100</span> CONTAINER
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># 在运行中的容器内执行命令</span>
-</span></span><span class="line"><span class="cl">docker <span class="nb">exec</span> -it CONTAINER sh
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># 查看容器的完整配置和状态</span>
-</span></span><span class="line"><span class="cl">docker inspect CONTAINER
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># 实时查看资源占用</span>
-</span></span><span class="line"><span class="cl">docker stats
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># 查看容器内运行的进程</span>
-</span></span><span class="line"><span class="cl">docker top CONTAINER
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># 在宿主机和容器之间复制文件</span>
-</span></span><span class="line"><span class="cl">docker cp ./nginx.conf CONTAINER:/etc/nginx/nginx.conf
-</span></span><span class="line"><span class="cl">docker cp CONTAINER:/var/log/nginx ./nginx-logs
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>精简镜像不一定包含 Bash，所以排障时通常先尝试 <code>sh</code>。使用 <code>scratch</code> 或 distroless 构建的镜像甚至可能完全没有 shell，此时应通过日志、指标、<code>docker inspect</code> 或专门的调试容器排查。</p>
-<h3 id="按需使用的容器命令">按需使用的容器命令
-</h3><div class="table-wrapper"><table>
-	<thead>
-			<tr>
-					<th>命令</th>
-					<th>作用</th>
-					<th>注意事项</th>
-			</tr>
-	</thead>
-	<tbody>
-			<tr>
-					<td><code>docker pause CONTAINER</code> / <code>docker unpause CONTAINER</code></td>
-					<td>暂停或恢复容器内全部进程</td>
-					<td>暂停不是优雅停机，连接可能超时</td>
-			</tr>
-			<tr>
-					<td><code>docker wait CONTAINER</code></td>
-					<td>等待容器停止并输出退出码</td>
-					<td>容器运行期间会阻塞当前终端</td>
-			</tr>
-			<tr>
-					<td><code>docker diff CONTAINER</code></td>
-					<td>查看容器可写层中变化的路径</td>
-					<td>不包含数据卷中的变化</td>
-			</tr>
-			<tr>
-					<td><code>docker events --since 10m</code></td>
-					<td>实时查看 Docker 对象事件</td>
-					<td>持续运行，使用 <code>Ctrl+C</code> 退出</td>
-			</tr>
-			<tr>
-					<td><code>docker kill CONTAINER</code></td>
-					<td>立即向容器主进程发送信号</td>
-					<td>默认发送 <code>SIGKILL</code>，优先使用 <code>docker stop</code></td>
-			</tr>
-	</tbody>
-</table></div>
-<p><code>docker create</code> 只创建容器但不启动，<code>docker run</code> 相当于创建后立即启动。<code>docker attach</code> 连接容器主进程的标准输入输出，可能把 <code>Ctrl+C</code> 等信号传给主进程，普通排障优先使用 <code>docker logs</code> 和 <code>docker exec</code>。<code>docker commit</code> 会把人工修改固化成难以复现的镜像，应优先维护 Dockerfile；容器文件系统迁移也优先使用镜像的 <code>save/load</code>，而不是会丢失镜像历史与配置的 <code>export/import</code>。</p>
-<h3 id="资源限制">资源限制
-</h3><p>容器默认可能使用宿主机的大部分资源。运行不可信或容易突发占用的服务时，应设置边界。下面的 <code>example/app:1.0</code> 是占位镜像名，使用时需要替换：</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">docker run --detach <span class="se">\
-</span></span></span><span class="line"><span class="cl">  --name limited-app <span class="se">\
-</span></span></span><span class="line"><span class="cl">  --memory 512m <span class="se">\
-</span></span></span><span class="line"><span class="cl">  --cpus 1.0 <span class="se">\
-</span></span></span><span class="line"><span class="cl">  --pids-limit <span class="m">200</span> <span class="se">\
-</span></span></span><span class="line"><span class="cl">  example/app:1.0
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>具体限制是否生效取决于宿主系统和 Docker 环境，可以通过 <code>docker inspect limited-app</code> 与 <code>docker stats limited-app</code> 验证。</p>
-<p>运行中的容器也可以调整部分资源限制：</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">docker update --memory 768m --cpus 1.5 limited-app
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>Compose 管理的容器应优先修改 <code>compose.yaml</code> 后重新创建，避免运行状态与声明配置不一致。</p>
-<h3 id="查看占用与清理">查看占用与清理
-</h3><div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 查看 Docker 对象占用的磁盘空间</span>
-</span></span><span class="line"><span class="cl">docker system df
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># 删除所有已停止的容器</span>
-</span></span><span class="line"><span class="cl">docker container prune
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># 删除悬空镜像</span>
-</span></span><span class="line"><span class="cl">docker image prune
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># 删除未被容器使用的网络</span>
-</span></span><span class="line"><span class="cl">docker network prune
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># 删除未被容器使用的匿名数据卷</span>
-</span></span><span class="line"><span class="cl">docker volume prune
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>如需把未使用的命名数据卷也纳入清理，使用 <code>docker volume prune --all</code>。清理命令会要求确认，但仍应先检查删除列表。下面的命令删除范围很大，可能同时清除未使用镜像、构建缓存和匿名数据卷，不应作为日常无脑清理命令：</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">docker system prune --all --volumes
-</span></span></code></pre></td></tr></table>
-</div>
-</div><h2 id="dockerfile">Dockerfile
-</h2><p>Dockerfile 是构建镜像的声明式文件。Docker 从上到下执行指令，并将文件变更组织为可复用的镜像层。</p>
-<h3 id="构建上下文">构建上下文
-</h3><p>执行下面的命令时，最后的 <code>.</code> 表示构建上下文：</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">docker build --tag docker-demo:1.0 .
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>Dockerfile 中的 <code>COPY</code> 只能读取构建上下文内的文件，不能读取它的父目录。构建上下文过大会拖慢构建，还可能把 Git 历史、日志、密钥或本地依赖发送给 builder，因此应配合 <code>.dockerignore</code> 使用。</p>
-<h3 id="常用指令">常用指令
-</h3><div class="table-wrapper"><table>
-	<thead>
-			<tr>
-					<th>指令</th>
-					<th>作用</th>
-					<th>示例</th>
-			</tr>
-	</thead>
-	<tbody>
-			<tr>
-					<td><code>FROM</code></td>
-					<td>指定基础镜像或构建阶段</td>
-					<td><code>FROM golang:1.25-alpine AS build</code></td>
-			</tr>
-			<tr>
-					<td><code>WORKDIR</code></td>
-					<td>设置后续指令的工作目录</td>
-					<td><code>WORKDIR /src</code></td>
-			</tr>
-			<tr>
-					<td><code>COPY</code></td>
-					<td>从构建上下文复制文件</td>
-					<td><code>COPY go.mod ./</code></td>
-			</tr>
-			<tr>
-					<td><code>RUN</code></td>
-					<td>构建镜像时执行命令</td>
-					<td><code>RUN go build -o /out/server .</code></td>
-			</tr>
-			<tr>
-					<td><code>ARG</code></td>
-					<td>声明构建参数</td>
-					<td><code>ARG VERSION=dev</code></td>
-			</tr>
-			<tr>
-					<td><code>ENV</code></td>
-					<td>设置镜像和容器环境变量</td>
-					<td><code>ENV APP_ENV=production</code></td>
-			</tr>
-			<tr>
-					<td><code>EXPOSE</code></td>
-					<td>声明应用监听的容器端口</td>
-					<td><code>EXPOSE 8080</code></td>
-			</tr>
-			<tr>
-					<td><code>USER</code></td>
-					<td>指定后续指令和容器进程用户</td>
-					<td><code>USER app</code></td>
-			</tr>
-			<tr>
-					<td><code>ENTRYPOINT</code></td>
-					<td>设置固定的容器入口程序</td>
-					<td><code>ENTRYPOINT [&quot;./server&quot;]</code></td>
-			</tr>
-			<tr>
-					<td><code>CMD</code></td>
-					<td>设置默认命令或默认参数</td>
-					<td><code>CMD [&quot;--port&quot;, &quot;8080&quot;]</code></td>
-			</tr>
-	</tbody>
-</table></div>
-<p><code>EXPOSE</code> 只记录镜像元数据，不会自动开放宿主机端口。真正发布端口仍要使用 <code>docker run -p</code> 或 Compose 的 <code>ports</code>。</p>
-<h3 id="一个完整的-go-示例">一个完整的 Go 示例
-</h3><p>目录结构如下：</p>
+</div><p>目录中先准备四个文件：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -1196,6 +816,15 @@
 </span><span class="lnt">25
 </span><span class="lnt">26
 </span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
 </span></code></pre></td>
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kn">package</span><span class="w"> </span><span class="nx">main</span><span class="w">
@@ -1205,6 +834,7 @@
 </span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="s">&#34;log&#34;</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="s">&#34;net/http&#34;</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="s">&#34;os&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="s">&#34;time&#34;</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="p">)</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="kd">func</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
@@ -1212,22 +842,32 @@
 </span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">hostname</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">&#34;unknown&#34;</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">message</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">os</span><span class="p">.</span><span class="nf">Getenv</span><span class="p">(</span><span class="s">&#34;APP_MESSAGE&#34;</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="k">if</span><span class="w"> </span><span class="nx">message</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s">&#34;&#34;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">message</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">&#34;hello&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">mux</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">http</span><span class="p">.</span><span class="nf">NewServeMux</span><span class="p">()</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">mux</span><span class="p">.</span><span class="nf">HandleFunc</span><span class="p">(</span><span class="s">&#34;/&#34;</span><span class="p">,</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">w</span><span class="w"> </span><span class="nx">http</span><span class="p">.</span><span class="nx">ResponseWriter</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">*</span><span class="nx">http</span><span class="p">.</span><span class="nx">Request</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Fprintf</span><span class="p">(</span><span class="nx">w</span><span class="p">,</span><span class="w"> </span><span class="s">&#34;hello from %s\n&#34;</span><span class="p">,</span><span class="w"> </span><span class="nx">hostname</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Fprintf</span><span class="p">(</span><span class="nx">w</span><span class="p">,</span><span class="w"> </span><span class="s">&#34;%s from %s\n&#34;</span><span class="p">,</span><span class="w"> </span><span class="nx">message</span><span class="p">,</span><span class="w"> </span><span class="nx">hostname</span><span class="p">)</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">})</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">mux</span><span class="p">.</span><span class="nf">HandleFunc</span><span class="p">(</span><span class="s">&#34;/health&#34;</span><span class="p">,</span><span class="w"> </span><span class="kd">func</span><span class="p">(</span><span class="nx">w</span><span class="w"> </span><span class="nx">http</span><span class="p">.</span><span class="nx">ResponseWriter</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">*</span><span class="nx">http</span><span class="p">.</span><span class="nx">Request</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">w</span><span class="p">.</span><span class="nf">WriteHeader</span><span class="p">(</span><span class="nx">http</span><span class="p">.</span><span class="nx">StatusOK</span><span class="p">)</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Fprintln</span><span class="p">(</span><span class="nx">w</span><span class="p">,</span><span class="w"> </span><span class="s">&#34;ok&#34;</span><span class="p">)</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">})</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">server</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">http</span><span class="p">.</span><span class="nx">Server</span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">Addr</span><span class="p">:</span><span class="w">              </span><span class="s">&#34;:8080&#34;</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">Handler</span><span class="p">:</span><span class="w">           </span><span class="nx">mux</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">		</span><span class="nx">ReadHeaderTimeout</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="p">}</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">log</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;listening on :8080&#34;</span><span class="p">)</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">log</span><span class="p">.</span><span class="nf">Fatal</span><span class="p">(</span><span class="nx">http</span><span class="p">.</span><span class="nf">ListenAndServe</span><span class="p">(</span><span class="s">&#34;:8080&#34;</span><span class="p">,</span><span class="w"> </span><span class="nx">mux</span><span class="p">))</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">	</span><span class="nx">log</span><span class="p">.</span><span class="nf">Fatal</span><span class="p">(</span><span class="nx">server</span><span class="p">.</span><span class="nf">ListenAndServe</span><span class="p">())</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="p">}</span><span class="w">
 </span></span></span></code></pre></td></tr></table>
 </div>
-</div><p><code>Dockerfile</code>：</p>
+</div><p><code>/</code> 返回问候语和容器主机名，<code>/health</code> 返回 <code>ok</code>。程序监听 <code>:8080</code>，可通过容器网络接口访问；如果只监听容器内的 <code>127.0.0.1</code>，端口映射通常无法访问它。</p>
+<h3 id="编写多阶段-dockerfile">编写多阶段 Dockerfile
+</h3><p><code>Dockerfile</code>：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -1249,15 +889,11 @@
 </span><span class="lnt">17
 </span><span class="lnt">18
 </span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
 </span></code></pre></td>
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-dockerfile" data-lang="dockerfile"><span class="line"><span class="cl"><span class="c"># syntax=docker/dockerfile:1</span><span class="err">
 </span></span></span><span class="line"><span class="cl"><span class="err">
 </span></span></span><span class="line"><span class="cl"><span class="k">FROM</span><span class="w"> </span><span class="s">golang:1.25-alpine</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="s">build</span><span class="err">
-</span></span></span><span class="line"><span class="cl"><span class="err">
 </span></span></span><span class="line"><span class="cl"><span class="k">WORKDIR</span><span class="w"> </span><span class="s">/src</span><span class="err">
 </span></span></span><span class="line"><span class="cl"><span class="k">COPY</span> go.mod ./<span class="err">
 </span></span></span><span class="line"><span class="cl"><span class="k">RUN</span> go mod download<span class="err">
@@ -1268,17 +904,181 @@
 </span></span></span><span class="line"><span class="cl">    -o /out/server .<span class="err">
 </span></span></span><span class="line"><span class="cl"><span class="err">
 </span></span></span><span class="line"><span class="cl"><span class="k">FROM</span><span class="w"> </span><span class="s">alpine:3.22</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="s">runtime</span><span class="err">
-</span></span></span><span class="line"><span class="cl"><span class="err">
 </span></span></span><span class="line"><span class="cl"><span class="k">RUN</span> addgroup -S app <span class="o">&amp;&amp;</span> adduser -S -G app app<span class="err">
 </span></span></span><span class="line"><span class="cl"><span class="k">WORKDIR</span><span class="w"> </span><span class="s">/app</span><span class="err">
-</span></span></span><span class="line"><span class="cl"><span class="k">COPY</span> --from<span class="o">=</span>build --chown<span class="o">=</span>app:app /out/server ./server<span class="err">
-</span></span></span><span class="line"><span class="cl"><span class="err">
+</span></span></span><span class="line"><span class="cl"><span class="k">COPY</span> --from<span class="o">=</span>build /out/server ./server<span class="err">
 </span></span></span><span class="line"><span class="cl"><span class="k">USER</span><span class="w"> </span><span class="s">app</span><span class="err">
 </span></span></span><span class="line"><span class="cl"><span class="k">EXPOSE</span><span class="w"> </span><span class="s">8080</span><span class="err">
 </span></span></span><span class="line"><span class="cl"><span class="k">ENTRYPOINT</span> <span class="p">[</span><span class="s2">&#34;./server&#34;</span><span class="p">]</span><span class="err">
 </span></span></span></code></pre></td></tr></table>
 </div>
-</div><p><code>.dockerignore</code>：</p>
+</div><p><code>build</code> 阶段包含编译器和源码；<code>runtime</code> 阶段只复制编译结果，并以非 root 用户运行。这个纯 Go 示例关闭了 CGO，避免依赖构建阶段的动态链接库。使用 CGO 的应用需要另行匹配运行时依赖。</p>
+<p>先理解构建时执行的五条指令：</p>
+<div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th>指令</th>
+					<th>作用</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>FROM</code></td>
+					<td>选择基础镜像，也可以开始一个新阶段</td>
+			</tr>
+			<tr>
+					<td><code>WORKDIR</code></td>
+					<td>设置后续指令的工作目录</td>
+			</tr>
+			<tr>
+					<td><code>COPY</code></td>
+					<td>复制构建上下文中的文件；<code>--from</code> 可从其他阶段复制</td>
+			</tr>
+			<tr>
+					<td><code>RUN</code></td>
+					<td>在构建过程中执行命令</td>
+			</tr>
+			<tr>
+					<td><code>ARG</code></td>
+					<td>声明构建参数，不会自动成为容器环境变量</td>
+			</tr>
+	</tbody>
+</table></div>
+<p>再区分会影响运行默认值的指令：</p>
+<div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th>指令</th>
+					<th>作用</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>ENV</code></td>
+					<td>设置环境变量，容器启动时可覆盖</td>
+			</tr>
+			<tr>
+					<td><code>USER</code></td>
+					<td>设置后续构建指令和容器进程的用户</td>
+			</tr>
+			<tr>
+					<td><code>EXPOSE</code></td>
+					<td>记录应用端口，不会自动发布宿主机端口</td>
+			</tr>
+			<tr>
+					<td><code>ENTRYPOINT</code></td>
+					<td>设置容器入口程序</td>
+			</tr>
+			<tr>
+					<td><code>CMD</code></td>
+					<td>提供默认命令；配合 <code>ENTRYPOINT</code> 时通常提供默认参数</td>
+			</tr>
+	</tbody>
+</table></div>
+<p>这里的 exec form <code>ENTRYPOINT [&quot;./server&quot;]</code> 让服务直接接收容器信号。应用仍需自行处理信号，才能完成连接排空等优雅退出逻辑。</p>
+<h3 id="控制构建上下文与缓存">控制构建上下文与缓存
+</h3><p><code>.dockerignore</code>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">.git
+</span></span><span class="line"><span class="cl">.env
+</span></span><span class="line"><span class="cl">.env.*
+</span></span><span class="line"><span class="cl">secrets/
+</span></span><span class="line"><span class="cl">backup/
+</span></span><span class="line"><span class="cl">*.log
+</span></span><span class="line"><span class="cl">tmp/
+</span></span><span class="line"><span class="cl">bin/
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>执行 <code>docker build ... .</code> 时，最后的 <code>.</code> 指定构建上下文。普通 <code>COPY</code> 从上下文中取文件，不能越过它读取父目录；<code>.dockerignore</code> 排除的文件也不能被普通 <code>COPY</code> 复制。</p>
+<p>Dockerfile 先复制 <code>go.mod</code> 并下载依赖，再复制 <code>main.go</code>。这样只修改源码时，通常可以复用依赖下载层。当前示例没有第三方依赖，因此没有 <code>go.sum</code>；实际项目应一起复制并维护 <code>go.mod</code> 和 <code>go.sum</code>。</p>
+<p>BuildKit 还支持缓存挂载。需要加速 Go 编译时，可以把构建指令替换为：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-dockerfile" data-lang="dockerfile"><span class="line"><span class="cl"><span class="k">RUN</span> --mount<span class="o">=</span><span class="nv">type</span><span class="o">=</span>cache,target<span class="o">=</span>/go/pkg/mod <span class="se">\
+</span></span></span><span class="line"><span class="cl">    --mount<span class="o">=</span><span class="nv">type</span><span class="o">=</span>cache,target<span class="o">=</span>/root/.cache/go-build <span class="se">\
+</span></span></span><span class="line"><span class="cl">    <span class="nv">CGO_ENABLED</span><span class="o">=</span><span class="m">0</span> <span class="nv">GOOS</span><span class="o">=</span>linux go build -trimpath -ldflags<span class="o">=</span><span class="s2">&#34;-s -w&#34;</span> -o /out/server .<span class="err">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>缓存挂载用于复用下载或编译结果，其目录内容不会自动写入镜像层。构建凭据应使用 secret mount，避免通过 <code>ARG</code>、<code>ENV</code> 或“复制后删除”留在镜像配置或历史层中。</p>
+<h3 id="构建运行并验证">构建、运行并验证
+</h3><p>确认第一节的 Nginx 已停止，释放 <code>8080</code> 端口：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">docker build --pull --tag docker-demo:1.0 .
+</span></span><span class="line"><span class="cl">docker run --detach --rm <span class="se">\
+</span></span></span><span class="line"><span class="cl">  --name docker-demo-app <span class="se">\
+</span></span></span><span class="line"><span class="cl">  --publish 127.0.0.1:8080:8080 <span class="se">\
+</span></span></span><span class="line"><span class="cl">  docker-demo:1.0
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">curl --fail http://127.0.0.1:8080/
+</span></span><span class="line"><span class="cl">curl --fail http://127.0.0.1:8080/health
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>预期分别返回 <code>hello from &lt;容器主机名&gt;</code> 和 <code>ok</code>。<code>--pull</code> 会检查基础镜像更新；它不等于禁用构建缓存。这里使用 <code>--rm</code>，停止后会自动删除实验容器：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">docker stop docker-demo-app
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h2 id="把数据与网络接到容器上">把数据与网络接到容器上
+</h2><h3 id="验证数据卷的生命周期">验证数据卷的生命周期
+</h3><p>停止容器会保留可写层，删除容器才会删除可写层。需要跨容器保存的数据，应放到挂载中。</p>
+<div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th>挂载方式</th>
+					<th>数据在哪里</th>
+					<th>典型用途</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>命名数据卷（volume）</td>
+					<td>由 Docker 管理，独立于容器</td>
+					<td>数据库、上传文件</td>
+			</tr>
+			<tr>
+					<td>绑定挂载（bind mount）</td>
+					<td>Docker 宿主机上的指定路径</td>
+					<td>开发源码、配置文件</td>
+			</tr>
+			<tr>
+					<td>tmpfs</td>
+					<td>Linux 宿主机内存，停止后消失</td>
+					<td>临时文件；仍可能受交换空间配置影响</td>
+			</tr>
+	</tbody>
+</table></div>
+<p>先用一个容器写入数据，再用另一个容器读取：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -1292,202 +1092,19 @@
 </span><span class="lnt">9
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">.git
-</span></span><span class="line"><span class="cl">.gitignore
-</span></span><span class="line"><span class="cl">.env
-</span></span><span class="line"><span class="cl">*.log
-</span></span><span class="line"><span class="cl">tmp/
-</span></span><span class="line"><span class="cl">bin/
-</span></span><span class="line"><span class="cl">Dockerfile*
-</span></span><span class="line"><span class="cl">compose*.yaml
-</span></span><span class="line"><span class="cl">README.md
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>构建并运行：</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 构建镜像，并检查是否有更新的基础镜像</span>
-</span></span><span class="line"><span class="cl">docker build --pull --tag docker-demo:1.0 .
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">docker volume create docker-demo-data
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># 后台运行，只将端口开放给本机</span>
-</span></span><span class="line"><span class="cl">docker run --detach <span class="se">\
-</span></span></span><span class="line"><span class="cl">  --rm <span class="se">\
-</span></span></span><span class="line"><span class="cl">  --name docker-demo <span class="se">\
-</span></span></span><span class="line"><span class="cl">  --publish 127.0.0.1:8080:8080 <span class="se">\
-</span></span></span><span class="line"><span class="cl">  docker-demo:1.0
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">curl http://127.0.0.1:8080/
-</span></span><span class="line"><span class="cl">curl http://127.0.0.1:8080/health
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># 停止后，因为使用了 --rm，容器会被自动删除</span>
-</span></span><span class="line"><span class="cl">docker stop docker-demo
-</span></span></code></pre></td></tr></table>
-</div>
-</div><h3 id="为什么使用多阶段构建">为什么使用多阶段构建
-</h3><p>上面的 Dockerfile 包含两个阶段：</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">build 阶段：编译器 + 源代码 → 可执行文件
-</span></span><span class="line"><span class="cl">                         ↓ COPY --from=build
-</span></span><span class="line"><span class="cl">runtime 阶段：最小运行环境 + 可执行文件
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>最终镜像不会包含 Go 编译器、模块缓存和源代码，因此镜像更小，攻击面也更少。多阶段构建同样适用于前端构建、Java 打包和原生程序编译。</p>
-<h3 id="镜像层与构建缓存">镜像层与构建缓存
-</h3><p>Docker 会复用没有变化的构建层。通常应先复制变化较少的依赖清单并安装依赖，再复制频繁变化的源代码：</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span><span class="lnt">7
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-dockerfile" data-lang="dockerfile"><span class="line"><span class="cl"><span class="c"># 依赖清单不变时，可以复用下载依赖的缓存层</span><span class="err">
-</span></span></span><span class="line"><span class="cl"><span class="k">COPY</span> go.mod ./<span class="err">
-</span></span></span><span class="line"><span class="cl"><span class="k">RUN</span> go mod download<span class="err">
-</span></span></span><span class="line"><span class="cl"><span class="err">
-</span></span></span><span class="line"><span class="cl"><span class="c"># 当前示例只有 main.go，源码变化只会让这里之后的层失效</span><span class="err">
-</span></span></span><span class="line"><span class="cl"><span class="k">COPY</span> main.go ./<span class="err">
-</span></span></span><span class="line"><span class="cl"><span class="k">RUN</span> go build -o /out/server .<span class="err">
-</span></span></span></code></pre></td></tr></table>
-</div>
-</div><p>BuildKit 还支持缓存挂载。例如 Go 模块与编译缓存可以写成：</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-dockerfile" data-lang="dockerfile"><span class="line"><span class="cl"><span class="k">RUN</span> --mount<span class="o">=</span><span class="nv">type</span><span class="o">=</span>cache,target<span class="o">=</span>/go/pkg/mod <span class="se">\
-</span></span></span><span class="line"><span class="cl">    --mount<span class="o">=</span><span class="nv">type</span><span class="o">=</span>cache,target<span class="o">=</span>/root/.cache/go-build <span class="se">\
-</span></span></span><span class="line"><span class="cl">    go build -o /out/server .<span class="err">
-</span></span></span></code></pre></td></tr></table>
-</div>
-</div><p>这些缓存用于加速后续构建，不会自动进入最终镜像。</p>
-<h3 id="dockerfile-最佳实践">Dockerfile 最佳实践
-</h3><ol>
-<li>使用可信、尽量精简的基础镜像，并定期更新和扫描漏洞。</li>
-<li>最终阶段使用非 root 用户，只复制运行所需的文件。</li>
-<li>使用 JSON exec form 的 <code>ENTRYPOINT</code> 和 <code>CMD</code>，让信号直接传给应用进程。</li>
-<li>使用 <code>.dockerignore</code> 缩小构建上下文，避免把密钥和无关文件送入构建器。</li>
-<li>不要用 <code>ARG</code>、<code>ENV</code> 或“复制后删除”的方式保存密钥；密钥可能留在镜像配置或历史层中。</li>
-</ol>
-<p>需要在构建过程中临时使用私有仓库凭据时，可以使用 BuildKit secret mount。下面以私有 Go 模块所需的 <code>.netrc</code> 为例：</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-dockerfile" data-lang="dockerfile"><span class="line"><span class="cl"><span class="k">RUN</span> --mount<span class="o">=</span><span class="nv">type</span><span class="o">=</span>secret,id<span class="o">=</span>netrc,target<span class="o">=</span>/root/.netrc,required<span class="o">=</span><span class="nb">true</span> <span class="se">\
-</span></span></span><span class="line"><span class="cl">    go mod download<span class="err">
-</span></span></span></code></pre></td></tr></table>
-</div>
-</div><div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">docker build --secret <span class="nv">id</span><span class="o">=</span>netrc,src<span class="o">=</span><span class="s2">&#34;</span><span class="nv">$HOME</span><span class="s2">/.netrc&#34;</span> --tag app:1.0 .
-</span></span></code></pre></td></tr></table>
-</div>
-</div><h2 id="数据卷">数据卷
-</h2><p>容器的可写层适合保存临时运行状态，但容器被删除时，这一层也会被删除。数据库文件、上传文件和需要跨容器复用的数据应放在容器可写层之外。</p>
-<p>Docker 主要提供三种挂载方式：</p>
-<div class="table-wrapper"><table>
-	<thead>
-			<tr>
-					<th>类型</th>
-					<th>数据位置</th>
-					<th>生命周期</th>
-					<th>适用场景</th>
-			</tr>
-	</thead>
-	<tbody>
-			<tr>
-					<td>命名数据卷（named volume）</td>
-					<td>Docker 管理</td>
-					<td>独立于容器</td>
-					<td>数据库、应用持久化数据</td>
-			</tr>
-			<tr>
-					<td>绑定挂载（bind mount）</td>
-					<td>指定宿主机路径</td>
-					<td>由宿主机文件决定</td>
-					<td>源代码、配置文件、开发环境</td>
-			</tr>
-			<tr>
-					<td>tmpfs</td>
-					<td>宿主机内存</td>
-					<td>容器停止后消失</td>
-					<td>临时文件、敏感的短期数据</td>
-			</tr>
-	</tbody>
-</table></div>
-<h3 id="命名数据卷">命名数据卷
-</h3><div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 创建和查看数据卷</span>
-</span></span><span class="line"><span class="cl">docker volume create demo-data
-</span></span><span class="line"><span class="cl">docker volume ls
-</span></span><span class="line"><span class="cl">docker volume inspect demo-data
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># 写入数据；--rm 不会删除显式命名的数据卷</span>
 </span></span><span class="line"><span class="cl">docker run --rm <span class="se">\
-</span></span></span><span class="line"><span class="cl">  --mount <span class="nv">type</span><span class="o">=</span>volume,src<span class="o">=</span>demo-data,dst<span class="o">=</span>/data <span class="se">\
-</span></span></span><span class="line"><span class="cl">  alpine:3.22 sh -c <span class="s1">&#39;date &gt; /data/created-at &amp;&amp; cat /data/created-at&#39;</span>
+</span></span></span><span class="line"><span class="cl">  --mount <span class="nv">type</span><span class="o">=</span>volume,src<span class="o">=</span>docker-demo-data,dst<span class="o">=</span>/data <span class="se">\
+</span></span></span><span class="line"><span class="cl">  alpine:3.22 sh -c <span class="s1">&#39;echo persisted &gt; /data/message.txt&#39;</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># 在另一个容器中读取同一份数据</span>
 </span></span><span class="line"><span class="cl">docker run --rm <span class="se">\
-</span></span></span><span class="line"><span class="cl">  --mount <span class="nv">type</span><span class="o">=</span>volume,src<span class="o">=</span>demo-data,dst<span class="o">=</span>/data,readonly <span class="se">\
-</span></span></span><span class="line"><span class="cl">  alpine:3.22 cat /data/created-at
+</span></span></span><span class="line"><span class="cl">  --mount <span class="nv">type</span><span class="o">=</span>volume,src<span class="o">=</span>docker-demo-data,dst<span class="o">=</span>/data,readonly <span class="se">\
+</span></span></span><span class="line"><span class="cl">  alpine:3.22 cat /data/message.txt
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h3 id="绑定挂载">绑定挂载
-</h3><p>绑定挂载把宿主机文件或目录直接映射到容器中：</p>
+</div><p>看到 <code>persisted</code> 就说明数据不依赖第一个容器。<code>--rm</code> 不会删除显式命名的数据卷。</p>
+<p>绑定挂载适合把已有文件交给容器，例如只读查看当前目录：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -1500,184 +1117,19 @@
 </span></span></span><span class="line"><span class="cl">  alpine:3.22 ls -la /workspace
 </span></span></code></pre></td></tr></table>
 </div>
-</div><p>绑定挂载适合开发时同步源码，也适合以只读方式提供配置。它依赖宿主机路径和权限，可移植性弱于命名数据卷。在 Docker Desktop 中，宿主机目录还需要处于允许共享的路径范围内。</p>
-<p><code>--mount</code> 语义明确，适合脚本和文档。使用 <code>-v 宿主路径:容器路径</code> 时，如果宿主路径拼错，Docker 可能自动创建一个目录，从而掩盖错误。</p>
-<h3 id="tmpfs">tmpfs
-</h3><div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">docker run --rm <span class="se">\
-</span></span></span><span class="line"><span class="cl">  --mount <span class="nv">type</span><span class="o">=</span>tmpfs,dst<span class="o">=</span>/tmp,tmpfs-size<span class="o">=</span>64m <span class="se">\
-</span></span></span><span class="line"><span class="cl">  alpine:3.22 sh -c <span class="s1">&#39;echo temporary &gt; /tmp/value &amp;&amp; cat /tmp/value&#39;</span>
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>tmpfs 数据不会写入容器可写层，容器停止后即消失。它适合缓存、临时文件和不需要持久化的短期敏感数据，但仍可能受到宿主机交换空间等系统配置影响。</p>
-<h3 id="挂载时的注意事项">挂载时的注意事项
-</h3><ul>
-<li>挂载会遮蔽容器目标目录中原有的文件，卸载后原文件才会重新可见。</li>
-<li>绑定挂载需要处理宿主机与容器之间的 UID、GID 和文件权限。</li>
-<li>配置、证书等只读内容应使用 <code>readonly</code> 或 <code>:ro</code>，减少误写风险。</li>
-<li>命名数据卷不是备份；误删除、应用错误和数据损坏仍会影响卷内数据。</li>
-<li><code>docker volume prune</code> 和 <code>docker compose down -v</code> 都可能永久删除数据，执行前应确认备份。</li>
-</ul>
-<h3 id="备份与恢复数据卷">备份与恢复数据卷
-</h3><p>下面先暂停应用写入，再创建专用备份目录并执行备份，避免给临时容器整个项目目录的写权限。示例使用固定文件名，重复执行会覆盖原文件；正式备份应使用带时间戳的唯一文件名：</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">mkdir -p backup
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">docker run --rm <span class="se">\
-</span></span></span><span class="line"><span class="cl">  --mount <span class="nv">type</span><span class="o">=</span>volume,src<span class="o">=</span>demo-data,dst<span class="o">=</span>/data,readonly <span class="se">\
-</span></span></span><span class="line"><span class="cl">  --mount <span class="nv">type</span><span class="o">=</span>bind,src<span class="o">=</span><span class="s2">&#34;</span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span><span class="s2">/backup&#34;</span>,dst<span class="o">=</span>/backup <span class="se">\
-</span></span></span><span class="line"><span class="cl">  alpine:3.22 tar -czf /backup/demo-data.tar.gz -C /data .
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>恢复时先创建一个新卷，避免覆盖原数据：</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">docker volume create demo-data-restored
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">docker run --rm <span class="se">\
-</span></span></span><span class="line"><span class="cl">  --mount <span class="nv">type</span><span class="o">=</span>volume,src<span class="o">=</span>demo-data-restored,dst<span class="o">=</span>/data <span class="se">\
-</span></span></span><span class="line"><span class="cl">  --mount <span class="nv">type</span><span class="o">=</span>bind,src<span class="o">=</span><span class="s2">&#34;</span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span><span class="s2">/backup&#34;</span>,dst<span class="o">=</span>/backup,readonly <span class="se">\
-</span></span></span><span class="line"><span class="cl">  alpine:3.22 tar -xzf /backup/demo-data.tar.gz -C /data
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>恢复后应启动临时容器或应用执行完整性校验。数据库通常还应优先使用数据库自身的逻辑备份工具，例如 <code>pg_dump</code>，而不是只复制正在写入的数据文件。</p>
-<p>完成备份和恢复验证后，再清理实验数据卷：</p>
+</div><p><code>--mount</code> 默认会在绑定挂载源路径不存在时报错；<code>-v</code> 则可能自动创建目录，掩盖路径拼写错误。挂载会遮蔽目标路径的原有内容；首次挂载空数据卷时，Docker 默认还可能把目标目录原有内容复制进卷。绑定挂载需要额外处理宿主机路径与 UID/GID 权限，Docker Desktop 还受目录共享设置影响。</p>
+<p>练习完成后，只删除本节创建的卷；这会永久删除其中的实验数据：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">docker volume rm demo-data demo-data-restored
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">docker volume rm docker-demo-data
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="docker-网络">Docker 网络
-</h2><p>容器拥有独立的网络命名空间。Docker 网络负责连接容器、分配地址、提供 DNS 服务发现，并限定容器之间以及容器与外部网络之间的通信范围。</p>
-<h3 id="常见网络驱动">常见网络驱动
-</h3><div class="table-wrapper"><table>
-	<thead>
-			<tr>
-					<th>驱动</th>
-					<th>特点</th>
-					<th>常见用途</th>
-			</tr>
-	</thead>
-	<tbody>
-			<tr>
-					<td><code>bridge</code></td>
-					<td>单台 Docker 主机上的虚拟网络</td>
-					<td>本地服务、单机部署</td>
-			</tr>
-			<tr>
-					<td><code>host</code></td>
-					<td>容器直接使用宿主机网络栈</td>
-					<td>特定 Linux 性能或端口场景</td>
-			</tr>
-			<tr>
-					<td><code>none</code></td>
-					<td>只保留回环接口</td>
-					<td>完全不需要网络的任务</td>
-			</tr>
-			<tr>
-					<td><code>overlay</code></td>
-					<td>跨多台 Docker 主机连接服务</td>
-					<td>Docker Swarm</td>
-			</tr>
-			<tr>
-					<td><code>macvlan</code></td>
-					<td>为容器分配局域网中的独立 MAC/IP</td>
-					<td>需要直接接入物理网络的场景</td>
-			</tr>
-	</tbody>
-</table></div>
-<p>日常单机使用时，优先创建用户自定义桥接网络（user-defined bridge network），而不是把所有容器都放进默认 <code>bridge</code>。用户自定义网络具有更清晰的隔离边界，并提供基于容器名和网络别名的 DNS 解析。它不会自动提供服务认证、细粒度授权或流量加密。</p>
-<h3 id="创建自定义网络">创建自定义网络
-</h3><div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 创建和查看网络</span>
-</span></span><span class="line"><span class="cl">docker network create demo-net
-</span></span><span class="line"><span class="cl">docker network ls
-</span></span><span class="line"><span class="cl">docker network inspect demo-net
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># Redis 容器加入 demo-net</span>
-</span></span><span class="line"><span class="cl">docker run --detach <span class="se">\
-</span></span></span><span class="line"><span class="cl">  --name redis <span class="se">\
-</span></span></span><span class="line"><span class="cl">  --network demo-net <span class="se">\
-</span></span></span><span class="line"><span class="cl">  redis:7-alpine
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># 临时客户端通过容器名 redis 访问服务</span>
-</span></span><span class="line"><span class="cl">docker run --rm <span class="se">\
-</span></span></span><span class="line"><span class="cl">  --network demo-net <span class="se">\
-</span></span></span><span class="line"><span class="cl">  redis:7-alpine <span class="se">\
-</span></span></span><span class="line"><span class="cl">  redis-cli -h redis ping
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>如果返回 <code>PONG</code>，说明 Docker DNS 已将名称 <code>redis</code> 解析到对应容器。对于另一个正在运行的容器，可以将下面的 <code>CONTAINER</code> 替换为它的名称，动态接入或断开网络：</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">docker network connect demo-net CONTAINER
-</span></span><span class="line"><span class="cl">docker network disconnect demo-net CONTAINER
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>完成实验后清理：</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">docker stop redis
-</span></span><span class="line"><span class="cl">docker rm redis
-</span></span><span class="line"><span class="cl">docker network rm demo-net
-</span></span></code></pre></td></tr></table>
-</div>
-</div><h3 id="端口映射">端口映射
-</h3><p>同一 Docker 网络中的容器可以直接访问对方的容器端口，不需要发布到宿主机。只有宿主机或外部客户端需要访问服务时，才使用 <code>-p</code>：</p>
+</div><p>数据卷本身不是备份。数据库应优先使用自身的备份工具并验证恢复；复制数据文件时需要保证写入一致性。</p>
+<h3 id="通过容器名称访问服务">通过容器名称访问服务
+</h3><p>先建立用户自定义桥接网络，再把第三节的 Go 镜像接进去：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -1687,96 +1139,73 @@
 </span><span class="lnt">5
 </span><span class="lnt">6
 </span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">浏览器
-</span></span><span class="line"><span class="cl">  │ 127.0.0.1:8080
-</span></span><span class="line"><span class="cl">  ▼
-</span></span><span class="line"><span class="cl">宿主机端口 8080
-</span></span><span class="line"><span class="cl">  │ Docker 端口转发
-</span></span><span class="line"><span class="cl">  ▼
-</span></span><span class="line"><span class="cl">web 容器端口 80 ───── 容器网络 ───── db:5432
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>下面两种发布方式按访问范围二选一。命令以前台方式运行，按 <code>Ctrl+C</code> 停止后，<code>--rm</code> 会删除实验容器：</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 默认通常绑定宿主机所有接口，局域网也可能访问</span>
-</span></span><span class="line"><span class="cl">docker run --rm -p 8080:80 nginx:alpine
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">docker network create docker-demo-net
+</span></span><span class="line"><span class="cl">docker run --detach --rm <span class="se">\
+</span></span></span><span class="line"><span class="cl">  --name docker-demo-app <span class="se">\
+</span></span></span><span class="line"><span class="cl">  --network docker-demo-net <span class="se">\
+</span></span></span><span class="line"><span class="cl">  docker-demo:1.0
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># 只允许宿主机本地访问，更适合开发环境</span>
-</span></span><span class="line"><span class="cl">docker run --rm -p 127.0.0.1:8080:80 nginx:alpine
+</span></span><span class="line"><span class="cl">docker run --rm <span class="se">\
+</span></span></span><span class="line"><span class="cl">  --network docker-demo-net <span class="se">\
+</span></span></span><span class="line"><span class="cl">  alpine:3.22 wget -qO- http://docker-demo-app:8080/health
 </span></span></code></pre></td></tr></table>
 </div>
-</div><p>排查已有容器的端口映射时，可以直接查询全部映射或指定容器端口：</p>
+</div><p>预期输出 <code>ok</code>。这次没有 <code>-p</code>：临时客户端与应用在同一用户自定义网络中，可以通过 Docker DNS 解析容器名，直接访问容器端口。默认 <code>bridge</code> 网络不提供相同的容器名自动解析体验。</p>
+<div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th>谁访问谁</th>
+					<th>应使用的地址</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>宿主机访问发布后的服务</td>
+					<td><code>127.0.0.1:宿主机端口</code></td>
+			</tr>
+			<tr>
+					<td>同一网络中的容器访问应用</td>
+					<td><code>docker-demo-app:8080</code>；Compose 中使用服务名</td>
+			</tr>
+			<tr>
+					<td>容器访问自己</td>
+					<td><code>127.0.0.1:容器端口</code></td>
+			</tr>
+			<tr>
+					<td>容器访问 Docker Desktop 宿主机</td>
+					<td>通常使用 <code>host.docker.internal:服务端口</code></td>
+			</tr>
+	</tbody>
+</table></div>
+<p>Linux Engine 上访问宿主机时，可在 <code>docker run</code> 中添加 <code>--add-host host.docker.internal:host-gateway</code>；宿主机服务也必须监听容器可达的接口并允许访问。容器内的 <code>localhost</code> 不会指向另一个容器或宿主机。</p>
+<p>发布端口时，<code>-p 8080:80</code> 默认通常绑定宿主机所有接口；<code>-p 127.0.0.1:8080:80</code> 用于本机开发。服务间通信通常只需要共享网络，不必给每个服务发布端口。</p>
+<p>结束本节实验，下一节交给 Compose 管理网络：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
 </span><span class="lnt">2
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">docker port CONTAINER
-</span></span><span class="line"><span class="cl">docker port CONTAINER 80/tcp
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">docker stop docker-demo-app
+</span></span><span class="line"><span class="cl">docker network rm docker-demo-net
 </span></span></code></pre></td></tr></table>
 </div>
-</div><p>应用进程通常需要监听容器内的 <code>0.0.0.0</code>，才能通过端口映射访问。如果只监听容器内的 <code>127.0.0.1</code>，外部请求通常无法进入该进程。</p>
-<h3 id="localhost-与服务发现">localhost 与服务发现
-</h3><p>容器内的 <code>localhost</code> 只指向当前容器本身。应用容器访问数据库容器时，不应连接 <code>localhost:5432</code>，而应使用同一网络中的服务名：</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">错误：DB_HOST=localhost
-</span></span><span class="line"><span class="cl">正确：DB_HOST=db
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>容器访问宿主机服务时，Docker Desktop 通常可以使用 <code>host.docker.internal</code>。Linux Docker Engine 常常需要显式添加映射。下面的 <code>example/app:1.0</code> 需要替换为实际镜像：</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">docker run <span class="se">\
-</span></span></span><span class="line"><span class="cl">  --add-host host.docker.internal:host-gateway <span class="se">\
-</span></span></span><span class="line"><span class="cl">  example/app:1.0
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p><code>--network host</code> 的行为具有平台差异，不应作为通用跨平台方案。</p>
-<h2 id="docker-compose">Docker Compose
-</h2><p>手动管理一个容器时，<code>docker run</code> 足够直接。但一个应用通常包含 Web 服务、数据库、缓存、消息队列等多个容器。如果每次都手写网络、数据卷、环境变量和启动顺序，命令会迅速变得难以维护。</p>
-<p>Docker Compose 使用一个 <code>compose.yaml</code> 文件声明多容器应用：</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">compose.yaml
-</span></span><span class="line"><span class="cl">    ├── services：要运行的服务
-</span></span><span class="line"><span class="cl">    ├── networks：服务使用的网络
-</span></span><span class="line"><span class="cl">    ├── volumes：需要持久化的数据卷
-</span></span><span class="line"><span class="cl">    ├── configs：非敏感配置
-</span></span><span class="line"><span class="cl">    └── secrets：敏感文件的挂载声明
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>现代 Compose 遵循 Compose Specification，顶层不再需要 <code>version: &quot;3&quot;</code>。</p>
-<h3 id="完整-compose-示例">完整 Compose 示例
-</h3><p>沿用前面的 Go 应用，再添加一个 Caddy 反向代理。目录结构如下：</p>
+</div><h2 id="用-compose-组织完整应用">用 Compose 组织完整应用
+</h2><p>现在把 Go 服务放在 Caddy 反向代理后面，由一份 <code>compose.yaml</code> 声明构建、网络、挂载和启动依赖。现代 Compose 使用 <code>docker compose</code> 命令并遵循 Compose Specification，顶层不需要 <code>version: &quot;3&quot;</code>。</p>
+<pre class="mermaid">
+  flowchart LR
+    A[浏览器] --&gt;|127.0.0.1:8080| B[proxy:80 / Caddy]
+    B --&gt;|app:8080 / 项目网络| C[app / Go 服务]
+    D[Caddyfile] -.只读绑定挂载.-&gt; B
+    E[Caddy 命名数据卷] --- B
+</pre>
+
+<h3 id="添加-caddy-与-compose-配置">添加 Caddy 与 Compose 配置
+</h3><p>在第三节的 <code>docker-demo</code> 目录里增加 <code>Caddyfile</code> 和 <code>compose.yaml</code>：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -1806,7 +1235,7 @@
 </span></code></pre></td>
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-caddyfile" data-lang="caddyfile"><span class="line"><span class="cl"><span class="gh">:80</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">    <span class="k">reverse_proxy</span> <span class="n">app</span><span class="p">:</span><span class="mi">8080</span>
+</span></span><span class="line"><span class="cl">	<span class="k">reverse_proxy</span> <span class="n">app</span><span class="p">:</span><span class="mi">8080</span>
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span></code></pre></td></tr></table>
 </div>
@@ -1851,10 +1280,6 @@
 </span><span class="lnt">36
 </span><span class="lnt">37
 </span><span class="lnt">38
-</span><span class="lnt">39
-</span><span class="lnt">40
-</span><span class="lnt">41
-</span><span class="lnt">42
 </span></code></pre></td>
 <td class="lntd">
 <pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">docker-demo</span><span class="w">
@@ -1864,6 +1289,8 @@
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">build</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">context</span><span class="p">:</span><span class="w"> </span><span class="l">.</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l">runtime</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">environment</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">APP_MESSAGE</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;${APP_MESSAGE:-hello}&#34;</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l">unless-stopped</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">healthcheck</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">test</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&#34;CMD&#34;</span><span class="p">,</span><span class="w"> </span><span class="s2">&#34;wget&#34;</span><span class="p">,</span><span class="w"> </span><span class="s2">&#34;-qO-&#34;</span><span class="p">,</span><span class="w"> </span><span class="s2">&#34;http://127.0.0.1:8080/health&#34;</span><span class="p">]</span><span class="w">
@@ -1871,185 +1298,182 @@
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">timeout</span><span class="p">:</span><span class="w"> </span><span class="l">3s</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">retries</span><span class="p">:</span><span class="w"> </span><span class="m">3</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">start_period</span><span class="p">:</span><span class="w"> </span><span class="l">5s</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="l">app-net</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">proxy</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l">caddy:2.9-alpine</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l">caddy:2-alpine</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">restart</span><span class="p">:</span><span class="w"> </span><span class="l">unless-stopped</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">ports</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="s2">&#34;127.0.0.1:8080:80&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="s2">&#34;127.0.0.1:${APP_PORT:-8080}:80&#34;</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">volumes</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">bind</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l">./Caddyfile</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l">/etc/caddy/Caddyfile</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">read_only</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">bind</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="nt">create_host_path</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="l">caddy-data:/data</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="l">caddy-config:/config</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">depends_on</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">condition</span><span class="p">:</span><span class="w"> </span><span class="l">service_healthy</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">networks</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="l">app-net</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="nt">volumes</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">caddy-data</span><span class="p">:</span><span class="w">
 </span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">caddy-config</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="nt">networks</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">app-net</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l">bridge</span><span class="w">
 </span></span></span></code></pre></td></tr></table>
 </div>
-</div><p>这个配置体现了前面几节的核心概念：</p>
-<ul>
-<li><code>app</code> 使用当前目录的 Dockerfile 构建镜像。</li>
-<li><code>proxy</code> 通过 Compose DNS 使用 <code>app:8080</code> 访问应用。</li>
-<li>只有 <code>proxy</code> 向宿主机发布端口，<code>app</code> 只在 <code>app-net</code> 中被其他服务访问。</li>
-<li><code>Caddyfile</code> 通过只读绑定挂载提供，Caddy 状态保存在命名数据卷中。</li>
-<li><code>proxy</code> 等待 <code>app</code> 健康检查通过后再启动。</li>
-</ul>
-<p><code>depends_on</code> 和健康检查可以改善启动顺序，但不能替代应用自身的重试与故障恢复。依赖服务在运行中重启时，应用仍应能够重新连接。</p>
-<h3 id="compose-常用命令">Compose 常用命令
+</div><p>这里使用 Compose 自动创建的项目默认网络，<code>proxy</code> 可以通过服务名 <code>app</code> 找到 Go 服务，无需硬编码 IP 或设置 <code>container_name</code>。只有 <code>proxy</code> 向宿主机发布端口，<code>app</code> 通过项目网络接收请求。</p>
+<p><code>Caddyfile</code> 以只读方式挂载，源文件不存在时直接报错。<code>/data</code> 和 <code>/config</code> 使用命名数据卷保存 Caddy 的持久状态；本例只配置 HTTP，不涉及域名与自动 HTTPS 证书签发。</p>
+<p><code>app</code> 的健康检查在它自己的容器中执行，因此使用 <code>127.0.0.1:8080</code>。运行镜像 Alpine 自带的 BusyBox <code>wget</code> 可用于本例检查；换成 distroless 等镜像时，必须同步调整检查方式。</p>
+<h3 id="启动并检查整条请求链路">启动并检查整条请求链路
 </h3><div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span><span class="lnt">24
-</span><span class="lnt">25
-</span><span class="lnt">26
-</span><span class="lnt">27
-</span><span class="lnt">28
-</span><span class="lnt">29
-</span><span class="lnt">30
-</span><span class="lnt">31
-</span><span class="lnt">32
-</span><span class="lnt">33
-</span><span class="lnt">34
-</span><span class="lnt">35
-</span><span class="lnt">36
-</span><span class="lnt">37
-</span><span class="lnt">38
-</span><span class="lnt">39
-</span><span class="lnt">40
-</span><span class="lnt">41
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 展开变量、合并配置并验证语法</span>
-</span></span><span class="line"><span class="cl">docker compose config
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># 拉取使用 image 的服务，跳过由 Dockerfile 构建的服务</span>
-</span></span><span class="line"><span class="cl">docker compose pull --ignore-buildable
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># 只构建服务镜像，不启动容器</span>
-</span></span><span class="line"><span class="cl">docker compose build
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># 构建镜像并在后台启动全部服务</span>
-</span></span><span class="line"><span class="cl">docker compose up --detach --build
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># 查看服务与容器状态</span>
-</span></span><span class="line"><span class="cl">docker compose ps
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># 查看当前项目的服务镜像</span>
-</span></span><span class="line"><span class="cl">docker compose images
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># 持续查看全部服务日志</span>
-</span></span><span class="line"><span class="cl">docker compose logs --follow --tail <span class="m">100</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># 只查看 app 服务日志</span>
-</span></span><span class="line"><span class="cl">docker compose logs --follow app
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># 在现有 app 容器内执行命令</span>
-</span></span><span class="line"><span class="cl">docker compose <span class="nb">exec</span> app sh
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># 创建一个一次性服务容器，并覆盖默认入口执行检查命令</span>
-</span></span><span class="line"><span class="cl">docker compose run --rm --entrypoint sh app -c <span class="s1">&#39;id&#39;</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># 停止服务，但保留容器</span>
-</span></span><span class="line"><span class="cl">docker compose stop
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># 启动已经停止的服务</span>
-</span></span><span class="line"><span class="cl">docker compose start
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># 只重启 app 服务，不应用配置文件变更</span>
-</span></span><span class="line"><span class="cl">docker compose restart app
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># 停止并删除容器与项目网络，默认保留命名数据卷</span>
-</span></span><span class="line"><span class="cl">docker compose down
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>启动后访问：</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">curl http://127.0.0.1:8080/
-</span></span><span class="line"><span class="cl">curl http://127.0.0.1:8080/health
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>修改 <code>compose.yaml</code>、环境变量或镜像后，<code>docker compose restart</code> 不会应用这些变化。应使用 <code>docker compose up -d</code> 让 Compose 按需重新创建容器；Dockerfile 或源码变化时再加 <code>--build</code>。</p>
-<p>删除服务和命名数据卷时需要显式使用 <code>-v/--volumes</code>。这会删除 Compose 项目声明的非 external 命名数据卷和匿名卷，应在确认备份后执行：</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">docker compose down --volumes
-</span></span></code></pre></td></tr></table>
-</div>
-</div><h3 id="环境变量">环境变量
-</h3><p>Compose 支持从 shell 或项目目录中的 <code>.env</code> 文件读取插值变量：</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">APP_PORT=8080
-</span></span><span class="line"><span class="cl">APP_IMAGE_TAG=1.0
-</span></span></code></pre></td></tr></table>
-</div>
-</div><div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
 </span><span class="lnt">2
 </span><span class="lnt">3
 </span><span class="lnt">4
 </span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">services</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">app</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l">example/app:${APP_IMAGE_TAG:-latest}</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">ports</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="s2">&#34;127.0.0.1:${APP_PORT:-8080}:8080&#34;</span><span class="w">
-</span></span></span></code></pre></td></tr></table>
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 验证配置，再构建并等待服务就绪</span>
+</span></span><span class="line"><span class="cl">docker compose config --quiet
+</span></span><span class="line"><span class="cl">docker compose up --detach --build --wait --wait-timeout <span class="m">120</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># 查看状态，验证经过 Caddy 的请求</span>
+</span></span><span class="line"><span class="cl">docker compose ps
+</span></span><span class="line"><span class="cl">curl --fail http://127.0.0.1:8080/
+</span></span><span class="line"><span class="cl">curl --fail http://127.0.0.1:8080/health
+</span></span></code></pre></td></tr></table>
 </div>
-</div><p><code>${VAR}</code> 是 Compose 在解析 YAML 时进行的变量插值，而 <code>environment</code> 和 <code>env_file</code> 用于设置容器内部的环境变量，这几个概念不要混淆。</p>
-<p>密码和令牌不应提交到 <code>.env</code>。本地开发可以使用不进 Git 的独立密钥文件，并通过 Compose secrets 以文件形式挂载：</p>
+</div><p>预期 <code>app</code> 显示 <code>healthy</code>、<code>proxy</code> 处于运行状态，请求返回 <code>hello from &lt;容器主机名&gt;</code> 与 <code>ok</code>。可用 <code>docker compose logs --tail 50</code> 排查启动问题。</p>
+<p><code>depends_on: condition: service_healthy</code> 让 Caddy 在创建启动时等待应用健康；普通 <code>depends_on</code> 只保证依赖先启动，不保证可接受请求。<code>--wait</code> 对有健康检查的服务等待健康，对没有健康检查的服务只等待运行，因此仍需用 <code>curl</code> 验证入口。</p>
+<p>健康检查失败不会单独触发 <code>restart: unless-stopped</code>。重启策略主要处理进程退出，启动依赖也不会持续修复运行期间的依赖故障；实际应用仍需实现超时、重试和恢复。</p>
+<h3 id="修改配置区分插值与容器环境变量">修改配置：区分插值与容器环境变量
+</h3><p>在同一目录新建可选的 <code>.env</code>：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">APP_PORT=18080
+</span></span><span class="line"><span class="cl">APP_MESSAGE=hello-compose
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>保持 <code>compose.yaml</code> 使用前面的完整配置，然后执行：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">docker compose config
+</span></span><span class="line"><span class="cl">docker compose up --detach --wait --wait-timeout <span class="m">120</span>
+</span></span><span class="line"><span class="cl">curl --fail http://127.0.0.1:18080/
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>预期返回 <code>hello-compose from &lt;容器主机名&gt;</code>。后续从宿主机验证服务时，使用新端口 <code>18080</code>。</p>
+<div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th>配置机制</th>
+					<th>发生在哪一步</th>
+					<th>本例中的作用</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>Shell 环境或 <code>.env</code> 中的变量</td>
+					<td>Compose 解析配置时</td>
+					<td>替换 <code>${APP_PORT:-8080}</code> 等表达式；Shell 同名变量优先</td>
+			</tr>
+			<tr>
+					<td><code>environment</code></td>
+					<td>创建容器时</td>
+					<td>将展开后的 <code>APP_MESSAGE</code> 注入应用容器</td>
+			</tr>
+			<tr>
+					<td>服务级 <code>env_file</code></td>
+					<td>创建容器时</td>
+					<td>把指定文件中的变量传给该服务容器</td>
+			</tr>
+	</tbody>
+</table></div>
+<p><strong><code>.env</code> 被 Compose 读取，不代表其中所有变量自动进入容器。</strong> 本例的 <code>APP_PORT</code> 只改变宿主机发布端口，Go 服务仍监听容器端口 <code>8080</code>。<code>APP_MESSAGE</code> 能被 Go 程序读取，是因为配置中写了 <code>environment</code>。</p>
+<p><code>docker compose config</code> 会显示展开后的配置，不应把包含真实密钥的输出直接贴入公共日志。密钥应使用未提交到 Git 的文件或专门的密钥管理系统；Compose secrets 可将文件挂到 <code>/run/secrets/&lt;名称&gt;</code>，但本地源文件仍是明文。</p>
+<h3 id="更新与停止">更新与停止
+</h3><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th>需求</th>
+					<th>命令</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>修改源码或 Dockerfile 后更新</td>
+					<td><code>docker compose up -d --build --wait</code></td>
+			</tr>
+			<tr>
+					<td>修改环境变量或 Compose 服务配置后更新</td>
+					<td><code>docker compose up -d --wait</code></td>
+			</tr>
+			<tr>
+					<td>拉取 Caddy 镜像更新并应用</td>
+					<td><code>docker compose pull --ignore-buildable</code>，再执行 <code>docker compose up -d --wait</code></td>
+			</tr>
+			<tr>
+					<td>暂停环境，保留容器</td>
+					<td><code>docker compose stop</code>；恢复用 <code>docker compose start</code></td>
+			</tr>
+			<tr>
+					<td>结束实验，删除容器与项目网络</td>
+					<td><code>docker compose down</code>；默认保留命名数据卷</td>
+			</tr>
+	</tbody>
+</table></div>
+<p><code>docker compose restart</code> 只重启已有容器，不会应用新的环境变量、镜像或服务配置。若只修改了绑定挂载的 <code>Caddyfile</code> 内容，可执行 <code>docker compose exec proxy caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile</code>，让 Caddy 重新加载配置。</p>
+<p>完整重置本例时，<code>docker compose down --volumes</code> 还会删除声明的非 external 命名数据卷和附属匿名卷。它会永久删除卷内数据，且不会额外询问确认，应与日常 <code>down</code> 区分使用。</p>
+<h2 id="command-reference">命令速查
+</h2><p>下面的 <code>IMAGE</code>、<code>CONTAINER</code>、<code>NETWORK</code> 和 <code>registry.example.com/team</code> 都是占位值，执行前需要替换。这些是按需查阅的命令，不是一段需要顺序执行的脚本。</p>
+<h3 id="镜像与分发">镜像与分发
+</h3><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th>目的</th>
+					<th>命令</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>拉取、列出镜像</td>
+					<td><code>docker pull IMAGE</code> / <code>docker image ls</code>（或 <code>docker images</code>）</td>
+			</tr>
+			<tr>
+					<td>检查配置与构建历史</td>
+					<td><code>docker image inspect IMAGE</code> / <code>docker image history IMAGE</code></td>
+			</tr>
+			<tr>
+					<td>添加引用、推送镜像</td>
+					<td><code>docker tag IMAGE registry.example.com/team/app:1.0</code> / <code>docker push registry.example.com/team/app:1.0</code></td>
+			</tr>
+			<tr>
+					<td>离线导出与载入</td>
+					<td><code>docker save -o app.tar IMAGE</code> / <code>docker load -i app.tar</code></td>
+			</tr>
+			<tr>
+					<td>删除本地镜像引用</td>
+					<td><code>docker image rm IMAGE</code>（或 <code>docker rmi IMAGE</code>）</td>
+			</tr>
+	</tbody>
+</table></div>
+<p>推送前使用 <code>docker login registry.example.com</code> 登录；自动化中使用 <code>--password-stdin</code> 从标准输入接收凭据，避免把令牌直接写在命令参数中。</p>
+<p><code>save/load</code> 保存镜像配置和镜像层，不包含数据卷或容器可写层。<code>export/import</code> 处理容器文件系统，无法完整保留原镜像的分层、历史与配置，也不会备份挂载卷，不能与镜像归档或数据备份混用。</p>
+<p>需要发布多架构镜像时，可使用 Buildx：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -2062,117 +1486,136 @@
 </span><span class="lnt">8
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">services</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">app</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">secrets</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      </span>- <span class="l">db-password</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="nt">secrets</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">db-password</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">file</span><span class="p">:</span><span class="w"> </span><span class="l">./secrets/db-password.txt</span><span class="w">
-</span></span></span></code></pre></td></tr></table>
-</div>
-</div><p>应用可从 <code>/run/secrets/db-password</code> 读取内容。Compose secrets 改善了传递方式，但本地文件本身仍是明文，生产环境还需要专门的密钥管理系统和访问控制。</p>
-<h3 id="compose-使用建议">Compose 使用建议
-</h3><ol>
-<li>文件优先命名为 <code>compose.yaml</code>，并提交一份不含真实密钥的默认配置。</li>
-<li>不要无必要设置 <code>container_name</code>，否则容易产生项目间冲突，也会妨碍同一服务扩容。</li>
-<li>服务之间使用服务名和容器端口通信，只有外部需要访问的服务才配置 <code>ports</code>。</li>
-<li>配置健康检查，同时让应用对数据库、缓存等依赖实现超时和重试。</li>
-<li>提交前运行 <code>docker compose config</code>，检查变量展开、端口和挂载路径是否符合预期。</li>
-</ol>
-<h2 id="一套完整的日常工作流">一套完整的日常工作流
-</h2><p>从修改代码到停止环境，可以按照下面的顺序操作：</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 1. 检查最终 Compose 配置</span>
-</span></span><span class="line"><span class="cl">docker compose config
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 先核对 builder 支持的平台</span>
+</span></span><span class="line"><span class="cl">docker buildx inspect --bootstrap
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># 2. 构建、启动并等待服务进入运行或健康状态</span>
-</span></span><span class="line"><span class="cl">docker compose up --detach --build --wait
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># 3. 查看状态和最近 100 行日志</span>
-</span></span><span class="line"><span class="cl">docker compose ps
-</span></span><span class="line"><span class="cl">docker compose logs --tail <span class="m">100</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># 4. 测试服务</span>
-</span></span><span class="line"><span class="cl">curl http://127.0.0.1:8080/health
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># 5. 停止并删除容器，保留命名数据卷</span>
-</span></span><span class="line"><span class="cl">docker compose down
+</span></span><span class="line"><span class="cl"><span class="c1"># 替换为自己的仓库地址；--push 会实际发布镜像</span>
+</span></span><span class="line"><span class="cl">docker buildx build <span class="se">\
+</span></span></span><span class="line"><span class="cl">  --platform linux/amd64,linux/arm64 <span class="se">\
+</span></span></span><span class="line"><span class="cl">  --tag registry.example.com/team/app:1.0 <span class="se">\
+</span></span></span><span class="line"><span class="cl">  --push .
 </span></span></code></pre></td></tr></table>
 </div>
-</div><p>发布镜像时，再增加版本标签和镜像仓库步骤。下面的 <code>registry.example.com</code>、团队名和凭据变量都是占位值，需要替换为自己的仓库信息：</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># 构建带版本的镜像</span>
-</span></span><span class="line"><span class="cl">docker build --tag registry.example.com/team/docker-demo:1.0.0 .
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># 登录时通过标准输入传递令牌，避免把密码直接写进命令参数</span>
-</span></span><span class="line"><span class="cl"><span class="nb">printf</span> <span class="s1">&#39;%s&#39;</span> <span class="s2">&#34;</span><span class="nv">$REGISTRY_TOKEN</span><span class="s2">&#34;</span> <span class="p">|</span> <span class="se">\
-</span></span></span><span class="line"><span class="cl">  docker login registry.example.com <span class="se">\
-</span></span></span><span class="line"><span class="cl">  --username <span class="s2">&#34;</span><span class="nv">$REGISTRY_USER</span><span class="s2">&#34;</span> <span class="se">\
-</span></span></span><span class="line"><span class="cl">  --password-stdin
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># 推送不可混淆的版本标签</span>
-</span></span><span class="line"><span class="cl">docker push registry.example.com/team/docker-demo:1.0.0
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1"># 共享设备使用结束后退出仓库</span>
-</span></span><span class="line"><span class="cl">docker <span class="nb">logout</span> registry.example.com
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>多架构发布可以使用 Buildx：</p>
+</div><p>跨架构 <code>RUN</code> 需要原生 worker 或 QEMU/binfmt 模拟支持。非默认 builder 的单平台本地构建通常需要 <code>--load</code> 才会载入本地镜像列表，多平台结果通常直接推送到仓库。</p>
+<h3 id="容器与日志">容器与日志
+</h3><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th>目的</th>
+					<th>命令</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>查看全部容器及状态</td>
+					<td><code>docker ps -a</code></td>
+			</tr>
+			<tr>
+					<td>跟踪最近日志</td>
+					<td><code>docker logs --follow --tail 100 CONTAINER</code></td>
+			</tr>
+			<tr>
+					<td>在已有容器中执行命令</td>
+					<td><code>docker exec -it CONTAINER sh</code></td>
+			</tr>
+			<tr>
+					<td>检查配置与端口</td>
+					<td><code>docker inspect CONTAINER</code> / <code>docker port CONTAINER</code></td>
+			</tr>
+			<tr>
+					<td>查看资源与进程</td>
+					<td><code>docker stats CONTAINER</code> / <code>docker top CONTAINER</code></td>
+			</tr>
+	</tbody>
+</table></div>
+<p><code>logs --follow</code> 和 <code>stats</code> 会持续运行，按 <code>Ctrl+C</code> 退出查看；<code>exec</code> 启动的 shell 用 <code>exit</code> 退出。精简镜像可能没有 Bash，distroless 或 <code>scratch</code> 镜像甚至没有 shell，应通过日志、指标或专门的调试工具排查。</p>
+<p>需要复制文件时，使用 <code>docker cp ./file CONTAINER:/path</code> 或反向复制；需要查看可写层变化时，使用 <code>docker diff CONTAINER</code>。这些操作不会把修改自动写回 Dockerfile。</p>
+<h3 id="compose-与资源限制">Compose 与资源限制
+</h3><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th>目的</th>
+					<th>命令</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td>检查配置与状态</td>
+					<td><code>docker compose config</code> / <code>docker compose ps</code></td>
+			</tr>
+			<tr>
+					<td>跟踪一个服务的日志</td>
+					<td><code>docker compose logs --follow --tail 100 app</code></td>
+			</tr>
+			<tr>
+					<td>在应用容器内执行命令</td>
+					<td><code>docker compose exec app sh</code></td>
+			</tr>
+			<tr>
+					<td>创建一次性容器并覆盖入口</td>
+					<td><code>docker compose run --rm --entrypoint sh app -c 'id'</code></td>
+			</tr>
+			<tr>
+					<td>查看项目使用的镜像</td>
+					<td><code>docker compose images</code></td>
+			</tr>
+	</tbody>
+</table></div>
+<p>给独立容器设置资源上限的示例，使用第三节已经构建的镜像：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
 </span><span class="lnt">2
 </span><span class="lnt">3
 </span><span class="lnt">4
+</span><span class="lnt">5
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">docker buildx build <span class="se">\
-</span></span></span><span class="line"><span class="cl">  --platform linux/amd64,linux/arm64 <span class="se">\
-</span></span></span><span class="line"><span class="cl">  --tag registry.example.com/team/docker-demo:1.0.0 <span class="se">\
-</span></span></span><span class="line"><span class="cl">  --push .
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">docker run --rm <span class="se">\
+</span></span></span><span class="line"><span class="cl">  --memory 512m <span class="se">\
+</span></span></span><span class="line"><span class="cl">  --cpus 1.0 <span class="se">\
+</span></span></span><span class="line"><span class="cl">  --pids-limit <span class="m">200</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl">  docker-demo:1.0
 </span></span></code></pre></td></tr></table>
 </div>
-</div><p>执行多架构构建前，可以用 <code>docker buildx inspect --bootstrap</code> 检查 builder 支持的平台。包含跨架构 <code>RUN</code> 的 Dockerfile 需要对应架构的原生 worker，或预先配置 binfmt/QEMU 模拟；Docker Desktop 通常已经配置，普通 Linux Engine 不一定具备。使用非默认 builder 时，单平台本地构建通常需要 <code>--load</code> 才会把结果加载到本地镜像列表；多平台结果一般直接使用 <code>--push</code> 发布到仓库。</p>
-<h2 id="常见问题">常见问题
+</div><p>命令在前台运行，按 <code>Ctrl+C</code> 结束。Compose 服务可以配置对应的 <code>mem_limit</code>、<code>cpus</code>、<code>pids_limit</code>，再用 <code>up -d</code> 应用，并通过 <code>docker inspect</code>、<code>docker stats</code> 核对效果。</p>
+<h3 id="磁盘占用与清理">磁盘占用与清理
+</h3><p>先用 <code>docker system df --verbose</code> 确认空间用在哪里，再选择清理范围：</p>
+<div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th>命令</th>
+					<th>删除范围</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>docker container prune</code></td>
+					<td>所有已停止的容器及其可写层</td>
+			</tr>
+			<tr>
+					<td><code>docker image prune</code></td>
+					<td>悬空镜像；加 <code>--all</code> 扩大到未被容器引用的镜像</td>
+			</tr>
+			<tr>
+					<td><code>docker builder prune</code></td>
+					<td>未使用的构建缓存，默认主要清理悬空缓存</td>
+			</tr>
+			<tr>
+					<td><code>docker network prune</code></td>
+					<td>未被容器使用的网络</td>
+			</tr>
+			<tr>
+					<td><code>docker volume prune</code></td>
+					<td>现代 Engine 默认仅清理未被容器引用的匿名本地卷；<code>--all</code> 包括命名卷</td>
+			</tr>
+	</tbody>
+</table></div>
+<p><strong>未被引用，不代表数据已经没有价值。</strong> <code>prune</code> 的确认提示主要说明删除范围，并不是完整的待删除对象预览。先查看 <code>docker ps -a</code>、<code>docker volume ls</code> 和相关 <code>inspect</code> 输出，确认后再清理；能明确定位的对象，优先按名称删除。</p>
+<p><code>docker system prune --all --volumes</code> 会合并清理停止的容器、未使用网络、未被容器引用的镜像、构建缓存与未使用匿名卷，影响范围很大，不适合作为日常实验的收尾命令。</p>
+<h2 id="troubleshooting">常见问题
 </h2><h3 id="容器启动后立即退出">容器启动后立即退出
-</h3><p>容器的生命周期由主进程决定，主进程退出后容器就会停止。先查看状态、退出码和日志：</p>
+</h3><p>容器主进程退出，容器就会停止。先查退出码和日志：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -2185,92 +1628,76 @@
 </span></span><span class="line"><span class="cl">docker logs CONTAINER
 </span></span></code></pre></td></tr></table>
 </div>
-</div><p>不要通过在后台运行一个无意义进程来“保活”，应修复入口命令、配置或应用本身。</p>
-<h3 id="端口映射后仍无法访问">端口映射后仍无法访问
-</h3><p>依次检查：</p>
-<ol>
-<li>容器是否仍在运行，应用日志是否报错。</li>
-<li><code>-p</code> 的顺序是否为“宿主机端口:容器端口”。</li>
-<li>应用是否监听容器内的 <code>0.0.0.0</code>，而不是只监听 <code>127.0.0.1</code>。</li>
-<li>Docker Desktop 的虚拟机、宿主防火墙或云安全组是否允许访问。</li>
-<li>服务是否实际上监听了预期的容器端口。</li>
+</div><p>检查入口命令、缺失配置与应用错误。服务应以前台进程运行；在容器里把服务放到后台后退出入口脚本，会导致容器结束。排障期间可暂时省略 <code>--rm</code>，保留退出后的状态与日志。</p>
+<h3 id="端口已经发布却无法访问">端口已经发布，却无法访问
+</h3><ol>
+<li>用 <code>docker ps -a</code> 和日志确认服务没有退出。</li>
+<li>用 <code>docker port CONTAINER</code> 核对“宿主机端口 → 容器端口”的映射。</li>
+<li>确认应用监听容器网络接口，而不是只监听容器内的 <code>127.0.0.1</code>。</li>
+<li>如果从另一台机器访问，确认端口没有仅绑定宿主机 <code>127.0.0.1</code>，并检查防火墙与安全组。</li>
 </ol>
-<h3 id="容器之间无法连接">容器之间无法连接
-</h3><p>先确认两个容器位于同一用户自定义网络，再使用容器名、网络别名或 Compose 服务名连接。容器内的 <code>localhost</code> 不能指向另一个容器。</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">docker network inspect NETWORK
-</span></span><span class="line"><span class="cl">docker inspect CONTAINER
-</span></span></code></pre></td></tr></table>
-</div>
-</div><h3 id="修改代码后镜像没有变化">修改代码后镜像没有变化
-</h3><p>检查构建上下文、<code>.dockerignore</code> 和 Dockerfile 的 <code>COPY</code> 路径，然后重新构建：</p>
+<p>如果报 <code>port is already allocated</code>，是宿主机端口冲突：单容器修改 <code>-p</code> 左侧端口，Compose 示例修改 <code>APP_PORT</code>。容器内部的监听端口不必跟着改变。</p>
+<h3 id="服务名解析失败或代理返回-502">服务名解析失败，或代理返回 502
+</h3><p>先用 <code>docker compose ps</code> 确认两个服务都存在，再检查 <code>docker compose logs --tail 100 app proxy</code>。同一网络内使用服务名与容器端口，不能用宿主机映射端口或把 <code>localhost</code> 当作其他服务。</p>
+<p>对本文示例，可从 Caddy 容器中直接请求应用：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">docker build --no-cache --tag docker-demo:test .
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">docker compose <span class="nb">exec</span> proxy wget -qO- http://app:8080/health
 </span></span></code></pre></td></tr></table>
 </div>
-</div><p><code>--no-cache</code> 适合定位缓存问题，不必用于每次日常构建。Compose 环境中使用 <code>docker compose up -d --build</code> 更新镜像并重新创建需要变化的服务。</p>
-<h3 id="磁盘空间持续增长">磁盘空间持续增长
-</h3><p>先观察占用来源，再按对象类型清理：</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">docker system df --verbose
-</span></span><span class="line"><span class="cl">docker builder prune
-</span></span><span class="line"><span class="cl">docker image prune
-</span></span><span class="line"><span class="cl">docker container prune
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>不要直接跳到 <code>docker system prune -a --volumes</code>。匿名数据卷、未运行环境的镜像和构建缓存都可能仍有价值；未使用的命名数据卷只有在单独执行 <code>docker volume prune --all</code> 等命令时才会被纳入清理。</p>
-<h2 id="安全边界">安全边界
-</h2><p>容器带来隔离，但不会自动让应用安全。至少应遵守下面几条原则：</p>
+</div><p>返回 <code>ok</code> 说明代理到应用的网络路径正常，再检查 Caddy 配置与宿主机入口。独立容器使用 <code>docker network inspect NETWORK</code> 核对网络成员。</p>
+<h3 id="修改代码或配置后没有生效">修改代码或配置后没有生效
+</h3><div class="table-wrapper"><table>
+	<thead>
+			<tr>
+					<th>修改内容</th>
+					<th>应执行的操作</th>
+			</tr>
+	</thead>
+	<tbody>
+			<tr>
+					<td><code>main.go</code>、Dockerfile 或构建依赖</td>
+					<td><code>docker compose up -d --build --wait</code></td>
+			</tr>
+			<tr>
+					<td><code>.env</code>、<code>environment</code> 或端口等服务配置</td>
+					<td><code>docker compose up -d --wait</code></td>
+			</tr>
+			<tr>
+					<td>绑定挂载的 <code>Caddyfile</code></td>
+					<td>在 Caddy 容器中执行 <code>caddy reload</code></td>
+			</tr>
+	</tbody>
+</table></div>
+<p>先检查构建上下文、<code>.dockerignore</code> 和 <code>COPY</code> 是否包含目标文件。只有仍怀疑缓存时，才用 <code>docker compose build --no-cache app</code> 后重新 <code>up -d</code>；<code>--no-cache</code> 不需要用于每次构建，也不会自动拉取更新的基础镜像。</p>
+<h3 id="重建容器后数据不见了">重建容器后数据不见了
+</h3><p>先确认数据是否曾写入命名卷，以及新容器是否挂载了同一个卷。<code>docker inspect CONTAINER</code> 的 <code>Mounts</code> 和 <code>docker volume inspect VOLUME</code> 可帮助核对。</p>
+<p>Compose 默认把项目名作为卷名的一部分，例如本例的 <code>docker-demo_caddy-data</code>。改变项目名可能创建一组新卷，看起来像“数据丢失”，旧卷可能仍在。不要先运行清理命令；如果已执行 <code>down --volumes</code>，则需要从备份恢复。</p>
+<h2 id="用到真实项目时">用到真实项目时
+</h2><p>本文示例用于本地练习。投入实际服务前，补齐与应用相关的五件事：</p>
 <ol>
-<li>运行时使用非 root 用户，只授予应用真正需要的 Linux capabilities。</li>
-<li>不把 <code>--privileged</code>、宿主机根目录或 <code>/var/run/docker.sock</code> 挂载当作普通方案。</li>
-<li>只发布必要端口，开发数据库优先绑定到宿主机 <code>127.0.0.1</code>。</li>
-<li>不在 Dockerfile、镜像层、Git、命令历史或日志中保存密码和令牌。</li>
-<li>使用可信基础镜像，持续更新依赖、扫描漏洞，并设置 CPU、内存和进程数限制。</li>
+<li><strong>管理交付版本</strong>：使用可信基础镜像，固定经过测试的版本或 digest，持续更新与扫描漏洞。</li>
+<li><strong>限制运行权限</strong>：使用非 root 用户，按需配置资源上限，谨慎开放 Docker socket、宿主机目录或 <code>--privileged</code>。</li>
+<li><strong>分开配置与密钥</strong>：普通配置可以版本化，真实密钥放到独立的密钥管理流程中，只发布必要端口。</li>
+<li><strong>验证服务恢复</strong>：实现依赖超时与重试、优雅退出，接入健康监测和日志。</li>
+<li><strong>验证数据恢复</strong>：为持久数据建立备份，实际演练恢复，确认重建容器后仍能读取原数据。</li>
 </ol>
-<p>在 Linux 上，能访问 Docker 守护进程的用户通常可以获得接近宿主机 root 的能力，因此 <code>docker</code> 用户组和 Docker socket 都应按高权限入口管理。</p>
-<h2 id="小结">小结
-</h2><p>Docker 的核心不是记住大量命令，而是理解几个对象之间的关系：</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span><span class="lnt">3
-</span><span class="lnt">4
-</span><span class="lnt">5
-</span><span class="lnt">6
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-text" data-lang="text"><span class="line"><span class="cl">Dockerfile ──构建──&gt; 镜像 ──运行──&gt; 容器
-</span></span><span class="line"><span class="cl">                                  │
-</span></span><span class="line"><span class="cl">                    ┌─────────────┴─────────────┐
-</span></span><span class="line"><span class="cl">                    ▼                           ▼
-</span></span><span class="line"><span class="cl">                 数据卷                        网络
-</span></span><span class="line"><span class="cl">                    └──────── Docker Compose ───┘
-</span></span></code></pre></td></tr></table>
-</div>
-</div><ul>
-<li>镜像负责交付一致的应用和运行环境，容器负责运行镜像。</li>
-<li>Dockerfile 把手工安装过程变成可审查、可重复的构建过程。</li>
-<li>数据卷让重要数据脱离容器的可写层，网络让服务在指定范围内互相发现和通信。</li>
-<li>Docker Compose 把多个服务、网络、数据卷和配置组织成一个可复现的应用环境。</li>
-<li>生产环境还需要持续处理镜像更新、密钥管理、资源限制、日志监控、数据备份和安全加固。</li>
+<p>默认以 root 运行的 Linux Docker daemon 具有很高的宿主机权限，访问其 socket 或加入 <code>docker</code> 用户组通常也意味着接近 root 的能力。共享容器网络只提供连接与一定的隔离，不会自动提供服务认证或流量加密。</p>
+<h2 id="参考资料">参考资料
+</h2><ul>
+<li><a class="link" href="https://docs.docker.com/get-started/"  target="_blank" rel="noopener"
+    >Docker 入门与核心概念</a></li>
+<li><a class="link" href="https://docs.docker.com/reference/dockerfile/"  target="_blank" rel="noopener"
+    >Dockerfile 指令参考</a></li>
+<li><a class="link" href="https://docs.docker.com/engine/storage/"  target="_blank" rel="noopener"
+    >数据持久化与挂载</a></li>
+<li><a class="link" href="https://docs.docker.com/compose/how-tos/startup-order/"  target="_blank" rel="noopener"
+    >Compose 启动顺序与健康检查</a></li>
+<li><a class="link" href="https://docs.docker.com/compose/how-tos/environment-variables/variable-interpolation/"  target="_blank" rel="noopener"
+    >Compose 变量插值</a></li>
 </ul>
 
 </section>
@@ -2324,7 +1751,7 @@
         
         
             <div class="article-image">
-                <img src="/p/codex-vs-claude-codeai-%E7%BC%96%E7%A8%8B%E5%8A%A9%E6%89%8B%E5%AE%9E%E8%B7%B5%E5%AF%B9%E6%AF%94/claude-code.4c3fec44ee666712a4aad49f3530dea8_hu_5e4dbc97ba468828.png" 
+                <img src="/p/codex-vs-claude-codeai-%E7%BC%96%E7%A8%8B%E5%8A%A9%E6%89%8B%E5%AE%9E%E8%B7%B5%E5%AF%B9%E6%AF%94/claude-code.4c3fec44ee666712a4aad49f3530dea8_hu_34fb2ddc20c37a0f.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -2348,7 +1775,7 @@
         
         
             <div class="article-image">
-                <img src="/p/claude-code-%E5%AE%89%E8%A3%85%E4%B8%8E-superpowers-%E5%AE%9E%E6%88%98%E4%BB%8E%E6%83%B3%E6%B3%95%E5%88%B0%E5%8F%91%E5%B8%83%E7%9A%84%E5%B7%A5%E7%A8%8B%E5%8C%96%E5%B7%A5%E4%BD%9C%E6%B5%81/claude-code.4c3fec44ee666712a4aad49f3530dea8_hu_5e4dbc97ba468828.png" 
+                <img src="/p/claude-code-%E5%AE%89%E8%A3%85%E4%B8%8E-superpowers-%E5%AE%9E%E6%88%98%E4%BB%8E%E6%83%B3%E6%B3%95%E5%88%B0%E5%8F%91%E5%B8%83%E7%9A%84%E5%B7%A5%E7%A8%8B%E5%8C%96%E5%B7%A5%E4%BD%9C%E6%B5%81/claude-code.4c3fec44ee666712a4aad49f3530dea8_hu_34fb2ddc20c37a0f.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -2372,7 +1799,7 @@
         
         
             <div class="article-image">
-                <img src="/p/claude-code-skills-%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B/claude-code.4c3fec44ee666712a4aad49f3530dea8_hu_5e4dbc97ba468828.png" 
+                <img src="/p/claude-code-skills-%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B/claude-code.4c3fec44ee666712a4aad49f3530dea8_hu_34fb2ddc20c37a0f.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -2396,7 +1823,7 @@
         
         
             <div class="article-image">
-                <img src="/p/claude-code-%E5%AE%89%E8%A3%85%E9%85%8D%E7%BD%AE-mcp-%E6%95%99%E7%A8%8B/claude-code.4c3fec44ee666712a4aad49f3530dea8_hu_5e4dbc97ba468828.png" 
+                <img src="/p/claude-code-%E5%AE%89%E8%A3%85%E9%85%8D%E7%BD%AE-mcp-%E6%95%99%E7%A8%8B/claude-code.4c3fec44ee666712a4aad49f3530dea8_hu_34fb2ddc20c37a0f.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -2420,7 +1847,7 @@
         
         
             <div class="article-image">
-                <img src="/p/claude-code-%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4%E9%80%9F%E6%9F%A5%E6%89%8B%E5%86%8C/claude-code.4c3fec44ee666712a4aad49f3530dea8_hu_5e4dbc97ba468828.png" 
+                <img src="/p/claude-code-%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4%E9%80%9F%E6%9F%A5%E6%89%8B%E5%86%8C/claude-code.4c3fec44ee666712a4aad49f3530dea8_hu_34fb2ddc20c37a0f.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -2584,6 +2011,14 @@
                 href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
             >
     
+<script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11.12.2/+esm';
+    mermaid.initialize({
+        startOnLoad: true,
+        theme: 'neutral',
+    });
+</script>
+
 
             </main>
         </div>

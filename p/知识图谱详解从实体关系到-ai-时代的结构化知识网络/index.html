@@ -6,7 +6,7 @@
 
 <link rel='canonical' href='https://liusir521.github.io/p/%E7%9F%A5%E8%AF%86%E5%9B%BE%E8%B0%B1%E8%AF%A6%E8%A7%A3%E4%BB%8E%E5%AE%9E%E4%BD%93%E5%85%B3%E7%B3%BB%E5%88%B0-ai-%E6%97%B6%E4%BB%A3%E7%9A%84%E7%BB%93%E6%9E%84%E5%8C%96%E7%9F%A5%E8%AF%86%E7%BD%91%E7%BB%9C/'>
 
-<link rel="stylesheet" href="/scss/style.min.ae56834d8e6c736a3fd56f971794f8c0705364d4411c7000fbf5dc668862af2f.css"><meta property='og:title' content="知识图谱详解：从实体关系到 AI 时代的结构化知识网络">
+<link rel="stylesheet" href="/scss/style.min.db5b58cfbb81c62ddc8a55c6384335626e74f304aa8992172c79c3ab7db71b41.css"><meta property='og:title' content="知识图谱详解：从实体关系到 AI 时代的结构化知识网络">
 <meta property='og:description' content="系统介绍知识图谱的核心概念、数据结构、构建流程、存储查询、典型应用，以及它与大语言模型、RAG 和 Agent 的结合方式">
 <meta property='og:url' content='https://liusir521.github.io/p/%E7%9F%A5%E8%AF%86%E5%9B%BE%E8%B0%B1%E8%AF%A6%E8%A7%A3%E4%BB%8E%E5%AE%9E%E4%BD%93%E5%85%B3%E7%B3%BB%E5%88%B0-ai-%E6%97%B6%E4%BB%A3%E7%9A%84%E7%BB%93%E6%9E%84%E5%8C%96%E7%9F%A5%E8%AF%86%E7%BD%91%E7%BB%9C/'>
 <meta property='og:site_name' content='你怂你mua'>
@@ -59,7 +59,7 @@
                     
                     
                         
-                        <img src="/img/avatar_hu_f8501f45e2b24951.png" width="300"
+                        <img src="/img/avatar_hu_3619e91efb610b21.png" width="300"
                             height="300" class="site-logo" loading="lazy" alt="Avatar">
                     
                 
@@ -400,8 +400,8 @@
     <header class="article-header">
         <div class="article-image">
             <a href="/p/%E7%9F%A5%E8%AF%86%E5%9B%BE%E8%B0%B1%E8%AF%A6%E8%A7%A3%E4%BB%8E%E5%AE%9E%E4%BD%93%E5%85%B3%E7%B3%BB%E5%88%B0-ai-%E6%97%B6%E4%BB%A3%E7%9A%84%E7%BB%93%E6%9E%84%E5%8C%96%E7%9F%A5%E8%AF%86%E7%BD%91%E7%BB%9C/">
-                <img src="/p/%E7%9F%A5%E8%AF%86%E5%9B%BE%E8%B0%B1%E8%AF%A6%E8%A7%A3%E4%BB%8E%E5%AE%9E%E4%BD%93%E5%85%B3%E7%B3%BB%E5%88%B0-ai-%E6%97%B6%E4%BB%A3%E7%9A%84%E7%BB%93%E6%9E%84%E5%8C%96%E7%9F%A5%E8%AF%86%E7%BD%91%E7%BB%9C/knowledge-graph_hu_fc1d0a8ecb097593.png"
-                        srcset="/p/%E7%9F%A5%E8%AF%86%E5%9B%BE%E8%B0%B1%E8%AF%A6%E8%A7%A3%E4%BB%8E%E5%AE%9E%E4%BD%93%E5%85%B3%E7%B3%BB%E5%88%B0-ai-%E6%97%B6%E4%BB%A3%E7%9A%84%E7%BB%93%E6%9E%84%E5%8C%96%E7%9F%A5%E8%AF%86%E7%BD%91%E7%BB%9C/knowledge-graph_hu_fc1d0a8ecb097593.png 800w, /p/%E7%9F%A5%E8%AF%86%E5%9B%BE%E8%B0%B1%E8%AF%A6%E8%A7%A3%E4%BB%8E%E5%AE%9E%E4%BD%93%E5%85%B3%E7%B3%BB%E5%88%B0-ai-%E6%97%B6%E4%BB%A3%E7%9A%84%E7%BB%93%E6%9E%84%E5%8C%96%E7%9F%A5%E8%AF%86%E7%BD%91%E7%BB%9C/knowledge-graph_hu_b695aa1b745fa25f.png 1600w"
+                <img src="/p/%E7%9F%A5%E8%AF%86%E5%9B%BE%E8%B0%B1%E8%AF%A6%E8%A7%A3%E4%BB%8E%E5%AE%9E%E4%BD%93%E5%85%B3%E7%B3%BB%E5%88%B0-ai-%E6%97%B6%E4%BB%A3%E7%9A%84%E7%BB%93%E6%9E%84%E5%8C%96%E7%9F%A5%E8%AF%86%E7%BD%91%E7%BB%9C/knowledge-graph_hu_e2eb82c60abe2d6.png"
+                        srcset="/p/%E7%9F%A5%E8%AF%86%E5%9B%BE%E8%B0%B1%E8%AF%A6%E8%A7%A3%E4%BB%8E%E5%AE%9E%E4%BD%93%E5%85%B3%E7%B3%BB%E5%88%B0-ai-%E6%97%B6%E4%BB%A3%E7%9A%84%E7%BB%93%E6%9E%84%E5%8C%96%E7%9F%A5%E8%AF%86%E7%BD%91%E7%BB%9C/knowledge-graph_hu_e2eb82c60abe2d6.png 800w, /p/%E7%9F%A5%E8%AF%86%E5%9B%BE%E8%B0%B1%E8%AF%A6%E8%A7%A3%E4%BB%8E%E5%AE%9E%E4%BD%93%E5%85%B3%E7%B3%BB%E5%88%B0-ai-%E6%97%B6%E4%BB%A3%E7%9A%84%E7%BB%93%E6%9E%84%E5%8C%96%E7%9F%A5%E8%AF%86%E7%BD%91%E7%BB%9C/knowledge-graph_hu_b243e39fa0d5e183.png 1600w"
                         width="800" 
                         height="533" 
                         loading="lazy"
@@ -1609,7 +1609,7 @@
         
         
             <div class="article-image">
-                <img src="/p/rag%E5%90%91%E9%87%8F%E6%A3%80%E7%B4%A2%E7%AD%96%E7%95%A5%E4%B8%8E%E5%8F%AC%E5%9B%9E%E4%BC%98%E5%8C%96%E8%AF%A6%E8%A7%A3/rag.f564c28f3dec0443ec341ead5d988aef_hu_a9bb05fac32afd75.png" 
+                <img src="/p/rag%E5%90%91%E9%87%8F%E6%A3%80%E7%B4%A2%E7%AD%96%E7%95%A5%E4%B8%8E%E5%8F%AC%E5%9B%9E%E4%BC%98%E5%8C%96%E8%AF%A6%E8%A7%A3/rag.f564c28f3dec0443ec341ead5d988aef_hu_6b49d262b7dc89ef.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -1633,7 +1633,7 @@
         
         
             <div class="article-image">
-                <img src="/p/rag%E6%9E%B6%E6%9E%84%E8%AF%A6%E8%A7%A3%E4%BB%8E%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%B1%80%E9%99%90%E5%88%B0%E6%A3%80%E7%B4%A2%E5%A2%9E%E5%BC%BA%E7%94%9F%E6%88%90/rag.f564c28f3dec0443ec341ead5d988aef_hu_a9bb05fac32afd75.png" 
+                <img src="/p/rag%E6%9E%B6%E6%9E%84%E8%AF%A6%E8%A7%A3%E4%BB%8E%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%B1%80%E9%99%90%E5%88%B0%E6%A3%80%E7%B4%A2%E5%A2%9E%E5%BC%BA%E7%94%9F%E6%88%90/rag.f564c28f3dec0443ec341ead5d988aef_hu_6b49d262b7dc89ef.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -1657,7 +1657,7 @@
         
         
             <div class="article-image">
-                <img src="/p/ai-agent-%E8%AF%84%E4%BC%B0%E4%BD%93%E7%B3%BB%E8%AF%A6%E8%A7%A3%E4%BB%8E%E5%87%86%E7%A1%AE%E7%8E%87%E5%88%B0%E7%AB%AF%E5%88%B0%E7%AB%AF%E4%BB%BB%E5%8A%A1%E6%88%90%E5%8A%9F%E7%8E%87/agent.eeda6d8a8b2dcc1f636fc8f0b922c53d_hu_9b56cdc14f822e9f.png" 
+                <img src="/p/ai-agent-%E8%AF%84%E4%BC%B0%E4%BD%93%E7%B3%BB%E8%AF%A6%E8%A7%A3%E4%BB%8E%E5%87%86%E7%A1%AE%E7%8E%87%E5%88%B0%E7%AB%AF%E5%88%B0%E7%AB%AF%E4%BB%BB%E5%8A%A1%E6%88%90%E5%8A%9F%E7%8E%87/agent.eeda6d8a8b2dcc1f636fc8f0b922c53d_hu_72abb784fa865772.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -1677,11 +1677,11 @@
             
                 
 <article class="has-image">
-    <a href="/p/function-calling-/-tool-calling-%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3/">
+    <a href="/p/function-calling-tool-calling-%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3/">
         
         
             <div class="article-image">
-                <img src="/p/function-calling-/-tool-calling-%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3/agent.eeda6d8a8b2dcc1f636fc8f0b922c53d_hu_9b56cdc14f822e9f.png" 
+                <img src="/p/function-calling-tool-calling-%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3/agent.eeda6d8a8b2dcc1f636fc8f0b922c53d_hu_72abb784fa865772.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
@@ -1705,7 +1705,7 @@
         
         
             <div class="article-image">
-                <img src="/p/mcp-%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E5%8D%8F%E8%AE%AE%E5%B7%A5%E5%85%B7%E8%B5%84%E6%BA%90%E4%B8%8E%E5%AE%89%E5%85%A8%E8%BE%B9%E7%95%8C/claude-code.4c3fec44ee666712a4aad49f3530dea8_hu_5e4dbc97ba468828.png" 
+                <img src="/p/mcp-%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3%E5%8D%8F%E8%AE%AE%E5%B7%A5%E5%85%B7%E8%B5%84%E6%BA%90%E4%B8%8E%E5%AE%89%E5%85%A8%E8%BE%B9%E7%95%8C/claude-code.4c3fec44ee666712a4aad49f3530dea8_hu_34fb2ddc20c37a0f.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"

@@ -9,11 +9,11 @@
         <copyright>Example Person</copyright>
         <lastBuildDate>Sat, 09 May 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://liusir521.github.io/tags/function-calling/index.xml" rel="self" type="application/rss+xml" /><item>
         <title>Function Calling / Tool Calling 原理详解</title>
-        <link>https://liusir521.github.io/p/function-calling-/-tool-calling-%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3/</link>
+        <link>https://liusir521.github.io/p/function-calling-tool-calling-%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3/</link>
         <pubDate>Sat, 09 May 2026 00:00:00 +0000</pubDate>
         
-        <guid>https://liusir521.github.io/p/function-calling-/-tool-calling-%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3/</guid>
-        <description>&lt;img src="https://liusir521.github.io/p/function-calling-/-tool-calling-%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3/agent.png" alt="Featured image of post Function Calling / Tool Calling 原理详解" /&gt;&lt;h2 id=&#34;引言&#34;&gt;引言
+        <guid>https://liusir521.github.io/p/function-calling-tool-calling-%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3/</guid>
+        <description>&lt;img src="https://liusir521.github.io/p/function-calling-tool-calling-%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3/agent.png" alt="Featured image of post Function Calling / Tool Calling 原理详解" /&gt;&lt;h2 id=&#34;引言&#34;&gt;引言
 &lt;/h2&gt;&lt;p&gt;LLM 本身不会查数据库、不会读文件、不会创建工单，也不会真的调用接口。它能做的是根据上下文生成文本。&lt;/p&gt;
 &lt;p&gt;Function Calling / Tool Calling 的核心，就是让模型用结构化格式表达：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
