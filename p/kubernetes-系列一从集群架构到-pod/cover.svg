@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="787" viewBox="0 0 1400 787" role="img" aria-labelledby="title desc">
+  <title id="title">Kubernetes 集群架构与 Pod</title>
+  <desc id="desc">深色背景上的 Kubernetes 控制平面、工作节点和 Pod 连接图。</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#10182b"/>
+      <stop offset="1" stop-color="#18294a"/>
+    </linearGradient>
+    <linearGradient id="blue" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#5eb7ff"/>
+      <stop offset="1" stop-color="#326ce5"/>
+    </linearGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="7" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <pattern id="dots" width="34" height="34" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.5" fill="#6a91c9" opacity=".22"/>
+    </pattern>
+  </defs>
+
+  <rect width="1400" height="787" fill="url(#bg)"/>
+  <rect width="1400" height="787" fill="url(#dots)"/>
+  <path d="M0 690 C260 595 390 780 670 681 S1110 610 1400 718 V787 H0Z" fill="#0d1425" opacity=".72"/>
+
+  <g fill="none" stroke="#6caeff" opacity=".2">
+    <path d="M74 90h170M74 108h96M1240 106h110M1268 124h82"/>
+    <circle cx="116" cy="617" r="54"/><circle cx="116" cy="617" r="38"/>
+    <circle cx="1276" cy="628" r="70"/><circle cx="1276" cy="628" r="50"/>
+  </g>
+
+  <g transform="translate(92 151)">
+    <text x="0" y="0" fill="#ffffff" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="78" font-weight="700" letter-spacing="-2">Kubernetes</text>
+    <text x="4" y="59" fill="#9ecbff" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-serif" font-size="31" letter-spacing="5">集群架构与 Pod 基础</text>
+    <rect x="4" y="91" width="112" height="5" rx="2.5" fill="#55b7ff"/>
+    <text x="4" y="154" fill="#b7c8e5" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-serif" font-size="20">声明式管理 · 自愈 · 服务发现</text>
+  </g>
+
+  <!-- A simplified, original cluster mark rather than a copied logo. -->
+  <g transform="translate(1038 190)" filter="url(#glow)">
+    <circle r="102" fill="#172b50" stroke="#4ba9ff" stroke-width="3" opacity=".96"/>
+    <circle r="72" fill="none" stroke="#4ba9ff" stroke-width="3" stroke-dasharray="7 13" opacity=".7"/>
+    <path d="M0-65 L19-33 L57-20 L57 20 L19 33 L0 65 L-19 33 L-57 20 L-57-20 L-19-33Z" fill="url(#blue)" opacity=".95"/>
+    <circle r="22" fill="#ffffff"/>
+    <g fill="#ffffff">
+      <circle cx="0" cy="-44" r="8"/><circle cx="38" cy="-22" r="8"/><circle cx="38" cy="22" r="8"/>
+      <circle cx="0" cy="44" r="8"/><circle cx="-38" cy="22" r="8"/><circle cx="-38" cy="-22" r="8"/>
+    </g>
+  </g>
+
+  <g fill="none" stroke="#64b5ff" stroke-width="3" opacity=".72">
+    <path d="M1038 292 L1038 365"/>
+    <path d="M958 249 L858 308"/>
+    <path d="M1118 249 L1218 308"/>
+    <path d="M858 308 L858 353"/>
+    <path d="M1218 308 L1218 353"/>
+  </g>
+
+  <g transform="translate(905 363)">
+    <rect width="266" height="99" rx="14" fill="#1a3765" stroke="#4ca9ff" stroke-width="2"/>
+    <text x="22" y="34" fill="#8dcbff" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="14" letter-spacing="2">CONTROL PLANE</text>
+    <text x="22" y="69" fill="#ffffff" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="22" font-weight="600">API · SCHEDULER · etcd</text>
+  </g>
+
+  <g transform="translate(725 477)">
+    <rect width="250" height="133" rx="16" fill="#132746" stroke="#3e83e8" stroke-width="2"/>
+    <text x="21" y="34" fill="#79bdff" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="14" letter-spacing="2">WORKER NODE 01</text>
+    <rect x="21" y="55" width="94" height="49" rx="9" fill="#2852a0"/>
+    <rect x="135" y="55" width="94" height="49" rx="9" fill="#2852a0"/>
+    <circle cx="44" cy="75" r="7" fill="#a8ddff"/><circle cx="158" cy="75" r="7" fill="#a8ddff"/>
+    <text x="56" y="81" fill="#ffffff" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="16">Pod</text>
+    <text x="170" y="81" fill="#ffffff" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="16">Pod</text>
+  </g>
+
+  <g transform="translate(1058 477)">
+    <rect width="250" height="133" rx="16" fill="#132746" stroke="#3e83e8" stroke-width="2"/>
+    <text x="21" y="34" fill="#79bdff" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="14" letter-spacing="2">WORKER NODE 02</text>
+    <rect x="21" y="55" width="94" height="49" rx="9" fill="#2852a0"/>
+    <rect x="135" y="55" width="94" height="49" rx="9" fill="#2852a0"/>
+    <circle cx="44" cy="75" r="7" fill="#a8ddff"/><circle cx="158" cy="75" r="7" fill="#a8ddff"/>
+    <text x="56" y="81" fill="#ffffff" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="16">Pod</text>
+    <text x="170" y="81" fill="#ffffff" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="16">Pod</text>
+  </g>
+
+  <g transform="translate(91 711)">
+    <circle cx="8" cy="0" r="6" fill="#53b6ff"/>
+    <text x="26" y="7" fill="#8ea8cf" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-serif" font-size="17">期望状态 → 控制平面 → 节点 → Pod</text>
+  </g>
+</svg>

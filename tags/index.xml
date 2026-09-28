@@ -7,7 +7,39 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>zh-cn</language>
         <copyright>Example Person</copyright>
-        <lastBuildDate>Sat, 25 Jul 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://liusir521.github.io/tags/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Mon, 21 Sep 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://liusir521.github.io/tags/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>K8s</title>
+        <link>https://liusir521.github.io/tags/k8s/</link>
+        <pubDate>Mon, 21 Sep 2026 00:00:00 +0000</pubDate>
+        
+        <guid>https://liusir521.github.io/tags/k8s/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Kubernetes</title>
+        <link>https://liusir521.github.io/tags/kubernetes/</link>
+        <pubDate>Mon, 21 Sep 2026 00:00:00 +0000</pubDate>
+        
+        <guid>https://liusir521.github.io/tags/kubernetes/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>容器</title>
+        <link>https://liusir521.github.io/tags/%E5%AE%B9%E5%99%A8/</link>
+        <pubDate>Mon, 21 Sep 2026 00:00:00 +0000</pubDate>
+        
+        <guid>https://liusir521.github.io/tags/%E5%AE%B9%E5%99%A8/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>云原生</title>
+        <link>https://liusir521.github.io/tags/%E4%BA%91%E5%8E%9F%E7%94%9F/</link>
+        <pubDate>Mon, 21 Sep 2026 00:00:00 +0000</pubDate>
+        
+        <guid>https://liusir521.github.io/tags/%E4%BA%91%E5%8E%9F%E7%94%9F/</guid>
+        <description></description>
+        </item>
+        <item>
         <title>DevOps</title>
         <link>https://liusir521.github.io/tags/devops/</link>
         <pubDate>Sat, 25 Jul 2026 00:00:00 +0000</pubDate>
@@ -29,14 +61,6 @@
         <pubDate>Sat, 25 Jul 2026 00:00:00 +0000</pubDate>
         
         <guid>https://liusir521.github.io/tags/docker-compose/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>容器</title>
-        <link>https://liusir521.github.io/tags/%E5%AE%B9%E5%99%A8/</link>
-        <pubDate>Sat, 25 Jul 2026 00:00:00 +0000</pubDate>
-        
-        <guid>https://liusir521.github.io/tags/%E5%AE%B9%E5%99%A8/</guid>
         <description></description>
         </item>
         <item>

@@ -7,7 +7,608 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>zh-cn</language>
         <copyright>Example Person</copyright>
-        <lastBuildDate>Sat, 25 Jul 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://liusir521.github.io/post/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Mon, 21 Sep 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://liusir521.github.io/post/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>Kubernetes 系列一：从集群架构到 Pod</title>
+        <link>https://liusir521.github.io/p/kubernetes-%E7%B3%BB%E5%88%97%E4%B8%80%E4%BB%8E%E9%9B%86%E7%BE%A4%E6%9E%B6%E6%9E%84%E5%88%B0-pod/</link>
+        <pubDate>Mon, 21 Sep 2026 00:00:00 +0000</pubDate>
+        
+        <guid>https://liusir521.github.io/p/kubernetes-%E7%B3%BB%E5%88%97%E4%B8%80%E4%BB%8E%E9%9B%86%E7%BE%A4%E6%9E%B6%E6%9E%84%E5%88%B0-pod/</guid>
+        <description>&lt;img src="https://liusir521.github.io/p/kubernetes-%E7%B3%BB%E5%88%97%E4%B8%80%E4%BB%8E%E9%9B%86%E7%BE%A4%E6%9E%B6%E6%9E%84%E5%88%B0-pod/cover.svg" alt="Featured image of post Kubernetes 系列一：从集群架构到 Pod" /&gt;&lt;p&gt;Kubernetes 常被简称为 K8s（&lt;code&gt;K&lt;/code&gt; 和 &lt;code&gt;s&lt;/code&gt; 之间省略了 8 个字母）。它是一个管理容器化应用的开源平台，负责把应用安排到集群里的机器上运行，并持续让实际状态接近期望状态。&lt;/p&gt;
+&lt;p&gt;学完 Docker 之后，我的理解是：Docker 解决的是“怎样把应用打包并运行起来”，Kubernetes 解决的是“应用跑在很多台机器上时，怎样持续管理这些容器”。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;本文基于 Kubernetes 1.37，第六节的实验用 kind 在本地搭集群。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;这是 K8s 学习笔记的第一篇，先把整体地图搭起来：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;为什么有了 Docker 和 Compose，还需要 Kubernetes。&lt;/li&gt;
+&lt;li&gt;一个 Kubernetes 集群由哪些部分组成。&lt;/li&gt;
+&lt;li&gt;控制平面负责什么。&lt;/li&gt;
+&lt;li&gt;Node 节点负责什么。&lt;/li&gt;
+&lt;li&gt;Pod 为什么是 Kubernetes 调度和运行应用的基本单位。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;后面再分篇记录 Deployment、Service、Gateway API、ConfigMap、Secret、存储、调度和故障排查。&lt;/p&gt;
+&lt;h2 id=&#34;一为什么要用-kubernetes&#34;&gt;一、为什么要用 Kubernetes
+&lt;/h2&gt;&lt;h3 id=&#34;从一个容器到一组服务&#34;&gt;从一个容器到一组服务
+&lt;/h3&gt;&lt;p&gt;在本地运行一个 Web 服务很简单：准备镜像，执行 &lt;code&gt;docker run&lt;/code&gt;，映射一个端口即可。服务数量增加后，问题会同时出现：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;容器应该运行在哪台机器上？这台机器资源够不够？&lt;/li&gt;
+&lt;li&gt;容器崩溃后，谁负责重新启动？机器故障后，谁负责迁移？&lt;/li&gt;
+&lt;li&gt;一个服务启动多个副本后，流量怎样分发？客户端应该连接哪个地址？&lt;/li&gt;
+&lt;li&gt;发布新版本时，怎样逐步替换旧版本，避免所有实例同时中断？&lt;/li&gt;
+&lt;li&gt;配置、密钥和持久化数据怎样与镜像分开管理？&lt;/li&gt;
+&lt;li&gt;集群有几十或几百台机器时，怎样统一查看状态和执行变更？&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Compose 能很好地描述一台机器上的多容器应用，但它管的是“在这个环境里把这一组服务启动起来”。应用一旦需要跨机器调度、自动恢复和持续发布，就需要一个集群级的控制系统，这正是 Kubernetes 做的事。&lt;/p&gt;
+&lt;h3 id=&#34;kubernetes-提供了什么&#34;&gt;Kubernetes 提供了什么
+&lt;/h3&gt;&lt;p&gt;在我看来，Kubernetes 的核心不是“又一条启动容器的命令”，而是把运行应用所需的状态交给一组控制器持续维护。&lt;/p&gt;
+&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;能力&lt;/th&gt;
+					&lt;th&gt;Kubernetes 做什么&lt;/th&gt;
+					&lt;th&gt;实际收益&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;调度&lt;/td&gt;
+					&lt;td&gt;根据资源、约束和策略把 Pod 放到合适的 Node&lt;/td&gt;
+					&lt;td&gt;不需要手动挑选机器&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;自愈&lt;/td&gt;
+					&lt;td&gt;发现容器或节点异常，重新创建或调度工作负载&lt;/td&gt;
+					&lt;td&gt;减少人工值守&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;服务发现&lt;/td&gt;
+					&lt;td&gt;为一组动态变化的 Pod 提供稳定的 Service 地址&lt;/td&gt;
+					&lt;td&gt;服务之间不依赖 Pod IP&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;水平扩展&lt;/td&gt;
+					&lt;td&gt;修改副本数量，或根据指标自动扩缩容&lt;/td&gt;
+					&lt;td&gt;应对流量变化&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;滚动更新&lt;/td&gt;
+					&lt;td&gt;分批替换旧版本，控制不可用实例数量&lt;/td&gt;
+					&lt;td&gt;降低发布风险&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;配置与资源管理&lt;/td&gt;
+					&lt;td&gt;集中管理配置、密钥、CPU 和内存边界&lt;/td&gt;
+					&lt;td&gt;镜像与运行配置分离&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;这些能力都建立在声明式模型上。我们提交的是“希望有 3 个副本、用哪个镜像、暴露哪个端口”，剩下的由控制器观察当前状态并不断修正差异。&lt;/p&gt;
+&lt;pre class=&#34;mermaid&#34;&gt;
+  flowchart LR
+    A[提交期望状态] --&amp;gt; B[API Server]
+    B --&amp;gt; C[控制器与调度器]
+    C --&amp;gt; D[选择 Node]
+    D --&amp;gt; E[kubelet 启动容器]
+    E --&amp;gt; F[实际运行状态]
+    F --&amp;gt;|持续观察并修正差异| B
+&lt;/pre&gt;
+
+&lt;h3 id=&#34;kubernetes-不会自动解决所有问题&#34;&gt;Kubernetes 不会自动解决所有问题
+&lt;/h3&gt;&lt;p&gt;Kubernetes 不会替应用修复代码，也不会自动保证数据库事务、备份和权限设计正确。它提供的是运行平台：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;应用仍需要正确处理信号、超时和依赖重连。&lt;/li&gt;
+&lt;li&gt;数据库等有状态服务需要独立的备份、恢复和容量规划。&lt;/li&gt;
+&lt;li&gt;集群需要权限控制、镜像安全、日志、指标和审计。&lt;/li&gt;
+&lt;li&gt;小型应用如果只需要单机部署，Compose 或托管平台可能更简单。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;所以上不上 K8s，要看集群管理、可用性和交付流程上有没有真实需求，而不是“所有服务都得上 Kubernetes”。&lt;/p&gt;
+&lt;h2 id=&#34;二kubernetes-集群的整体架构&#34;&gt;二、Kubernetes 集群的整体架构
+&lt;/h2&gt;&lt;p&gt;一个集群通常分为两类节点：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;控制平面（Control Plane）&lt;/strong&gt;：保存集群状态，接受操作请求，做出调度和控制决策。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;工作节点（Worker Node）&lt;/strong&gt;：运行实际的 Pod 和业务容器。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;控制平面在早期资料里叫 Master 节点，社区出于包容性命名已经统一改为 control-plane。新集群里 &lt;code&gt;kubectl get nodes&lt;/code&gt; 的 ROLES 列显示的是 &lt;code&gt;control-plane&lt;/code&gt;，旧教程里带 &lt;code&gt;master&lt;/code&gt; 的标签和污点命令已经不适用了。&lt;/p&gt;
+&lt;pre class=&#34;mermaid&#34;&gt;
+  flowchart TB
+    Client[kubectl / CI / 外部系统] --&amp;gt; CP
+
+    subgraph CP[控制平面]
+        direction LR
+        Scheduler[kube-scheduler] --&amp;gt; API[kube-apiserver]
+        Controller[kube-controller-manager] --&amp;gt; API
+        Cloud[cloud-controller-manager（可选）] --&amp;gt; API
+        API &amp;lt;--&amp;gt; ETCD[(etcd)]
+    end
+
+    subgraph N1[Node 1]
+        direction TB
+        K1[kubelet] --&amp;gt;|CRI| R1[容器运行时] --&amp;gt; P1[Pod]
+        Proxy1[kube-proxy]
+    end
+
+    subgraph N2[Node 2]
+        direction TB
+        K2[kubelet] --&amp;gt;|CRI| R2[容器运行时] --&amp;gt; P2[Pod]
+        Proxy2[kube-proxy]
+    end
+
+    CP &amp;lt;--&amp;gt;|watch / 上报状态| N1
+    CP &amp;lt;--&amp;gt;|watch / 上报状态| N2
+&lt;/pre&gt;
+
+&lt;p&gt;图中控制平面与 Node 之间的双向箭头，表示 Node 上的组件与 kube-apiserver 保持通信：kubelet 获取分配给本节点的 Pod 并上报状态，kube-proxy 监听 Service 和 EndpointSlice 的变化来更新转发规则。&lt;/p&gt;
+&lt;h3 id=&#34;一次部署发生了什么&#34;&gt;一次部署发生了什么
+&lt;/h3&gt;&lt;p&gt;执行下面的命令时，&lt;code&gt;kubectl&lt;/code&gt; 并不会直接登录某台 Node 创建容器：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;kubectl apply -f app.yaml
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;我把请求的流程整理成下面几步：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;code&gt;kubectl&lt;/code&gt; 把 YAML 发送给 &lt;code&gt;kube-apiserver&lt;/code&gt;。&lt;/li&gt;
+&lt;li&gt;API Server 校验请求，并把持久化状态写入 &lt;code&gt;etcd&lt;/code&gt;。&lt;/li&gt;
+&lt;li&gt;Deployment 控制器发现期望状态发生变化，创建或更新 ReplicaSet；ReplicaSet 控制器再创建 Pod 对象，此时 Pod 还没有分配 Node。&lt;/li&gt;
+&lt;li&gt;Scheduler 为没有绑定 Node 的 Pod 选择合适的工作节点，并通过 API Server 写回绑定结果。&lt;/li&gt;
+&lt;li&gt;目标 Node 上的 kubelet 观察到 Pod 规格，调用容器运行时拉取镜像并启动容器。&lt;/li&gt;
+&lt;li&gt;kubelet 持续汇报状态；控制器根据状态决定是否重建、扩容或更新 Pod。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;可以看出，各个组件都是通过 API Server 协作的。我们平时只跟 API 打交道，不需要登录每台 Node 去启动容器。&lt;/p&gt;
+&lt;h2 id=&#34;三控制平面的组件&#34;&gt;三、控制平面的组件
+&lt;/h2&gt;&lt;p&gt;控制平面组件可以运行在一台或多台机器上。生产环境通常使用多个控制平面实例，并为 API Server 和 etcd 设计高可用方案；单机学习集群则常把它们运行在同一个节点。&lt;/p&gt;
+&lt;h3 id=&#34;1-kube-apiserver集群的统一入口&#34;&gt;1. kube-apiserver：集群的统一入口
+&lt;/h3&gt;&lt;p&gt;&lt;code&gt;kube-apiserver&lt;/code&gt; 是 Kubernetes API 的 HTTP 入口。&lt;code&gt;kubectl&lt;/code&gt;、控制器、Scheduler、kubelet 以及外部系统都会通过它读写资源对象。&lt;/p&gt;
+&lt;p&gt;它主要负责：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;认证：请求来自谁？&lt;/li&gt;
+&lt;li&gt;授权：这个身份能操作哪些资源？&lt;/li&gt;
+&lt;li&gt;准入控制：这次变更是否符合策略？&lt;/li&gt;
+&lt;li&gt;API 版本与对象校验：字段类型是否正确？&lt;/li&gt;
+&lt;li&gt;把资源变更通知给观察者。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;API Server 本身不运行容器。它接收并记录“应该是什么样”，具体动作由控制器、Scheduler 和 kubelet 完成。它也是唯一直接读写 etcd 的组件，其他组件都要经过它访问集群状态。&lt;/p&gt;
+&lt;h3 id=&#34;2-etcd保存集群状态&#34;&gt;2. etcd：保存集群状态
+&lt;/h3&gt;&lt;p&gt;&lt;code&gt;etcd&lt;/code&gt; 是一个分布式键值存储，Kubernetes 用它保存 API 对象和集群状态，例如：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Deployment 希望有多少个副本。&lt;/li&gt;
+&lt;li&gt;Pod 被调度到了哪台 Node。&lt;/li&gt;
+&lt;li&gt;Service 的端口和 Selector 是什么。&lt;/li&gt;
+&lt;li&gt;Secret、ConfigMap、RBAC 和节点信息是什么。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;etcd 可以理解成集群的状态数据库，但它不是给业务用的数据库。etcd 的数据需要备份和保护，丢失或损坏会影响控制平面的恢复能力。&lt;/p&gt;
+&lt;p&gt;etcd 通过 Raft 共识算法在多个成员之间复制数据（Raft 的原理我在&lt;a class=&#34;link&#34; href=&#34;https://liusir521.github.io/p/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86%E7%AE%97%E6%B3%95/&#34; &gt;分布式共识算法&lt;/a&gt;里整理过）。写入需要多数成员确认，所以生产环境通常部署 3 或 5 个成员：3 个成员可以容忍 1 个故障，5 个成员可以容忍 2 个。&lt;/p&gt;
+&lt;h3 id=&#34;3-kube-scheduler为-pod-选择-node&#34;&gt;3. kube-scheduler：为 Pod 选择 Node
+&lt;/h3&gt;&lt;p&gt;Scheduler 负责处理还没有绑定 Node 的 Pod。它先过滤不满足条件的节点，再对候选节点打分，选择一个合适的目标。&lt;/p&gt;
+&lt;p&gt;它会考虑：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Pod 的 CPU、内存 requests 与 Node 的可分配资源。&lt;/li&gt;
+&lt;li&gt;Node 的 taint、Pod 的 toleration。&lt;/li&gt;
+&lt;li&gt;节点选择器、亲和性和反亲和性。&lt;/li&gt;
+&lt;li&gt;拓扑分布、卷约束和其他调度策略。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Scheduler 只做“放在哪里”的决定：选定 Node 后，它通过 API Server 把结果写回 Pod 的 &lt;code&gt;spec.nodeName&lt;/code&gt;，并不直接联系目标 Node。Pod 被绑定到 Node 后，由该 Node 的 kubelet 负责实际创建容器。&lt;/p&gt;
+&lt;h3 id=&#34;4-kube-controller-manager持续修正状态&#34;&gt;4. kube-controller-manager：持续修正状态
+&lt;/h3&gt;&lt;p&gt;Controller Manager 运行多个控制器。每个控制器都采用类似的循环：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;7
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;读取期望状态和当前状态
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        ↓
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;计算两者之间的差异
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        ↓
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;创建、更新或删除对象
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        ↓
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;再次观察，直到状态收敛
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;例如，Deployment 控制器负责把 Deployment 转换为 ReplicaSet，ReplicaSet 控制器负责让 Pod 副本数达到目标。Pod 被删除后，控制器会发现副本数不足并创建替代 Pod。&lt;/p&gt;
+&lt;p&gt;控制器不是执行一次就结束，而是一直在观察，所以 Kubernetes 才能在运行期间自己处理故障和变化。&lt;/p&gt;
+&lt;h3 id=&#34;5-cloud-controller-manager对接云平台可选&#34;&gt;5. cloud-controller-manager：对接云平台（可选）
+&lt;/h3&gt;&lt;p&gt;使用公有云时，cloud-controller-manager 可以把 Kubernetes 对象与云平台能力连接起来，例如：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;云厂商的负载均衡器。&lt;/li&gt;
+&lt;li&gt;云主机节点生命周期。&lt;/li&gt;
+&lt;li&gt;云硬盘的创建和挂载。&lt;/li&gt;
+&lt;li&gt;云平台路由。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;裸机或本地实验集群通常不需要这个组件。&lt;/p&gt;
+&lt;h3 id=&#34;控制平面组件的关系&#34;&gt;控制平面组件的关系
+&lt;/h3&gt;&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;组件&lt;/th&gt;
+					&lt;th&gt;核心问题&lt;/th&gt;
+					&lt;th&gt;是否直接运行业务容器&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;kube-apiserver&lt;/td&gt;
+					&lt;td&gt;谁可以读取和修改集群对象？&lt;/td&gt;
+					&lt;td&gt;否&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;etcd&lt;/td&gt;
+					&lt;td&gt;集群状态保存在哪里？&lt;/td&gt;
+					&lt;td&gt;否&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;kube-scheduler&lt;/td&gt;
+					&lt;td&gt;Pod 应该放到哪台 Node？&lt;/td&gt;
+					&lt;td&gt;否&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;kube-controller-manager&lt;/td&gt;
+					&lt;td&gt;怎样让实际状态接近期望状态？&lt;/td&gt;
+					&lt;td&gt;否&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;cloud-controller-manager&lt;/td&gt;
+					&lt;td&gt;怎样使用云平台资源？&lt;/td&gt;
+					&lt;td&gt;否，负责云资源协作&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;控制平面组件可以被部署为系统服务或静态 Pod，具体方式取决于安装工具和集群发行版。这里要把“组件怎么运行”和“组件负责什么”分开看。&lt;/p&gt;
+&lt;h2 id=&#34;四node-节点运行-pod-的地方&#34;&gt;四、Node 节点：运行 Pod 的地方
+&lt;/h2&gt;&lt;p&gt;Node 是集群中真正承载工作负载的机器，可以是虚拟机或物理机。每台 Node 至少需要 kubelet 和容器运行时；网络组件通常由 CNI 插件和 kube-proxy 等组件提供。&lt;/p&gt;
+&lt;h3 id=&#34;1-kubeletnode-上的代理&#34;&gt;1. kubelet：Node 上的代理
+&lt;/h3&gt;&lt;p&gt;kubelet 运行在每台 Node 上，负责让这台机器上的 Pod 处于期望状态。它会：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;从 API Server 获取分配给本节点的 Pod 规格。&lt;/li&gt;
+&lt;li&gt;调用容器运行时创建、启动和停止容器。&lt;/li&gt;
+&lt;li&gt;挂载卷，执行探针，并上报 Pod 状态。&lt;/li&gt;
+&lt;li&gt;发现容器退出或探针失败后，按 Pod 的重启策略处理。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;注意 kubelet 不负责调度，它只管理被分配到本节点的 Pod。&lt;/p&gt;
+&lt;h3 id=&#34;2-容器运行时真正启动容器&#34;&gt;2. 容器运行时：真正启动容器
+&lt;/h3&gt;&lt;p&gt;Kubernetes 通过 CRI（Container Runtime Interface）与容器运行时通信。常见运行时包括 containerd 和 CRI-O。&lt;/p&gt;
+&lt;p&gt;运行时负责拉取镜像、创建容器并管理容器的生命周期。现在的集群一般直接用 containerd 或 CRI-O，Node 上不需要装 Docker（早期是通过内置的 dockershim 对接 Docker Engine，1.24 已移除）。&lt;/p&gt;
+&lt;p&gt;这不影响用 Docker 构建的镜像：&lt;a class=&#34;link&#34; href=&#34;https://liusir521.github.io/p/docker-%E5%85%A5%E9%97%A8%E4%B8%8E%E5%AE%9E%E6%88%98%E4%BB%8E%E5%AE%B9%E5%99%A8%E5%88%B0-compose/&#34; &gt;Docker 入门与实战&lt;/a&gt;里 &lt;code&gt;docker build&lt;/code&gt; 出来的镜像符合 OCI 规范，推到镜像仓库后，containerd 和 CRI-O 都能直接拉取运行。&lt;/p&gt;
+&lt;h3 id=&#34;3-kube-proxyservice-流量转发&#34;&gt;3. kube-proxy：Service 流量转发
+&lt;/h3&gt;&lt;p&gt;kube-proxy 在 Node 上维护 Service 相关的转发规则，把访问 Service 虚拟地址的流量转发到后端 Pod。目前默认是 iptables 模式，较新的 Linux 内核上可以改用 nftables 模式（1.33 起 GA）。以前常见的 IPVS 模式已在 1.35 弃用。&lt;/p&gt;
+&lt;p&gt;它不是完整的网络插件。Pod IP 分配、跨 Node 路由和网络策略通常由 CNI 插件负责，例如 Calico、Cilium 或 Flannel；容器运行时创建 Pod 时会调用 CNI 插件配置网络。有些 CNI（例如 Cilium）还能用 eBPF 直接接管 Service 转发，这时集群中可以不运行 kube-proxy。具体组件取决于集群安装方案。&lt;/p&gt;
+&lt;h3 id=&#34;4-node-的资源与状态&#34;&gt;4. Node 的资源与状态
+&lt;/h3&gt;&lt;p&gt;Scheduler 根据 Node 的容量和可分配资源做决定。Node 不只是“能运行或不能运行”，还拥有一组状态和约束：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;CPU、内存和临时存储容量。&lt;/li&gt;
+&lt;li&gt;Ready、MemoryPressure、DiskPressure 等条件。&lt;/li&gt;
+&lt;li&gt;labels，用于节点选择和拓扑分布。&lt;/li&gt;
+&lt;li&gt;taints，用于阻止不匹配的 Pod 被调度。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;常用检查命令：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;kubectl get nodes
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;kubectl describe node NODE_NAME
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;kubectl top node
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;code&gt;kubectl top&lt;/code&gt; 需要集群中安装 Metrics Server；没有它时，节点和 Pod 仍然可以运行，但不能直接通过这个命令查看资源使用率。&lt;/p&gt;
+&lt;h2 id=&#34;五podkubernetes-的基本运行单位&#34;&gt;五、Pod：Kubernetes 的基本运行单位
+&lt;/h2&gt;&lt;h3 id=&#34;pod-不是一个容器的别名&#34;&gt;Pod 不是“一个容器的别名”
+&lt;/h3&gt;&lt;p&gt;Pod 是 Kubernetes 可以创建和管理的最小部署单位。一个 Pod 可以包含一个或多个紧密协作的容器：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Pod 中的容器共享同一个网络命名空间。&lt;/li&gt;
+&lt;li&gt;它们通过 &lt;code&gt;localhost&lt;/code&gt; 访问同一个 Pod 内的其他容器端口。&lt;/li&gt;
+&lt;li&gt;它们可以共享挂载卷。&lt;/li&gt;
+&lt;li&gt;Pod 拥有自己的 IP，但这个 IP 会随着 Pod 重建而变化。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;最常见的做法是一个 Pod 运行一个主应用容器。多容器 Pod 适合日志代理、代理 sidecar 这类要和主容器紧密协作的进程，不相关的服务不应该塞进同一个 Pod。sidecar 从 1.33 起可以原生声明：写在 &lt;code&gt;initContainers&lt;/code&gt; 里并设置 &lt;code&gt;restartPolicy: Always&lt;/code&gt;，它会先于主容器启动，并在主容器退出后才停止。&lt;/p&gt;
+&lt;pre class=&#34;mermaid&#34;&gt;
+  flowchart LR
+    subgraph Pod[Pod：共享网络与生命周期]
+        App[应用容器&amp;lt;br&amp;gt;:8080]
+        Sidecar[Sidecar 容器&amp;lt;br&amp;gt;日志或代理]
+        Vol[(共享卷)]
+        App --- Vol
+        Sidecar --- Vol
+    end
+    App -.localhost.-&amp;gt; Sidecar
+    Service[Service 稳定地址] --&amp;gt; Pod
+&lt;/pre&gt;
+
+&lt;h3 id=&#34;pod-的生命周期&#34;&gt;Pod 的生命周期
+&lt;/h3&gt;&lt;p&gt;Pod 不是永久服务器。它可能因为发布、驱逐、节点故障或配置变化而被删除并重新创建。重新创建后的 Pod 通常拥有新的 IP 和 UID，所以 Pod IP 不能当作稳定地址，数据也不能只写在容器可写层里。&lt;/p&gt;
+&lt;p&gt;Pod 的阶段（&lt;code&gt;status.phase&lt;/code&gt;）只有下面五种：&lt;/p&gt;
+&lt;table&gt;
+	&lt;thead&gt;
+			&lt;tr&gt;
+					&lt;th&gt;阶段&lt;/th&gt;
+					&lt;th&gt;含义&lt;/th&gt;
+			&lt;/tr&gt;
+	&lt;/thead&gt;
+	&lt;tbody&gt;
+			&lt;tr&gt;
+					&lt;td&gt;Pending&lt;/td&gt;
+					&lt;td&gt;Pod 已创建，但还没有完成调度、镜像拉取或容器启动&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;Running&lt;/td&gt;
+					&lt;td&gt;Pod 已绑定 Node，至少有容器正在运行或启动中&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;Succeeded&lt;/td&gt;
+					&lt;td&gt;Pod 中的容器都以成功状态结束&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;Failed&lt;/td&gt;
+					&lt;td&gt;Pod 中的容器都已终止，且至少有一个以失败状态结束&lt;/td&gt;
+			&lt;/tr&gt;
+			&lt;tr&gt;
+					&lt;td&gt;Unknown&lt;/td&gt;
+					&lt;td&gt;控制平面暂时无法取得 Pod 的状态&lt;/td&gt;
+			&lt;/tr&gt;
+	&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;code&gt;READY&lt;/code&gt; 列表示 Pod 中已经通过就绪检查的容器数量，不等于容器进程“还活着”。一个进程存活但尚未准备好接收请求时，应该保持未就绪，避免 Service 把流量发送过去。&lt;/p&gt;
+&lt;h3 id=&#34;pod-的-ip-与-service&#34;&gt;Pod 的 IP 与 Service
+&lt;/h3&gt;&lt;p&gt;Pod IP 用于集群内部通信，但它不是服务发现地址。扩容或重建会让后端 Pod 集合变化，客户端不应该写死某个 Pod IP。&lt;/p&gt;
+&lt;p&gt;Service 通过 Selector 找到一组标签匹配的 Pod，并提供稳定的虚拟地址与 DNS 名称：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-text&#34; data-lang=&#34;text&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;客户端 → web.default.svc.cluster.local:80
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                    ↓ Service Selector
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;             web-xxxxx Pod:8080
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;             web-yyyyy Pod:8080
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;在同一个 Namespace 中，通常可以直接使用 Service 名称，例如 &lt;code&gt;http://web:80&lt;/code&gt;。Service 的 &lt;code&gt;port&lt;/code&gt; 是客户端访问的端口，&lt;code&gt;targetPort&lt;/code&gt; 是后端容器监听的端口，两者可以不同：上图中 Service 端口是 80，Pod 监听 8080；第六节的 Nginx 示例两者都是 80。&lt;/p&gt;
+&lt;h3 id=&#34;pod-与工作负载对象的关系&#34;&gt;Pod 与工作负载对象的关系
+&lt;/h3&gt;&lt;p&gt;生产环境通常不直接创建裸 Pod，而是使用更高层的工作负载对象：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Deployment 管理无状态应用的 ReplicaSet 和 Pod。&lt;/li&gt;
+&lt;li&gt;StatefulSet 管理需要稳定身份和持久存储的副本。&lt;/li&gt;
+&lt;li&gt;DaemonSet 确保每个符合条件的 Node 运行一个 Pod 副本。&lt;/li&gt;
+&lt;li&gt;Job 和 CronJob 管理一次性或定时任务。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;这些对象最终都会创建 Pod，但它们负责的生命周期不同。删除由 Deployment 管理的 Pod，Deployment 会通过 ReplicaSet 补回副本；直接删除裸 Pod 就真的没了，没有上层对象会把它补回来。&lt;/p&gt;
+&lt;h2 id=&#34;六用一个最小示例把对象连起来&#34;&gt;六、用一个最小示例把对象连起来
+&lt;/h2&gt;&lt;p&gt;下面用一个最小示例把前面的对象串起来：两个 Nginx Pod 加一个 Service，不依赖业务代码。&lt;/p&gt;
+&lt;p&gt;动手前需要一个集群。我这里用 &lt;a class=&#34;link&#34; href=&#34;https://kind.sigs.k8s.io/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;kind&lt;/a&gt;：它用 Docker 容器模拟 Kubernetes 节点，正好复用之前装好的 Docker；用 Docker Desktop 的话，也可以直接在设置里打开内置的 Kubernetes。先按&lt;a class=&#34;link&#34; href=&#34;https://kubernetes.io/docs/tasks/tools/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;官方文档&lt;/a&gt;装好 &lt;code&gt;kubectl&lt;/code&gt; 和 &lt;code&gt;kind&lt;/code&gt;，再执行：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;kind create cluster --name k8s-lab
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;kubectl get nodes
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;首次创建要拉取节点镜像，等节点的 &lt;code&gt;STATUS&lt;/code&gt; 变成 &lt;code&gt;Ready&lt;/code&gt; 就可以继续。kind 默认只有一个节点，ROLES 显示 &lt;code&gt;control-plane&lt;/code&gt;，控制平面组件和业务 Pod 跑在同一个节点上，也就是前面说的单机学习集群。第四节的检查命令也可以在这个集群中执行。&lt;/p&gt;
+&lt;p&gt;保存为 &lt;code&gt;web.yaml&lt;/code&gt;：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;14
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;15
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;16
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;17
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;18
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;19
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;20
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;21
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;22
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;23
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;24
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;25
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;26
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;27
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;28
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;29
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;30
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;31
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;32
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;33
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;34
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;35
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;36
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;37
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;38
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;39
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;40
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;41
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;42
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;43
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;44
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nt&#34;&gt;apiVersion&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;apps/v1&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nt&#34;&gt;kind&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;Deployment&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nt&#34;&gt;metadata&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;web&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nt&#34;&gt;spec&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;replicas&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;m&#34;&gt;2&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;selector&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;matchLabels&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;app&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;web&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;template&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;metadata&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;labels&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;        &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;app&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;web&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;spec&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;containers&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;        &lt;/span&gt;- &lt;span class=&#34;nt&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;nginx&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;          &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;image&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;nginx:1.30-alpine&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;          &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;ports&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;            &lt;/span&gt;- &lt;span class=&#34;nt&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;http&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;              &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;containerPort&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;m&#34;&gt;80&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;          &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;resources&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;            &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;requests&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;              &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;cpu&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;50m&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;              &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;memory&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;64Mi&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;            &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;limits&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;              &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;memory&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;128Mi&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;          &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;readinessProbe&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;            &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;httpGet&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;              &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;path&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;/&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;              &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;port&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;http&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;            &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;initialDelaySeconds&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;m&#34;&gt;2&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;            &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;periodSeconds&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;m&#34;&gt;5&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nn&#34;&gt;---&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nt&#34;&gt;apiVersion&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;v1&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nt&#34;&gt;kind&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;Service&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nt&#34;&gt;metadata&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;web&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nt&#34;&gt;spec&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;selector&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;app&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;web&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;ports&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;- &lt;span class=&#34;nt&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;http&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;port&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;m&#34;&gt;80&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;targetPort&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;http&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;code&gt;resources.requests&lt;/code&gt; 就是第三节提到的调度依据：Scheduler 按 requests 而不是实时用量判断 Node 能否容纳这个 Pod。&lt;code&gt;limits.memory&lt;/code&gt; 是容器可用内存的上限，超出后容器会被 OOM Kill。&lt;/p&gt;
+&lt;h3 id=&#34;创建和观察&#34;&gt;创建和观察
+&lt;/h3&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;kubectl apply -f web.yaml
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;kubectl get deployment web
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;kubectl get pods -l &lt;span class=&#34;nv&#34;&gt;app&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;web -o wide
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;kubectl get service web
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;预期 Deployment 的 &lt;code&gt;READY&lt;/code&gt; 最终为 &lt;code&gt;2/2&lt;/code&gt;，两个 Pod 都进入 &lt;code&gt;Running&lt;/code&gt;，Service 获得 ClusterIP。镜像首次拉取需要时间，等待期间可以执行：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;kubectl rollout status deployment/web
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;kubectl describe pod -l &lt;span class=&#34;nv&#34;&gt;app&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;web
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;code&gt;kubectl get pods&lt;/code&gt; 的 &lt;code&gt;STATUS&lt;/code&gt; 列显示的不只是上一节表格里的 Pod 阶段：拉取镜像、创建容器期间会显示 &lt;code&gt;ContainerCreating&lt;/code&gt;，镜像拉取失败时显示 &lt;code&gt;ErrImagePull&lt;/code&gt; 或 &lt;code&gt;ImagePullBackOff&lt;/code&gt;，容器反复崩溃时显示 &lt;code&gt;CrashLoopBackOff&lt;/code&gt;。这些是容器处于等待状态的原因，排查时先看 &lt;code&gt;kubectl describe pod&lt;/code&gt; 输出末尾的 Events。&lt;/p&gt;
+&lt;p&gt;Service 未指定 &lt;code&gt;type&lt;/code&gt; 时默认是 ClusterIP，只能在集群内部访问。在本地实验集群中，用端口转发从宿主机访问 Service：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;kubectl port-forward service/web 8080:80
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;保持这个命令运行，在另一个终端执行：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;curl http://127.0.0.1:8080
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;&lt;code&gt;port-forward&lt;/code&gt; 是本地调试入口，不是生产环境的外部暴露方案。它指向 Service 时，kubectl 只会从中选择一个 Pod 建立连接，请求不经过 Service 的负载均衡；这个 Pod 被删除后，转发会直接断开。&lt;/p&gt;
+&lt;p&gt;生产环境一般通过 Gateway API 或云负载均衡器把流量引入集群。以前常用的 Ingress 已经冻结，不再增加新功能，社区版 ingress-nginx 控制器也在 2026 年 3 月退役了。&lt;/p&gt;
+&lt;h3 id=&#34;观察自愈行为&#34;&gt;观察自愈行为
+&lt;/h3&gt;&lt;p&gt;先在运行 &lt;code&gt;port-forward&lt;/code&gt; 的终端按 &lt;code&gt;Ctrl+C&lt;/code&gt; 结束转发（它连着的 Pod 可能正好是要删的那个），再删除一个 Pod：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nv&#34;&gt;POD&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;$(&lt;/span&gt;kubectl get pods -l &lt;span class=&#34;nv&#34;&gt;app&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;web -o &lt;span class=&#34;nv&#34;&gt;jsonpath&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;{.items[0].metadata.name}&amp;#39;&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;kubectl delete pod &lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;$POD&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;kubectl get pods -l &lt;span class=&#34;nv&#34;&gt;app&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;web --watch
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;Deployment 期望有两个副本。一个 Pod 被删除后，ReplicaSet 会创建替代 Pod。新 Pod 的名字和 UID 一定与旧 Pod 不同，IP 通常也会变化，但 Service 仍然通过标签找到可用副本。&lt;/p&gt;
+&lt;h3 id=&#34;清理实验&#34;&gt;清理实验
+&lt;/h3&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;kubectl delete -f web.yaml
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;这个动作删除 Deployment、ReplicaSet、Pod 和 Service。它不会删除集群本身，也不会删除镜像仓库中的镜像。&lt;/p&gt;
+&lt;p&gt;不再需要实验集群时，再删除 kind 集群：&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;kind delete cluster --name k8s-lab
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;h2 id=&#34;七先记住这张关系图&#34;&gt;七、先记住这张关系图
+&lt;/h2&gt;&lt;pre class=&#34;mermaid&#34;&gt;
+  flowchart TB
+    CP[控制平面&amp;lt;br&amp;gt;保存并协调集群状态]
+    CP -.控制器调谐.-&amp;gt; Deploy[Deployment]
+    CP -.调度器分配 Node.-&amp;gt; Kubelet[kubelet / Node]
+    Deploy --&amp;gt;|管理| RS[ReplicaSet]
+    RS --&amp;gt;|维持副本数| Pod
+    Kubelet --&amp;gt;|启动容器、上报状态| Pod
+    Svc[Service] --&amp;gt;|Selector 匹配标签| Pod
+
+    subgraph Pod[Pod]
+        direction TB
+        C[容器]
+        Net[共享网络]
+        Vol[(共享卷)]
+    end
+&lt;/pre&gt;
+
+&lt;p&gt;最后用五句话总结一下：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Kubernetes 用声明式 API 管理容器化应用的期望状态。&lt;/li&gt;
+&lt;li&gt;控制平面负责接收状态、保存状态、调度 Pod 和持续修正差异。&lt;/li&gt;
+&lt;li&gt;Node 提供运行 Pod 所需的 kubelet、容器运行时和网络能力。&lt;/li&gt;
+&lt;li&gt;Pod 是最小部署单位，容器在 Pod 内共享网络和生命周期边界。&lt;/li&gt;
+&lt;li&gt;Deployment 管理 Pod 副本，Service 为变化的 Pod 提供稳定访问入口。&lt;/li&gt;
+&lt;/ol&gt;
+</description>
+        </item>
+        <item>
         <title>Docker 入门与实战：从容器到 Compose</title>
         <link>https://liusir521.github.io/p/docker-%E5%85%A5%E9%97%A8%E4%B8%8E%E5%AE%9E%E6%88%98%E4%BB%8E%E5%AE%B9%E5%99%A8%E5%88%B0-compose/</link>
         <pubDate>Sat, 25 Jul 2026 00:00:00 +0000</pubDate>
